@@ -1,0 +1,12 @@
+sane defaults (old)
+lsp/completion
+treesitter
+bufferline
+lualine
+colorscheme
+noice
+gitsigns
+lazygit? or fugitive
+trouble
+
+
