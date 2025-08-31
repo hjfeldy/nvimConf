@@ -1,6 +1,5 @@
 sane defaults (old)
 lsp/completion
-treesitter
 bufferline
 lualine
 colorscheme
@@ -9,4 +8,5 @@ gitsigns
 lazygit? or fugitive
 trouble
 
+gitsigns
 
