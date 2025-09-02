@@ -4,6 +4,7 @@ vim.o.expandtab=true
 
 vim.o.hlsearch=true
 vim.o.smartcase=true
+vim.o.ignorecase=true
 
 vim.o.clipboard='unnamedplus'
 vim.g.clipboard='xclip'
@@ -18,4 +19,7 @@ vim.o.undofile=true
 
 vim.o.mouse=''
 
--- vim.o.statuscolumn = [[%!v:lua.require'snacks.statuscolumn'.get()]]
+vim.o.fillchars='foldsep:│'
+vim.o.signcolumn='auto:2'
+vim.o.foldcolumn='auto:2'
+vim.o.wrap=false

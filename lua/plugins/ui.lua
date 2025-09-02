@@ -1,12 +1,38 @@
 local icons = require('icons')
+local util = require('util')
+local api = vim.api
 
 return {
+  -- ui components
+  { "MunifTanjim/nui.nvim", lazy = true },
+  {"nvim-tree/nvim-web-devicons"},
+
+  -- git-diff statuscolumn / git-hunk navigation
   {
     "lewis6991/gitsigns.nvim",
     event = "BufReadPre",
     -- lazy=false,
+    keys = {
+      { "<leader>G", "", mode="n", desc="+GitSigns"},
+      { "<leader>Gl", function() require('gitsigns').nav_hunk("last") end, mode="n", desc="Last Hunk" },
+      { "<leader>Gf", function() require('gitsigns').nav_hunk("first") end, mode="n", desc="First Hunk" },
+      { "<leader>Gn", function() require('gitsigns').nav_hunk("next") end, mode="n", desc="Next Hunk" },
+      { "<leader>Gp", function() require('gitsigns').nav_hunk("prev") end, mode="n", desc="Previous Hunk" },
+      { "<leader>Gs", "<cmd>Gitsigns stage_hunk<CR>", mode={ "n", "v" }, desc="Stage/Unstage Hunk" },
+      -- { "<leader>Gu", function() require('gitsigns').undo_stage_hunk() end, mode="n", desc="Undo Stage Hunk"},
+      -- map({ "n", "v" }, "<leader>Ghr", ":Gitsigns reset_hunk<CR>", "Reset Hunk")
+      {"<leader>GS", function() require('gitsigns').stage_buffer() end, mode="n", desc="Stage Buffer"},
+      -- {"<leader>ghR", gs.reset_buffer, mode="n", desc="Reset Buffer"},
+      {"<leader>Gb", function() require('gitsigns').blame_line({ full = true }) end, mode="n", desc="Blame Line"},
+      {"<leader>GB", function() require('gitsigns').blame() end, mode="n", desc="Blame Buffer"},
+      {"<leader>Gd", function() require('gitsigns').diffthis() end, mode="n", desc="Diff This"},
+      -- {"<leader>GD", function() gs.diffthis("~") end, mode="n", desc="Diff This ~"},
+      -- { "ih", ":<C-U>Gitsigns select_hunk<CR>", mode={ "o", "x" }, desc="Select Hunk")
+    },
+
     opts = {
       signcolumn=true,
+      sign_priority=100,
       signs = {
         add = { text = "▎" },
         change = { text = "▎" },
@@ -22,71 +48,22 @@ return {
         topdelete = { text = "" },
         changedelete = { text = "▎" },
       },
-      --[[ on_attach = function(buffer)
-        local gs = package.loaded.gitsigns
-
-        local function map(mode, l, r, desc)
-          vim.keymap.set(mode, l, r, { buffer = buffer, desc = desc })
-        end
-
-        -- stylua: ignore start
-        map("n", "]h", function()
-          if vim.wo.diff then
-            vim.cmd.normal({ "]c", bang = true })
-          else
-            gs.nav_hunk("next")
-          end
-        end, "Next Hunk")
-        map("n", "[h", function()
-          if vim.wo.diff then
-            vim.cmd.normal({ "[c", bang = true })
-          else
-            gs.nav_hunk("prev")
-          end
-        end, "Prev Hunk")
-        map("n", "]H", function() gs.nav_hunk("last") end, "Last Hunk")
-        map("n", "[H", function() gs.nav_hunk("first") end, "First Hunk")
-        map({ "n", "v" }, "<leader>ghs", ":Gitsigns stage_hunk<CR>", "Stage Hunk")
-        map({ "n", "v" }, "<leader>ghr", ":Gitsigns reset_hunk<CR>", "Reset Hunk")
-        map("n", "<leader>ghS", gs.stage_buffer, "Stage Buffer")
-        map("n", "<leader>ghu", gs.undo_stage_hunk, "Undo Stage Hunk")
-        map("n", "<leader>ghR", gs.reset_buffer, "Reset Buffer")
-        map("n", "<leader>ghp", gs.preview_hunk_inline, "Preview Hunk Inline")
-        map("n", "<leader>ghb", function() gs.blame_line({ full = true }) end, "Blame Line")
-        map("n", "<leader>ghB", function() gs.blame() end, "Blame Buffer")
-        map("n", "<leader>ghd", gs.diffthis, "Diff This")
-        map("n", "<leader>ghD", function() gs.diffthis("~") end, "Diff This ~")
-        map({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", "GitSigns Select Hunk")
-      end, ]]
     },
   },
 
-  {
-    "gitsigns.nvim",
-    opts = function()
-      Snacks.toggle({
-        name = "Git Signs",
-        get = function()
-          return require("gitsigns.config").config.signcolumn
-        end,
-        set = function(state)
-          require("gitsigns").toggle_signs(state)
-        end,
-      }):map("<leader>uG")
-    end,
-  },
 
-  -- ui components
-  { "MunifTanjim/nui.nvim", lazy = true },
-
+  -- tabs
   {
     "akinsho/bufferline.nvim",
     event = "VeryLazy",
     keys = {
+      { "g", "", desc = "+BufferLine"},
       { "gh", "<cmd>BufferLineCyclePrev<cr>", desc = "Prev Buffer" },
       { "gl", "<cmd>BufferLineCycleNext<cr>", desc = "Next Buffer" },
       { "gM", "<cmd>BufferLineMovePrev<cr>", desc = "Move buffer prev" },
       { "gm", "<cmd>BufferLineMoveNext<cr>", desc = "Move buffer next" },
+      { "gk", "gg", desc = "Top of buffer" },
+      { "gj", "GG", desc = "Bottom of buffer" },
     },
     opts = {
       options = {
@@ -95,7 +72,12 @@ return {
         -- stylua: ignore
         right_mouse_command = function(n) require('snacks').bufdelete(n) end,
         diagnostics = "nvim_lsp",
-        always_show_bufferline = false,
+        always_show_bufferline = true,
+        custom_filter = function(bufnr, bufnrs)
+          local bufType = vim.api.nvim_get_option_value('filetype', {buf=bufnr})
+          local blacklist = { ['grug-far'] = true }
+          return not blacklist[bufType]
+        end,
         diagnostics_indicator = function(_, _, diag)
           local ret = (diag.error and icons.diagnostics.Error .. diag.error .. " " or "")
             .. (diag.warning and icons.diagnostics.Warn .. diag.warning or "")
@@ -113,9 +95,9 @@ return {
           },
         },
         ---@param opts bufferline.IconFetcherOpts
-        get_element_icon = function(opts)
+        --[[ get_element_icon = function(opts)
           return icons.ft[opts.filetype]
-        end,
+        end, ]]
       },
     },
     config = function(_, opts)
@@ -131,55 +113,15 @@ return {
     end,
   },
 
-  {
-    "echasnovski/mini.icons",
-    lazy = true,
-    opts = {
-      file = {
-        [".keep"] = { glyph = "󰊢", hl = "MiniIconsGrey" },
-        ["devcontainer.json"] = { glyph = "", hl = "MiniIconsAzure" },
-      },
-      filetype = {
-        dotenv = { glyph = "", hl = "MiniIconsYellow" },
-      },
-    },
-    init = function()
-      package.preload["nvim-web-devicons"] = function()
-        require("mini.icons").mock_nvim_web_devicons()
-        return package.loaded["nvim-web-devicons"]
-      end
-    end,
-  },
-
-  {
-    "folke/snacks.nvim",
-    opts = {
-      indent = { enabled = true },
-      input = { enabled = true },
-      notifier = { enabled = true },
-      scope = { enabled = true },
-      scroll = { enabled = true },
-      words = { enabled = true },
-      statuscolumn = {
-        enabled = false,
-        left = { "mark", "sign" }, -- priority of signs on the left (high to low)
-        right = { "fold", "git" }, -- priority of signs on the right (high to low)
-        folds = {
-          open = false, -- show open fold icons
-          git_hl = false, -- use Git Signs hl for fold icons
-        },
-        git = {
-          -- patterns to match Git signs
-          patterns = { "GitSign", "MiniDiffSign" },
-        },
-        refresh = 50, -- refresh at most every 50ms
-      }
-    }
-  },
-
+  -- statusline
   {
     "nvim-lualine/lualine.nvim",
-    event = "VeryLazy",
+    dependencies = {
+      'nvim-telescope/telescope.nvim',
+      "nvim-tree/nvim-web-devicons"
+    },
+    -- event = "VeryLazy",
+    lazy=false,
     init = function()
       vim.g.lualine_laststatus = vim.o.laststatus
       if vim.fn.argc(-1) > 0 then
@@ -193,36 +135,151 @@ return {
     opts = function()
       -- PERF: we don't need this lualine require madness 🤷
       local lualine_require = require("lualine_require")
-      lualine_require.require = require
+      local telescopeHelpers = require('telescopeHelpers')
+
+      -- lualine_require.require = require
+
+      local trouble = require('trouble')
 
       -- local icons = LazyVim.config.icons
 
       vim.o.laststatus = vim.g.lualine_laststatus
       local Snacks = require('snacks')
 
-      local opts = {
+      -- ensure border is drawn
+      local ensureBorder = {function() return "" end, draw_empty=true}
+
+      -- telescope show/hide HUD
+      local telescopeConfig = {
+
+        ensureBorder,
+        -- diagnostic icon (is the LSP log level WARNING or HINT?)
+        {
+          function() return icons.kinds.Telescope end, separator = "",
+          color = function() 
+            -- color not working - always grey (TODO fix)
+            local whiteBlack = vim.o.background == 'dark' and 'white' or 'black'
+            return vim.o.filetype == 'TelescopePrompt' and whiteBlack or 'lualine_c_normal'
+          end
+        },
+        {
+          function()
+            return telescopeHelpers.WARNING_FILTER and icons.diagnostics.Warn or icons.diagnostics.Info
+          end,
+          color = function()
+            local whiteBlack = vim.o.background == 'dark' and 'white' or 'black'
+            return {fg = telescopeHelpers.WARNING_FILTER and "orange" or whiteBlack  }
+          end,
+          separator="",
+          padding = { left = 0, right = 0 }
+        },
+
+        -- telescope show-hidden-files
+        {
+          function() 
+            return telescopeHelpers.SHOW_HIDDEN and icons.showHide.Show or icons.showHide.Hide
+          end,
+          color = function() 
+            local whiteBlack = vim.o.background == 'dark' and 'white' or 'black'
+            return {fg=telescopeHelpers.SHOW_HIDDEN and "green" or whiteBlack}
+          end,
+          separator="",
+          padding = { left = 0, right = 0 }
+        },
+
+        -- telescope respect-gitignore
+        {
+          function() 
+            return icons.git.Logo
+          end,
+          color = function() 
+            return {fg=telescopeHelpers.RESPECT_IGNORE and "green" or "red"}
+          end,
+          separator="",
+          padding = { left = 0, right = 1 }
+        },
+        ensureBorder
+      }
+
+      local renderHome = function()
+        local cwd = vim.uv.cwd() or '__notfound__'
+        local home = os.getenv('HOME') or '__notfound__'
+        return " " .. string.gsub(cwd, home, '~')
+      end
+
+
+      local shortenPathFunc = function(maxComponents) 
+        return function() 
+          local path = api.nvim_buf_get_name(api.nvim_get_current_buf())
+          maxComponents = vim.o.filetype == 'Terminal' and 1 or maxComponents
+          return util.shortenPath(path, maxComponents)
+        end
+      end
+
+      return {
         options = {
-          theme = "auto",
+          theme = "NeoSolarized",
           globalstatus = vim.o.laststatus == 3,
           disabled_filetypes = { statusline = { "dashboard", "alpha", "ministarter", "snacks_dashboard" } },
+          --[[ section_separators = { left = '', right = '' },
+          component_separators = { left = '', right = '' }, ]]
         },
-        sections = {
-          lualine_a = { "mode" },
-          lualine_b = { "branch" },
-
-          lualine_c = {
-            function() return vim.uv.cwd()end,
+        --[[ component_separators = { left = '', right = ''},
+        section_separators = { left = '', right = ''}, ]]
+        inactive_sections = {
+          lualine_c = util.mergeArrays(
             {
-              "diagnostics",
+              { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
+              {shortenPathFunc(4), separator=''},
+            },
+            telescopeConfig
+          ),
+          lualine_z = {
+            renderHome
+          }
+        },
+
+        sections = {
+          lualine_a = {
+            { "mode" },
+          },
+          lualine_b = {
+            { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
+            {
+              shortenPathFunc(2),
+              shortVersion=shortenPathFunc(1)
+            },
+            {
+              "branch",
+              separator = "",
+            },
+            {
+              "diff",
               symbols = {
-                error = icons.diagnostics.Error,
-                warn = icons.diagnostics.Warn,
-                info = icons.diagnostics.Info,
-                hint = icons.diagnostics.Hint
+                added = icons.git.Added,
+                modified = icons.git.Modified,
+                removed = icons.git.Removed
               },
             },
-            { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
           },
+
+          lualine_c = util.mergeArrays(
+            telescopeConfig,
+            {
+              {
+              trouble.statusline({ 
+                mode = "symbols",
+                groups = {},
+                title = false,
+                filter = { range = true },
+                format = "{kind_icon}{symbol.name:Normal}",
+                hl_group = "lualine_c_normal",
+                -- hl_group = "Normal",
+              }).get,
+              separator=""
+              }
+            }
+          ),
           lualine_x = {
             Snacks.profiler.status(),
             -- stylua: ignore
@@ -232,11 +289,11 @@ return {
               color = function() return { fg = Snacks.util.color("Statement") } end,
             },
             -- stylua: ignore
-            {
+            --[[ {
               function() return require("noice").api.status.mode.get() end,
               cond = function() return package.loaded["noice"] and require("noice").api.status.mode.has() end,
               color = function() return { fg = Snacks.util.color("Constant") } end,
-            },
+            }, ]]
             -- stylua: ignore
             {
               function() return "  " .. require("dap").status() end,
@@ -249,60 +306,166 @@ return {
               cond = require("lazy.status").has_updates,
               color = function() return { fg = Snacks.util.color("Special") } end,
             },
-            {
-              "diff",
-              symbols = {
-                added = " ",
-                modified = " ",
-                removed = " ",
-              },
-              source = function()
-                local gitsigns = vim.b.gitsigns_status_dict
-
-                if gitsigns then
-                  return {
-                    added = gitsigns.added,
-                    modified = gitsigns.changed,
-                    removed = gitsigns.removed,
-                  }
-                end
-              end,
-            },
           },
           lualine_y = {
+            ensureBorder,
+            {
+              "diagnostics",
+              symbols = {
+                error = icons.diagnostics.Error,
+                warn = icons.diagnostics.Warn,
+                info = icons.diagnostics.Info,
+                hint = icons.diagnostics.Hint
+              },
+            },
             { "progress", separator = " ", padding = { left = 1, right = 0 } },
             { "location", padding = { left = 0, right = 1 } },
           },
           lualine_z = {
-            function()
-              return " " .. os.date("%R")
-            end,
+            renderHome
           },
         },
         extensions = { "neo-tree", "lazy", "fzf" },
       }
+    end,
+  },
 
-      -- do not add trouble symbols if aerial is enabled
-      -- And allow it to be overriden for some buffer types (see autocmds)
-      if vim.g.trouble_lualine and LazyVim.has("trouble.nvim") then
-        local trouble = require("trouble")
-        local symbols = trouble.statusline({
-          mode = "symbols",
-          groups = {},
-          title = false,
-          filter = { range = true },
-          format = "{kind_icon}{symbol.name:Normal}",
-          hl_group = "lualine_c_normal",
-        })
-        table.insert(opts.sections.lualine_c, {
-          symbols and symbols.get,
-          cond = function()
-            return vim.b.trouble_lualine ~= false and symbols.has()
-          end,
-        })
+  -- Highly experimental plugin that completely replaces the UI for messages, cmdline and the popupmenu.
+  -- stolen from LazyVim config
+  {
+    "folke/noice.nvim",
+    event = "VeryLazy",
+    opts = function() 
+      print('loading noice with DEBUG = ' .. (vim.g.NOICE_DEBUG and 'true' or 'false')) 
+      return {
+        lsp = {
+          hover = {
+            enabled = false,
+          }
+          --[[ override = {
+            ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+            ["vim.lsp.util.stylize_markdown"] = true,
+            ["cmp.entry.get_documentation"] = true,
+          }, ]]
+        },
+
+        routes = {
+          {
+            -- filter out debug logs whenever NOICE_DEBUG is false
+            -- requires a call to "Lazy reload noice.nvim" to pick up changes to the DEBUG variable
+            opts = { skip = true },
+            filter = {
+              event = 'notify',
+              kind = vim.g.NOICE_DEBUG and '' or 'debug'
+            }
+          },
+
+          {
+            filter = {
+              event = "msg_show",
+              any = {
+                { find = "%d+L, %d+B" },
+                { find = "; after #%d+" },
+                { find = "; before #%d+" },
+              },
+            },
+            view = "mini",
+          },
+        },
+
+        presets = {
+          bottom_search = true,
+          command_palette = true,
+          long_message_to_split = true,
+        },
+
+        messages = {
+          enabled = true,
+        },
+        popupmenu = {
+          enabled = true,
+          backend = 'nui'
+        },
+        commands = {
+          history = {
+            view = 'popup'
+          }
+        },
+      }
+    end,
+    -- stylua: ignore
+    keys = {
+      { "<leader>n", "", desc = "+Noice Notifications"},
+      {
+        "<S-Enter>",
+        function() require("noice").redirect(vim.fn.getcmdline()) end,
+        mode = "c", desc = "Redirect Cmdline"
+      },
+      {
+        "<leader>nl",
+        function() require("noice").cmd("last") end,
+        desc = "Noice Last Message"
+      },
+      {
+        "<leader>nh",
+        function() require("noice").cmd("history") end,
+        desc = "Noice History"
+      },
+      {
+        "<leader>na",
+        function() require("noice").cmd("all") end,
+        desc = "Noice All"
+      },
+      {
+        "<leader>nd",
+        function() require("noice").cmd("dismiss") end,
+        desc = "Dismiss All"
+      },
+      {
+        "<leader>nD",
+        function() 
+          util.toggleDebug()
+        end,
+        desc = "Toggle Debug"
+      },
+      --[[ {
+        "<leader>nt",
+        function() require("noice").cmd("pick") end,
+        desc = "Noice Picker (Telescope/FzfLua)"
+      }, ]]
+      {
+        "<c-f>",
+        function()
+          if not require("noice.lsp").scroll(4) then
+            return "<c-f>"
+          end
+        end,
+        silent = true,
+        expr = true,
+        desc = "Scroll Forward",
+        mode = {"i", "n", "s"}
+      },
+      {
+        "<c-b>",
+        function()
+          if not require("noice.lsp").scroll(-4) then
+            return "<c-b>"
+          end
+        end,
+        silent = true,
+        expr = true,
+        desc = "Scroll Backward",
+        mode = {"i", "n", "s"}
+      },
+    },
+    config = function(_, opts)
+      -- HACK: noice shows messages from before it was enabled,
+      -- but this is not ideal when Lazy is installing plugins,
+      -- so clear the messages in this case.
+      if vim.o.filetype == "lazy" then
+        vim.cmd([[messages clear]])
       end
-
-      return opts
+      require("noice").setup(opts)
     end,
   },
 }

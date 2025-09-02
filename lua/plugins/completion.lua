@@ -1,4 +1,14 @@
+local function has_words_before()
+  local col = vim.api.nvim_win_get_cursor(0)[2]
+  if col == 0 then
+    return false
+  end
+  local line = vim.api.nvim_get_current_line()
+  return line:sub(col, col):match("%s") == nil
+end
+
 return {
+  {"mfussenegger/nvim-jdtls"},
   {"neovim/nvim-lspconfig"},
   {
     "folke/lazydev.nvim",
@@ -13,8 +23,12 @@ return {
   },
   {
   'saghen/blink.cmp',
+  lazy = false,
   -- optional: provides snippets for the snippet source
-  dependencies = { 'rafamadriz/friendly-snippets' },
+  dependencies = {
+    'rafamadriz/friendly-snippets' ,
+    'nvim-tree/nvim-web-devicons'
+  },
 
   -- use a release tag to download pre-built binaries
   version = '1.6.0',
@@ -38,12 +52,23 @@ return {
     -- C-k: Toggle signature help (if signature.enabled = true)
     --
     -- See :h blink-cmp-config-keymap for defining your own keymap
+    --
     keymap = {
       preset = 'default' ,
 
       ['<Up>'] = false,
       ['<Down>'] = false,
-      ['<tab>'] = { 'select_next', 'fallback' },
+      -- ['<tab>'] = { 'select_next', 'fallback' },
+      ['<tab>'] = {
+        function(cmp)
+          if cmp.is_menu_visible() then
+            return cmp.select_next()
+          elseif has_words_before() then
+            return cmp.show()
+          end
+        end,
+        'fallback' 
+      },
       ['<s-tab>'] = { 'select_prev', 'fallback' },
     },
 
@@ -58,13 +83,24 @@ return {
     appearance = {
       -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
       -- Adjusts spacing to ensure icons are aligned
-      nerd_font_variant = 'mono'
+      -- nerd_font_variant = 'mono'
+      kind_icons = require('icons').kinds
     },
 
-    -- (Default) Only show the documentation popup when manually triggered
     completion = {
       documentation = { auto_show = true } ,
-      list = { selection = { preselect = false, } }
+      list = { selection = { preselect = false, } },
+      menu = {
+        -- border = 'rounded' ,
+        draw = {
+          treesitter = {'lsp'},
+          columns = {
+            { 'kind_icon', 'kind', gap = 1 },
+            { 'label', 'label_description', gap = 1 },
+            {'source_name'} 
+          },
+        }
+      },
     },
 
     -- Default list of enabled providers defined so that you can extend it

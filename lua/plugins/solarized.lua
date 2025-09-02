@@ -1,14 +1,17 @@
 return {
-  'maxmx03/solarized.nvim',
-  lazy = false,
-  priority = 1000,
-  ---@type solarized.config
-  opts = {},
-  config = function(_, opts)
-    vim.o.termguicolors = true
-    vim.o.background = 'dark'
-    require('solarized').setup(opts)
-    vim.cmd.colorscheme 'solarized'
-  end,
+  "Tsuzat/NeoSolarized.nvim",
+    lazy = false, -- make sure we load this during startup if it is your main colorscheme
+    priority = 1000, -- make sure to load this before all the other start plugins
+    config = function()
+      local solarized = require('NeoSolarized')
+      local toggler = require('toggleColor')
+      local style = toggler.toggle()
+      vim.o.background = style
+      solarized.setup({
+        style=style,
+        -- style='dark',
+        transparent=toggler.DARK,
+      })
+      vim.cmd [[ colorscheme NeoSolarized ]]
+    end
 }
-

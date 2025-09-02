@@ -3,9 +3,6 @@
     misc = {
       dots = "󰇘",
     },
-    ft = {
-      octo = "",
-    },
     dap = {
       Stopped             = { "󰁕 ", "DiagnosticWarn", "DapStoppedLine" },
       Breakpoint          = " ",
@@ -20,11 +17,17 @@
       Info  = " ",
     },
     git = {
-      added    = " ",
-      modified = " ",
-      removed  = " ",
+      Added    = " ",
+      Modified = " ",
+      Removed  = " ",
+      Logo = " ",
+    },
+    showHide = {
+      Show = "󰈈 ",
+      Hide = "󰈉 "
     },
     kinds = {
+      Telescope     = " ",
       Array         = " ",
       Boolean       = "󰨙 ",
       Class         = " ",
