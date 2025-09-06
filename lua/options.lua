@@ -23,3 +23,5 @@ vim.o.fillchars='foldsep:│'
 vim.o.signcolumn='auto:2'
 vim.o.foldcolumn='auto:2'
 vim.o.wrap=false
+
+vim.o.scrolloff = 4

@@ -94,10 +94,6 @@ return {
             filetype = "snacks_layout_box",
           },
         },
-        ---@param opts bufferline.IconFetcherOpts
-        --[[ get_element_icon = function(opts)
-          return icons.ft[opts.filetype]
-        end, ]]
       },
     },
     config = function(_, opts)
@@ -115,8 +111,11 @@ return {
 
   -- statusline
   {
-    "nvim-lualine/lualine.nvim",
+    -- "nvim-lualine/lualine.nvim",
+    dir = '/home/harry/Repos/lualine.nvim/',
+    branch = 'feature/dynamicModes',
     dependencies = {
+      'folke/noice.nvim',
       'nvim-telescope/telescope.nvim',
       'folke/trouble.nvim',
       "nvim-tree/nvim-web-devicons"
@@ -242,97 +241,102 @@ return {
           }
         },
 
-        sections = lualineHelpers.parseConfig(),
-        --sections = {
-        --  lualine_a = {
-        --    { "mode" },
-        --  },
-        --  lualine_b = {
-        --    {
-        --      "filetype",
-        --      icon_only = true,
-        --      separator = "",
-        --      padding = { left = 1, right = 0 } 
-        --    },
-        --    {
-        --      shortenPathFunc(2)
-        --    },
-        --    {
-        --      "branch",
-        --      separator = "",
-        --    },
-        --    {
-        --      "diff",
-        --      symbols = {
-        --        added = icons.git.Added,
-        --        modified = icons.git.Modified,
-        --        removed = icons.git.Removed
-        --      },
-        --    },
-        --  },
+        -- sections = lualineHelpers.parseConfig(),
+        sections = {
+          lualine_a = {
+            {
+              "mode" ,
+              alts = {
+                test = { function() return 'ASDF' end }
+              }
+            },
+          },
+          lualine_b = {
+            {
+              "filetype",
+              icon_only = true,
+              separator = "",
+              padding = { left = 1, right = 0 } 
+            },
+            {
+              shortenPathFunc(2)
+            },
+            {
+              "branch",
+              separator = "",
+            },
+            {
+              "diff",
+              symbols = {
+                added = icons.git.Added,
+                modified = icons.git.Modified,
+                removed = icons.git.Removed
+              },
+            },
+          },
 
-        --  lualine_c = util.mergeArrays(
-        --    telescopeConfig,
-        --    {
-        --      {
-        --      trouble.statusline({ 
-        --        mode = "symbols",
-        --        groups = {},
-        --        title = false,
-        --        filter = { range = true },
-        --        format = "{kind_icon}{symbol.name:Normal}",
-        --        hl_group = "lualine_c_normal",
-        --        -- hl_group = "Normal",
-        --      }).get,
-        --      separator=""
-        --      }
-        --    }
-        --  ),
-        --  lualine_x = {
-        --    Snacks.profiler.status(),
-        --    -- stylua: ignore
-        --    {
-        --      function() return require("noice").api.status.command.get() end,
-        --      cond = function() return package.loaded["noice"] and require("noice").api.status.command.has() end,
-        --      color = function() return { fg = Snacks.util.color("Statement") } end,
-        --    },
-        --    -- stylua: ignore
-        --    --[[ {
-        --      function() return require("noice").api.status.mode.get() end,
-        --      cond = function() return package.loaded["noice"] and require("noice").api.status.mode.has() end,
-        --      color = function() return { fg = Snacks.util.color("Constant") } end,
-        --    }, ]]
-        --    -- stylua: ignore
-        --    {
-        --      function() return "  " .. require("dap").status() end,
-        --      cond = function() return package.loaded["dap"] and require("dap").status() ~= "" end,
-        --      color = function() return { fg = Snacks.util.color("Debug") } end,
-        --    },
-        --    -- stylua: ignore
-        --    {
-        --      require("lazy.status").updates,
-        --      cond = require("lazy.status").has_updates,
-        --      color = function() return { fg = Snacks.util.color("Special") } end,
-        --    },
-        --  },
-        --  lualine_y = {
-        --    ensureBorder,
-        --    {
-        --      "diagnostics",
-        --      symbols = {
-        --        error = icons.diagnostics.Error,
-        --        warn = icons.diagnostics.Warn,
-        --        info = icons.diagnostics.Info,
-        --        hint = icons.diagnostics.Hint
-        --      },
-        --    },
-        --    { "progress", separator = " ", padding = { left = 1, right = 0 } },
-        --    { "location", padding = { left = 0, right = 1 } },
-        --  },
-        --  lualine_z = {
-        --    renderHome
-        --  },
-        --},
+          lualine_c = util.mergeArrays(
+            telescopeConfig,
+            {
+              {
+              trouble.statusline({ 
+                mode = "symbols",
+                groups = {},
+                title = false,
+                filter = { range = true },
+                format = "{kind_icon}{symbol.name:Normal}",
+                hl_group = "lualine_c_normal",
+                -- hl_group = "Normal",
+              }).get,
+              separator=""
+              }
+            }
+          ),
+          lualine_x = {
+            Snacks.profiler.status(),
+            -- stylua: ignore
+            {
+              function() return require("noice").api.status.command.get() end,
+              cond = function() return package.loaded["noice"] and require("noice").api.status.command.has() end,
+              color = function() return { fg = Snacks.util.color("Statement") } end,
+            },
+            -- stylua: ignore
+            --[[ {
+              function() return require("noice").api.status.mode.get() end,
+              cond = function() return package.loaded["noice"] and require("noice").api.status.mode.has() end,
+              color = function() return { fg = Snacks.util.color("Constant") } end,
+            }, ]]
+            -- stylua: ignore
+            {
+              function() return "  " .. require("dap").status() end,
+              cond = function() return package.loaded["dap"] and require("dap").status() ~= "" end,
+              color = function() return { fg = Snacks.util.color("Debug") } end,
+            },
+            -- stylua: ignore
+            {
+              require("lazy.status").updates,
+              cond = require("lazy.status").has_updates,
+              color = function() return { fg = Snacks.util.color("Special") } end,
+            },
+          },
+          lualine_y = {
+            ensureBorder,
+            {
+              "diagnostics",
+              symbols = {
+                error = icons.diagnostics.Error,
+                warn = icons.diagnostics.Warn,
+                info = icons.diagnostics.Info,
+                hint = icons.diagnostics.Hint
+              },
+            },
+            { "progress", separator = " ", padding = { left = 1, right = 0 } },
+            { "location", padding = { left = 0, right = 1 } },
+          },
+          lualine_z = {
+            renderHome
+          },
+        },
         extensions = { "neo-tree", "lazy", "fzf" },
       }
     end,
@@ -342,10 +346,14 @@ return {
   -- stolen from LazyVim config
   {
     "folke/noice.nvim",
-    event = "VeryLazy",
+    lazy=false,
+    -- event = "VeryLazy",
     opts = function() 
       print('loading noice with DEBUG = ' .. (vim.g.NOICE_DEBUG and 'true' or 'false')) 
       return {
+        notify = {
+          enabled = true,
+        },
         lsp = {
           hover = {
             enabled = false,
@@ -466,14 +474,14 @@ return {
         mode = {"i", "n", "s"}
       },
     },
-    config = function(_, opts)
-      -- HACK: noice shows messages from before it was enabled,
-      -- but this is not ideal when Lazy is installing plugins,
-      -- so clear the messages in this case.
-      if vim.o.filetype == "lazy" then
-        vim.cmd([[messages clear]])
-      end
-      require("noice").setup(opts)
-    end,
+    --config = function(_, opts)
+    --  -- HACK: noice shows messages from before it was enabled,
+    --  -- but this is not ideal when Lazy is installing plugins,
+    --  -- so clear the messages in this case.
+    --  if vim.o.filetype == "lazy" then
+    --    vim.cmd([[messages clear]])
+    --  end
+    --  require("noice").setup(opts)
+    --end,
   },
 }

@@ -47,11 +47,12 @@ return {
   {
     "folke/snacks.nvim",
     opts = {
+      animate = { enabled = false },
       indent = { enabled = true },
       input = { enabled = true },
       notifier = { enabled = true },
       scope = { enabled = true },
-      scroll = { enabled = true },
+      scroll = { enabled = false },
       words = { enabled = true },
       statuscolumn = {
         enabled = false,

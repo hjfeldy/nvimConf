@@ -20,6 +20,12 @@ return {
         desc='Find Files'
       },
       {
+        "<leader>ft",
+        function() require('neoWin.customPicker').termPick() end,
+        mode="n",
+        desc='Pick Terminals'
+      },
+      {
         "<leader>fg",
         function() require('telescopeHelpers').liveGrep() end, 
         mode="n",
@@ -88,6 +94,8 @@ return {
           color_devicons=true,
           mappings = {
             i = {
+              ['<C-p>'] = actions.cycle_history_prev,
+              ['<C-n>'] = actions.cycle_history_next,
               ["<C-h>"] = helpers.findFilesToggleHidden,
               ["<C-g>"] = helpers.findFilesToggleIgnore,
               ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
