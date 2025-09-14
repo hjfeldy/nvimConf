@@ -4,6 +4,7 @@
       dots = "󰇘",
     },
     dap = {
+      Debugging = " ",
       Stopped             = { "󰁕 ", "DiagnosticWarn", "DapStoppedLine" },
       Breakpoint          = " ",
       BreakpointCondition = " ",

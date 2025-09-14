@@ -4,6 +4,10 @@ local helpers = require('lspHelpers')
 vim.lsp.config.basedpyright = {
   settings = {
     basedpyright = {
+      analysis = {
+        autoImportCompletions = true,
+        diagnosticMode = 'workspace'
+      }
     }
   }
 }

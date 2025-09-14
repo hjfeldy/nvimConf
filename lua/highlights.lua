@@ -1,14 +1,4 @@
 local util = require('util')
-local setHL = vim.api.nvim_set_hl
-
-local function getHL(hl)
-  return vim.api.nvim_get_hl(0, {name=hl})
-end
-
-local function copyHL(fromHL, toHL)
-  local copied = getHL(fromHL)
-  setHL(0, toHL, {fg=copied.fg, bg=copied.bg, link=copied.link})
-end
 
 local lspKinds = {
   '@lsp.type.enum',
@@ -39,7 +29,7 @@ local lspKinds = {
 -- BlinkCmpKindField = @lsp.type.number,
 -- BlinkCmpKindVariable = @lsp.type.number,
 -- etc.
-local overrides = {
+local blinkLspOverrides = {
   field = 'number',
   variable = 'number',
   snippet = 'property',
@@ -49,30 +39,62 @@ local overrides = {
 
 local M = {}
 
+M.setHL = vim.api.nvim_set_hl
+
+function M.getHL(hl)
+  return vim.api.nvim_get_hl(0, {name=hl})
+end
+
+function M.copyHL(fromHL, toHL)
+  local copied = M.getHL(fromHL)
+  M.setHL(0, toHL, {fg=copied.fg, bg=copied.bg, link=copied.link})
+end
+
+
 --- Invoke custom highlighting logic
 function M.setColors()
   -- Set the foldColumn color based on whether we currently are in dark mode
   local dark = require('toggleColor').DARK
   local color
   if dark then color = '#ffffff' else color = '#000000' end
-  setHL(0, 'FoldColumn', {fg=color})
+  M.setHL(0, 'FoldColumn', {fg=color})
 
   -- Hack statusline so we don't get weird conflicts with the trouble.statusline component
-  copyHL('lualine_c_normal', 'StatusLine')
+  M.copyHL('lualine_c_normal', 'StatusLine')
+
+  -- Get rid of annoying automatic highlighting of the word under the cursor
+  -- M.copyHL('Normal', 'CurrentWord')
+  M.setHL(0, 'CurrentWord', {})
+
+  -- Reverse flash label/cursor - more visibly clear
+  -- local flashLabel = M.getHL('FlashLabel')
+  -- local flashCursor = M.getHL('FlashCursor')
+  -- util.debug('Flash Label:', flashLabel)
+  -- util.debug('Flash Cursor:', flashCursor)
+  -- M.copyHL('FlashLabel', 'FlashCursor')
+  -- M.setHL(0, 'FlashCursor', {fg=flashLabel.fg, bg=flashLabel.bg})
+  -- flashLabel = M.getHL('FlashLabel')
+  -- flashCursor = M.getHL('FlashCursor')
+  -- util.debug('Flash Label (post):', flashLabel)
+  -- util.debug('Flash Cursor (post):', flashCursor)
+
+  M.setHL(0, 'FlashMatch', {fg='red', bg='black'})
+  M.setHL(0, 'FlashLabel', {fg='red', bg='black'})
+  M.setHL(0, 'FlashCurrent', {fg='red', bg='black'})
 
   -- Override Blink lsp highlights (which NeoSolarized does not define) with builtin lsp highlights
   -- This adds color/style to the LSP completion menu
   for _, lspKind in pairs(lspKinds) do
     local kind = util.split(lspKind, '.')[3]
     local cmpKind = 'BlinkCmpKind' .. util.capitalize(kind)
-    copyHL(lspKind, cmpKind)
+    M.copyHL(lspKind, cmpKind)
   end
 
-  -- Override Blink lsp highlights with custom highlights defined in the "overrides" table
-  for cmpKind, lspKind in pairs(overrides) do
+  -- Override Blink lsp highlights with custom highlights defined in the "blinkLspOverrides" table
+  for cmpKind, lspKind in pairs(blinkLspOverrides) do
     local fullLspKind = '@lsp.type.' .. lspKind
     local fullCmpKind = 'BlinkCmpKind' .. util.capitalize(cmpKind)
-    copyHL(fullLspKind, fullCmpKind)
+    M.copyHL(fullLspKind, fullCmpKind)
   end
 end
 

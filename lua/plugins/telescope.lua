@@ -1,3 +1,5 @@
+
+
 return {
   {
     'nvim-telescope/telescope-fzf-native.nvim',
@@ -13,6 +15,12 @@ return {
     },
     keys = {
       { "<leader>f", "", desc = "+Telescope"},
+      {
+        "<leader>fc",
+        function() require('telescope.builtin').command_history() end,
+        mode="n",
+        desc='Find Files'
+      },
       {
         "<leader>ff",
         function() require('telescopeHelpers').findFiles() end,
@@ -80,6 +88,7 @@ return {
     opts = function()
       local actions = require("telescope.actions")
       local helpers = require('telescopeHelpers')
+      -- actions.close = helpers.wrappedClose
 
       return {
         extensions = {
@@ -100,12 +109,14 @@ return {
               ["<C-g>"] = helpers.findFilesToggleIgnore,
               ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
               ["<C-t>"] = helpers.telescopeTrouble,
+              ["<C-c>"] = actions.close,
               -- ["<C-q>"] = helpers.sendSelectedTroubleQflist
             },
             n = {
               ["<C-c>"] = actions.close,
               ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
               ["<C-t>"] = helpers.telescopeTrouble,
+              ["<C-e>"] = helpers.debugPicker,
               ["<leader>q"] = actions.send_to_qflist + actions.open_qflist
               --[[ ["<C-q>"] = helpers.sendSelectedTroubleQflist,
               ["<leader>q"] = helpers.sendAllTroubleQfList ]]

@@ -20,17 +20,14 @@ function M.merge(d1, d2)
   return out
 end
 
-function M.mergeArrays(a1, a2) 
+function M.mergeArrays(...)
+  local arrays = { ... }
   local out = {}
-  local offset = 0
-  for i, v in ipairs(a1) do
-    out[i] = v
-    offset = offset + 1
+  for _, array in pairs(arrays) do
+    for i, v in ipairs(array) do
+      out[#out+1] = v
+    end
   end
-  for i, v in ipairs(a2) do
-    out[i+offset] = v
-  end
-
   return out
 end
 
@@ -107,6 +104,7 @@ function M.shortenPath(path, maxComponents)
 end
 
 function M.debug(...) 
+  if not vim.g.NOICE_DEBUG then return end
   local args = { ... }
   local s = ''
   for _, msg in pairs(args) do
@@ -122,7 +120,7 @@ end
 function M.toggleDebug()
   vim.g.NOICE_DEBUG = not vim.g.NOICE_DEBUG
   local tf = vim.g.NOICE_DEBUG and 'true' or 'false'
-  vim.cmd('Lazy reload noice.nvim')
+  -- vim.cmd('Lazy reload noice.nvim')
   vim.notify('Toggled debug logs to ' .. tf, vim.log.levels.INFO)
 end
 

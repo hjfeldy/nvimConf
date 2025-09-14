@@ -25,3 +25,5 @@ vim.o.foldcolumn='auto:2'
 vim.o.wrap=false
 
 vim.o.scrolloff = 4
+
+-- vim.o.sessionoptions='global,'

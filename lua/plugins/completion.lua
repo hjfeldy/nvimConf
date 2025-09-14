@@ -58,7 +58,14 @@ return {
 
       ['<Up>'] = false,
       ['<Down>'] = false,
-      -- ['<tab>'] = { 'select_next', 'fallback' },
+      ['<CR>'] = {
+        function(cmp)
+          if cmp.is_menu_visible() and cmp.get_selected_item() then
+            return cmp.select_and_accept() 
+          end
+        end,
+        'fallback' 
+      },
       ['<tab>'] = {
         function(cmp)
           if cmp.is_menu_visible() then
@@ -73,7 +80,10 @@ return {
     },
 
     cmdline = {
-      keymap = { preset = 'inherit' },
+      keymap = {
+        preset = 'inherit' ,
+        ['<CR>'] = { 'fallback' },
+      },
       completion = {
         menu = { auto_show = true } ,
         list = { selection = { preselect = false } },

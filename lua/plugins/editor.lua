@@ -8,19 +8,20 @@ return {
           line = '<leader>l',
         },
         opleader = {
-          block = '<leader>l',
+          block = '<leader>L',
+          line = '<leader>l'
         }
       }
     end,
   },
 
-  {
-    "folke/persistence.nvim",
-    event = "BufReadPre", -- this will only start session saving when an actual file was opened
-    opts = {
-      -- add any custom options here
-    }
-  },
+  -- {
+  --   "folke/persistence.nvim",
+  --   event = "BufReadPre", -- this will only start session saving when an actual file was opened
+  --   opts = {
+  --     -- add any custom options here
+  --   }
+  -- },
 
   {
     "nvim-treesitter/nvim-treesitter",
@@ -136,21 +137,17 @@ return {
   -- location.
   {
     "folke/flash.nvim",
-    event = "VeryLazy",
-    vscode = true,
+    lazy=false,
+    -- event = "VeryLazy",
     ---@type Flash.Config
     opts = {
+      label = {
+        format = function(opts)
+          return { { opts.match.label, opts.hl_group } }
+        end,
+      },
       modes = {
-        char = {
-          char_actions = function(motion)
-            return {
-              [';'] = 'next',
-              [','] = 'prev',
-              --[[ [motion:upper()] = nil,
-              [motion:lower()] = nil, ]]
-            }
-          end
-        }
+        char = { enabled = false }
       }
     },
     -- stylua: ignore
