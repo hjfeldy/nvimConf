@@ -15,7 +15,6 @@ vim.lsp.config.basedpyright = {
 
 -- https://luals.github.io/wiki/configuration/
 vim.lsp.config.lua_ls = {
-  
   settings = {
     Lua = {
       diagnostics = {

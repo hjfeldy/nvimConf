@@ -8,6 +8,7 @@ local entry_maker = require('telescope.make_entry')
 local conf = require('telescope.config').values
 local lspHelpers = require('lspHelpers')
 local dynamicMode = require('lualine.dynamicMode')
+local extensions = require('telescope').extensions.dir
 
 
 local M = {}
@@ -50,7 +51,6 @@ end
 
 
 function M.findFiles(args)
-
   require('lualine').refresh()
   args = args or {}
   if args.hidden == nil then
@@ -59,12 +59,26 @@ function M.findFiles(args)
   if args.no_ignore == nil then
     args.no_ignore = not M.RESPECT_IGNORE
   end
+  args.prompt_title = 'Find Files (' .. util.renderHome() .. ')'
   -- args.find_command = {'fdfind', '-l'}
   builtin.find_files(args)
-  dynamicMode.setGlobal('telescopeFiles', true)
+  dynamicMode.setGlobalMode('telescopeFiles', true)
   -- toggleIcons(true, false)
   -- require('lualine.dynamicMode').setMode('showHiddenIcon', nil)
   -- require('lualine.dynamicMode').setMode('respectGitignore', nil)
+end
+
+function M.dirFindFiles(args)
+  require('lualine').refresh()
+  args = args or {}
+  if args.hidden == nil then
+    args.hidden = M.SHOW_HIDDEN
+  end
+  if args.no_ignore == nil then
+    args.no_ignore = not M.RESPECT_IGNORE
+  end
+  args.prompt_title = 'Find Files in a Directory (' .. util.renderHome() .. ')'
+  extensions.find_files(args) 
 end
 
 function M.findFilesToggleHidden(prompt_bufnr)
@@ -91,9 +105,10 @@ function M.liveGrep(args)
     additional_args[#additional_args+1] = "--no-ignore"
   end
   args.additional_args = additional_args
+  args.prompt_title = 'Live Grep (' .. util.renderHome() .. ')'
   -- print(vim.inspect(args.additional_args))
   builtin.live_grep(args)
-  dynamicMode.setGlobal('telescopeFiles', true)
+  dynamicMode.setGlobalMode('telescopeFiles', true)
   -- toggleIcons(true, false)
 end
 
@@ -138,7 +153,7 @@ function M.diagnostics(args)
     end
   end
   
-  dynamicMode.setGlobal('telescopeDiagnostics', true)
+  dynamicMode.setGlobalMode('telescopeDiagnostics', true)
   -- toggleIcons(true, true)
   builtin.diagnostics(args)
 end
@@ -200,8 +215,8 @@ vim.api.nvim_create_autocmd('WinLeave', {
 
     if ft == 'TelescopeResults' or ft == 'TelescopePrompt' then
       util.debug('Left Telescope:', ev)
-      dynamicMode.setGlobal('telescopeFiles', false)
-      dynamicMode.setGlobal('telescopeDiagnostics', false)
+      dynamicMode.setGlobalMode('telescopeFiles', false)
+      dynamicMode.setGlobalMode('telescopeDiagnostics', false)
       -- toggleIcons(false)
     end
 

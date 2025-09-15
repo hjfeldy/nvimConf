@@ -1,3 +1,5 @@
+-- completions
+--
 local function has_words_before()
   local col = vim.api.nvim_win_get_cursor(0)[2]
   if col == 0 then
@@ -8,20 +10,6 @@ local function has_words_before()
 end
 
 return {
-  {"mfussenegger/nvim-jdtls"},
-  {"neovim/nvim-lspconfig"},
-  {
-    "folke/lazydev.nvim",
-    ft = "lua", -- only load on lua files
-    opts = {
-      library = {
-        -- See the configuration section for more details
-        -- Load luvit types when the `vim.uv` word is found
-        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
-      },
-    },
-  },
-  {
   'saghen/blink.cmp',
   lazy = false,
   -- optional: provides snippets for the snippet source
@@ -136,5 +124,4 @@ return {
   },
 
   opts_extend = { "sources.default" }
-  }
 }

@@ -1,4 +1,4 @@
-
+local util = require('util')
 
 return {
   {
@@ -8,6 +8,7 @@ return {
   {
     'nvim-telescope/telescope.nvim', tag = '0.1.8',
     dependencies = {
+      "debugloop/telescope-undo.nvim",
       'nvim-lua/plenary.nvim' ,
       'nvim-telescope/telescope-fzf-native.nvim',
       -- "nvim-mini/mini.icons",
@@ -81,9 +82,16 @@ return {
         mode="n",
         desc='Notifications'
       },
+      {
+        "<leader>fu",
+        function() require("telescope").extensions.undo.undo() end,
+        mode="n",
+        desc='Undo History'
+      },
     },
-    after = function() 
-      require('telescope').load_extension('fzf')
+    config = function() 
+      -- require('telescope').load_extension('fzf')
+      require('telescope').load_extension('undo')
     end,
     opts = function()
       local actions = require("telescope.actions")
@@ -100,6 +108,8 @@ return {
           }
         },
         defaults = {
+          dynamic_preview_title = true,
+          -- results_title = util.renderHome,
           color_devicons=true,
           mappings = {
             i = {
@@ -110,6 +120,8 @@ return {
               ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
               ["<C-t>"] = helpers.telescopeTrouble,
               ["<C-c>"] = actions.close,
+              ["<C-j>"] = actions.preview_scrolling_down,
+              ["<C-k>"] = actions.preview_scrolling_up,
               -- ["<C-q>"] = helpers.sendSelectedTroubleQflist
             },
             n = {
@@ -117,7 +129,11 @@ return {
               ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
               ["<C-t>"] = helpers.telescopeTrouble,
               ["<C-e>"] = helpers.debugPicker,
-              ["<leader>q"] = actions.send_to_qflist + actions.open_qflist
+              ["<leader>q"] = actions.send_to_qflist + actions.open_qflist,
+              ["<C-j>"] = actions.preview_scrolling_down,
+              ["<C-k>"] = actions.preview_scrolling_up,
+              ["K"] = actions.move_to_top,
+              ["J"] = actions.move_to_bottom,
               --[[ ["<C-q>"] = helpers.sendSelectedTroubleQflist,
               ["<leader>q"] = helpers.sendAllTroubleQfList ]]
             }

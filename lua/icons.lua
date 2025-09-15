@@ -22,6 +22,13 @@
       Modified = " ",
       Removed  = " ",
       Logo = " ",
+      Branch = ''
+    },
+    lsp = {
+      basedpyright = ' ',
+      lua_ls = ' ',
+      jdtls = ' ',
+      metals = ' '
     },
     showHide = {
       Show = "󰈈 ",

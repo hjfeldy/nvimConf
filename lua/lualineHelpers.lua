@@ -24,10 +24,18 @@ vim.api.nvim_create_autocmd('WinEnter', {
   end
 });
 
-local _refresh = lualine.refresh
-lualine.refresh = function() 
-  _refresh()
-  local stat = M.getStatus()
-end
+-- local _refresh = lualine.refresh
+-- lualine.refresh = function() 
+--   _refresh()
+--   local stat = M.getStatus()
+--   if #stat > vim.api.nvim_win_get_width(0) then
+--     -- util.debug('too long!')
+--     -- require('lualine.dynamicMode').setGlobal('short', true)
+--   else
+--     -- util.debug('not too long')
+--     -- require('lualine.dynamicMode').setGlobal('short', false)
+--   end
+--   -- util.debug('Refreshed - status length =', #stat, 'status =', stat)
+-- end
 
 return M
