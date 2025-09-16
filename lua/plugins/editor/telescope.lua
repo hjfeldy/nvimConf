@@ -2,15 +2,11 @@ local util = require('util')
 
 return {
   {
-    'nvim-telescope/telescope-fzf-native.nvim',
-    build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release'
-  },
-  {
     'nvim-telescope/telescope.nvim', tag = '0.1.8',
     dependencies = {
-      "debugloop/telescope-undo.nvim",
-      'nvim-lua/plenary.nvim' ,
-      'nvim-telescope/telescope-fzf-native.nvim',
+      -- "debugloop/telescope-undo.nvim",
+      'nvim-lua/plenary.nvim',
+      -- 'nvim-telescope/telescope-fzf-native.nvim',
       -- "nvim-mini/mini.icons",
       "nvim-tree/nvim-web-devicons",
     },
@@ -89,14 +85,9 @@ return {
         desc='Undo History'
       },
     },
-    config = function() 
-      -- require('telescope').load_extension('fzf')
-      require('telescope').load_extension('undo')
-    end,
     opts = function()
       local actions = require("telescope.actions")
       local helpers = require('telescopeHelpers')
-      -- actions.close = helpers.wrappedClose
 
       return {
         extensions = {
@@ -108,7 +99,7 @@ return {
           }
         },
         defaults = {
-          dynamic_preview_title = true,
+          -- dynamic_preview_title = true,
           -- results_title = util.renderHome,
           color_devicons=true,
           mappings = {
@@ -118,6 +109,7 @@ return {
               ["<C-h>"] = helpers.findFilesToggleHidden,
               ["<C-g>"] = helpers.findFilesToggleIgnore,
               ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
+              ["<C-e>"] = function() print ('ah!') end,
               ["<C-t>"] = helpers.telescopeTrouble,
               ["<C-c>"] = actions.close,
               ["<C-j>"] = actions.preview_scrolling_down,

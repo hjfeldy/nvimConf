@@ -7,8 +7,8 @@ local finders = require('telescope.finders')
 local entry_maker = require('telescope.make_entry')
 local conf = require('telescope.config').values
 local lspHelpers = require('lspHelpers')
-local dynamicMode = require('lualine.dynamicMode')
-local extensions = require('telescope').extensions.dir
+-- local dynamicMode = require('lualine.dynamicMode')
+-- local extensions = require('telescope').extensions.dir
 
 
 local M = {}
@@ -32,22 +32,22 @@ function M.toggleHidden()
   M.SHOW_HIDDEN = not M.SHOW_HIDDEN
 end
 
-local function toggleIcons(on, withDiagnostics) 
-  local mode = on and 'telescope' or nil
-  util.debug('Toggling icons to state ' .. (mode or 'nil'))
-  dynamicMode.setMode('showHiddenIcon', mode )
-  dynamicMode.setMode('respectGitignore', mode)
-  dynamicMode.setMode('telescopeIcon', mode)
-
-  -- By default, diagnostics icon is always on.
-  -- however, we want to turn it off when we open telescope,
-  -- EXCEPT for when we're using telescope diagnostics
-  if on and not withDiagnostics then
-    dynamicMode.setMode('diagnosticsFilter', 'inactive')
-  else 
-    dynamicMode.setMode('diagnosticsFilter', nil)
-  end
-end
+-- local function toggleIcons(on, withDiagnostics) 
+--   local mode = on and 'telescope' or nil
+--   util.debug('Toggling icons to state ' .. (mode or 'nil'))
+--   dynamicMode.setMode('showHiddenIcon', mode )
+--   dynamicMode.setMode('respectGitignore', mode)
+--   dynamicMode.setMode('telescopeIcon', mode)
+--
+--   -- By default, diagnostics icon is always on.
+--   -- however, we want to turn it off when we open telescope,
+--   -- EXCEPT for when we're using telescope diagnostics
+--   if on and not withDiagnostics then
+--     dynamicMode.setMode('diagnosticsFilter', 'inactive')
+--   else 
+--     dynamicMode.setMode('diagnosticsFilter', nil)
+--   end
+-- end
 
 
 function M.findFiles(args)
@@ -62,24 +62,24 @@ function M.findFiles(args)
   args.prompt_title = 'Find Files (' .. util.renderHome() .. ')'
   -- args.find_command = {'fdfind', '-l'}
   builtin.find_files(args)
-  dynamicMode.setGlobalMode('telescopeFiles', true)
+  require('lualine.dynamicMode').setGlobalMode('telescopeFiles', true)
   -- toggleIcons(true, false)
   -- require('lualine.dynamicMode').setMode('showHiddenIcon', nil)
   -- require('lualine.dynamicMode').setMode('respectGitignore', nil)
 end
 
-function M.dirFindFiles(args)
-  require('lualine').refresh()
-  args = args or {}
-  if args.hidden == nil then
-    args.hidden = M.SHOW_HIDDEN
-  end
-  if args.no_ignore == nil then
-    args.no_ignore = not M.RESPECT_IGNORE
-  end
-  args.prompt_title = 'Find Files in a Directory (' .. util.renderHome() .. ')'
-  extensions.find_files(args) 
-end
+-- function M.dirFindFiles(args)
+--   require('lualine').refresh()
+--   args = args or {}
+--   if args.hidden == nil then
+--     args.hidden = M.SHOW_HIDDEN
+--   end
+--   if args.no_ignore == nil then
+--     args.no_ignore = not M.RESPECT_IGNORE
+--   end
+--   args.prompt_title = 'Find Files in a Directory (' .. util.renderHome() .. ')'
+--   extensions.find_files(args) 
+-- end
 
 function M.findFilesToggleHidden(prompt_bufnr)
   M.toggleHidden()
@@ -108,7 +108,7 @@ function M.liveGrep(args)
   args.prompt_title = 'Live Grep (' .. util.renderHome() .. ')'
   -- print(vim.inspect(args.additional_args))
   builtin.live_grep(args)
-  dynamicMode.setGlobalMode('telescopeFiles', true)
+  require('lualine.dynamicMode').setGlobalMode('telescopeFiles', true)
   -- toggleIcons(true, false)
 end
 
@@ -153,9 +153,29 @@ function M.diagnostics(args)
     end
   end
   
-  dynamicMode.setGlobalMode('telescopeDiagnostics', true)
+  local diagnosticCount = M.diagnosticCount(args.bufnr ~= nil)
+  if diagnosticCount > 0 then
+    -- print('found ' .. diagnosticCount .. 'diagnostics')
+    require('lualine.dynamicMode').setGlobalMode('telescopeDiagnostics', true)
+  end
   -- toggleIcons(true, true)
   builtin.diagnostics(args)
+end
+
+function M.diagnosticCount(currBuf)
+  local severity = {
+    vim.diagnostic.severity.INFO,
+    vim.diagnostic.severity.WARN,
+    vim.diagnostic.severity.ERROR,
+  }
+  if not M.WARNING_FILTER then
+    table.insert(severity, 1, vim.diagnostic.severity.HINT)
+  end
+
+  local bufNr
+  if currBuf then bufNr = 0 else bufNr = nil end
+  return vim.tbl_count(vim.diagnostic.get(bufNr, {severity=severity}))
+
 end
 
 function M.diagnosticsToggleHints(prompt_bufnr)
@@ -167,16 +187,8 @@ function M.diagnosticsToggleHints(prompt_bufnr)
   local currentText = actionState.get_current_line()
   local diagnostics = vim.diagnostic.get(nil)
   local severityLimit = M.WARNING_FILTER and 2 or 4
-  local hintCount = 0
-  -- print('Got diagnostics:\n' .. vim.inspect(diagnostics))
-  for _, item in ipairs(diagnostics) do
-    if item.severity <= severityLimit then
-      hintCount = hintCount + 1
-    end
-  end
-  -- print('Got ' .. hintCount .. ' diagnostics past the severity threshold of ' .. severityLimit)
-  local currentText = actionState.get_current_line()
-  if hintCount == 0 then
+  local diagnosticCount = M.diagnosticCount(false)
+  if diagnosticCount == 0 then
     -- print('No warning/error diagnostics')
     return actions.close(prompt_bufnr)
   end
@@ -215,8 +227,9 @@ vim.api.nvim_create_autocmd('WinLeave', {
 
     if ft == 'TelescopeResults' or ft == 'TelescopePrompt' then
       util.debug('Left Telescope:', ev)
-      dynamicMode.setGlobalMode('telescopeFiles', false)
-      dynamicMode.setGlobalMode('telescopeDiagnostics', false)
+      require('lualine.dynamicMode').setGlobalMode('telescopeFiles', false)
+      require('lualine.dynamicMode').setGlobalMode('telescopeDiagnostics', false)
+      -- require('lualine.dynamicMode').setGlobalMode('normal', true)
       -- toggleIcons(false)
     end
 

@@ -112,7 +112,7 @@ return {
       end,
       separator="",
       padding = { left = 1, right = 0 },
-      altModes = {'!telescopeDiagnostics'}
+      altModes = {'normal', 'telescopeDiagnostics'}
     }
 
     local showHiddenIcon = {
