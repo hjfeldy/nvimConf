@@ -110,6 +110,7 @@ return {
               n = {
                 ["c"] = fileBrowserActions.change_cwd,
                 ["C"] = fileBrowserActions.goto_cwd,
+                ["O"] = helpers.openFileInTab,
                 ["<C-h>"] = function() helpers.fileBrowserToggleHidden() end,
                 ["<C-g>"] = function() helpers.fileBrowserToggleIgnore() end,
                 ["<C-u>"] = function() helpers.fileBrowserIncrementDepth() end,

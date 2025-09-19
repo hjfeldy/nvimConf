@@ -228,6 +228,19 @@ function M.diagnosticsToggleHints(prompt_bufnr)
 end
 
 
+function M.openFileInTab(prompt_bufnr, focus)
+  local entry = actionState.get_selected_entry()
+  local dir = entry.value
+  vim.cmd('tabnew')
+  local pathSep = package.config:sub(1,1)
+  local pathComponents = util.split(dir, pathSep)
+  local pathBasename = pathComponents[#pathComponents]
+  vim.cmd('BufferLineTabRename ' .. pathBasename)
+  if not focus then
+    vim.cmd('tabprevious')
+  end
+end
+
 function M.sendAllTroubleQfList(prompt_bufnr)
   require('telescope.actions').send_to_qflist(prompt_bufnr)
   vim.cmd('Trouble qflist')
