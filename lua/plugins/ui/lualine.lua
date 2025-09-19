@@ -5,8 +5,8 @@ local util = require('util')
 local api = vim.api
 
 return {
-  -- "hjfeldy/lualine.nvim",
-  dir = '/home/harry/Repos/lualine.nvim/',
+  "hjfeldy/lualine.nvim",
+  -- dir = '/home/harry/Repos/lualine.nvim/',
   branch = 'feature/dynamicModes',
   dependencies = {
     'folke/noice.nvim',
@@ -427,7 +427,6 @@ return {
         },
       },
       extensions = {
-        "neo-tree",
         "lazy",
         "fzf",
         "fugitive",

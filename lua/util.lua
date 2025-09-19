@@ -1,3 +1,6 @@
+
+local api = vim.api
+
 local M = {}
 
 function M.reverse(d)
@@ -39,7 +42,7 @@ function M.shallowCopy(d)
   return out
 end
 
-local map = vim.api.nvim_set_keymap
+local map = api.nvim_set_keymap
 local opts = { noremap = true }
 function M.mapKey(key, mapTo, mode, desc)
   local _opts = M.shallowCopy(opts)
@@ -129,5 +132,18 @@ function M.renderHome()
   local home = os.getenv('HOME') or '__notfound__'
   return " " .. string.gsub(cwd, home, '~')
 end
+
+function M.listedBufs()
+  local out = {}
+  for _, buf in ipairs(api.nvim_list_bufs()) do
+    local listed = api.nvim_get_option_value('buflisted', {buf=buf})
+    local name = api.nvim_buf_get_name(buf)
+    if listed then
+      out[#out+1] = name
+    end
+  end
+  return out
+end
+
 
 return M

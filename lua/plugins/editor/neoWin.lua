@@ -3,8 +3,8 @@ local toggleColor = require('toggleColor')
 
 return {
   {
-    -- "hjfeldy/neoWin",
-    dir = '/home/harry/Repos/neowin',
+    "hjfeldy/neoWin",
+    -- dir = '/home/harry/Repos/neowin',
     branch="feature/tpad",
     keys = {
       -- LSP 
