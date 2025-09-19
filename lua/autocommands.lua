@@ -17,6 +17,27 @@ api.nvim_create_autocmd('BufReadPost', {
   end
 })
 
+api.nvim_create_autocmd('BufReadPost', {
+  pattern = { '*.md' },
+  callback = function()
+    vim.cmd('TSBufEnable highlight')
+  end
+})
+
+api.nvim_create_autocmd('BufReadPost', {
+  pattern = { '*' },
+  callback = function()
+    for _, buf in ipairs(api.nvim_list_bufs()) do
+      local listed = api.nvim_get_option_value('buflisted', {buf=buf})
+      local name = api.nvim_buf_get_name(buf)
+      if string.len(name) == 0 and listed then
+        api.nvim_buf_delete(buf, {})
+        return
+      end
+    end
+  end
+})
+
 -- quit when deleting the last buffer
 -- api.nvim_create_autocmd('BufDelete', {
 --   pattern = { '*' },
