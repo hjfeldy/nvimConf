@@ -232,6 +232,7 @@ function M.openFileInTab(prompt_bufnr, focus)
   local entry = actionState.get_selected_entry()
   local dir = entry.value
   vim.cmd('tabnew')
+  vim.cmd('tcd ' .. dir)
   local pathSep = package.config:sub(1,1)
   local pathComponents = util.split(dir, pathSep)
   local pathBasename = pathComponents[#pathComponents]
