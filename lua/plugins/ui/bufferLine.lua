@@ -15,18 +15,30 @@ return {
     { "gk", "gg", desc = "Top of buffer" },
     { "gj", "GG", desc = "Bottom of buffer" },
 
-    { "<leader>T", "", desc = "+BufferLine Tabs"},
-    { "<leader>Tn", "<cmd>tabnext<cr>", desc = "Next Tab"},
-    { "<leader>Tp", "<cmd>tabprevious<cr>", desc = "Previous Tab"},
-    { "<leader>TN", "<cmd>tabnew<cr>", desc = "New Tab"},
-    {
-      "<leader>Tr", 
+    { "<C-a>", "", desc = "+BufferLine Tabs"},
+    { "<C-a>n", "<cmd>tabnext<cr>", desc = "Next Tab"},
+    { "<C-a>p", "<cmd>tabprevious<cr>", desc = "Previous Tab"},
+    { "<C-a>c", "<cmd>tabnew<cr>", desc = "New Tab"},
+    { "<C-a>x", "<cmd>tabclose<cr>", desc = "Close Tab"},
+    { "<C-a>r", 
       function() 
         local newName = vim.fn.input('New name for tab')
         vim.cmd('BufferLineTabRename ' .. newName)
       end,
       desc = "Rename Tab"
     },
+    -- { "<leader>T", "", desc = "+BufferLine Tabs"},
+    -- { "<leader>Tn", "<cmd>tabnext<cr>", desc = "Next Tab"},
+    -- { "<leader>Tp", "<cmd>tabprevious<cr>", desc = "Previous Tab"},
+    -- { "<leader>TN", "<cmd>tabnew<cr>", desc = "New Tab"},
+    -- {
+    --   "<leader>Tr", 
+    --   function() 
+    --     local newName = vim.fn.input('New name for tab')
+    --     vim.cmd('BufferLineTabRename ' .. newName)
+    --   end,
+    --   desc = "Rename Tab"
+    -- },
 
 
     },
