@@ -4,6 +4,7 @@ return {
   branch = 'master',
   lazy = false,
   build = ":TSUpdate",
+  -- dependencies = { "OXY2DEV/markview.nvim" },
   ensure_installed = {
     "c",
     "python",

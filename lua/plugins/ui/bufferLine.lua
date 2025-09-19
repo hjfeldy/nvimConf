@@ -13,7 +13,22 @@ return {
     { "gM", "<cmd>BufferLineMovePrev<cr>", desc = "Move buffer prev" },
     { "gm", "<cmd>BufferLineMoveNext<cr>", desc = "Move buffer next" },
     { "gk", "gg", desc = "Top of buffer" },
-    { "gj", "GG", desc = "Bottom of buffer" }
+    { "gj", "GG", desc = "Bottom of buffer" },
+
+    { "<leader>T", "", desc = "+BufferLine Tabs"},
+    { "<leader>Tn", "<cmd>tabnext<cr>", desc = "Next Tab"},
+    { "<leader>Tp", "<cmd>tabprevious<cr>", desc = "Previous Tab"},
+    { "<leader>TN", "<cmd>tabnew<cr>", desc = "New Tab"},
+    {
+      "<leader>Tr", 
+      function() 
+        local newName = vim.fn.input('New name for tab')
+        vim.cmd('BufferLineTabRename ' .. newName)
+      end,
+      desc = "Rename Tab"
+    },
+
+
     },
     (function()
       local numBindings = {}
@@ -26,6 +41,9 @@ return {
   opts = {
     options = {
       -- stylua: ignore
+      show_close_icon = false,
+      show_buffer_close_icon = false,
+      move_wraps_at_ends = true,
       close_command = function(n) require('snacks').bufdelete(n) end,
       numbers = 'ordinal',
       -- stylua: ignore
@@ -34,7 +52,13 @@ return {
       always_show_bufferline = true,
       custom_filter = function(bufnr, bufnrs)
         local bufType = vim.api.nvim_get_option_value('filetype', {buf=bufnr})
-        local blacklist = { ['grug-far'] = true, ['help'] = true, ['Terminal'] = true }
+        local blacklist = {
+          ['grug-far'] = true,
+          ['help'] = true,
+          ['Terminal'] = true,
+          ['qf'] = true,
+          ['fugitive'] = true 
+        }
         return not blacklist[bufType]
       end,
       diagnostics_indicator = function(_, _, diag)

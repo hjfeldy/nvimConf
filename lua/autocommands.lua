@@ -9,6 +9,14 @@ api.nvim_create_autocmd('BufReadPost', {
   end
 })
 
+-- clear fugitive buffers when 
+api.nvim_create_autocmd('BufReadPost', {
+  pattern = { 'fugitive://*' },
+  callback = function()
+    vim.o.bufhidden = 'delete'
+  end
+})
+
 -- quit when deleting the last buffer
 -- api.nvim_create_autocmd('BufDelete', {
 --   pattern = { '*' },

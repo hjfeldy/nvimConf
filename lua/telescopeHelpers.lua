@@ -1,6 +1,7 @@
 local builtin = require('telescope.builtin')
 local actionState = require("telescope.actions.state")
 local actions = require("telescope.actions")
+local fileBrowserActions = require("telescope").extensions.file_browser.actions
 local util = require('util')
 local pickers = require('telescope.pickers')
 local finders = require('telescope.finders')
@@ -62,37 +63,35 @@ function M.findFiles(args)
   args.prompt_title = 'Find Files (' .. util.renderHome() .. ')'
   -- args.find_command = {'fdfind', '-l'}
   builtin.find_files(args)
-  require('lualine.dynamicMode').setGlobalMode('telescopeFiles', true)
+  require('lualine.dynamicMode').setGlobalMode('telescopeFiles')
   -- toggleIcons(true, false)
   -- require('lualine.dynamicMode').setMode('showHiddenIcon', nil)
   -- require('lualine.dynamicMode').setMode('respectGitignore', nil)
 end
 
--- function M.dirFindFiles(args)
---   require('lualine').refresh()
---   args = args or {}
---   if args.hidden == nil then
---     args.hidden = M.SHOW_HIDDEN
---   end
---   if args.no_ignore == nil then
---     args.no_ignore = not M.RESPECT_IGNORE
---   end
---   args.prompt_title = 'Find Files in a Directory (' .. util.renderHome() .. ')'
---   extensions.find_files(args) 
--- end
+local function getFileArgs(args) 
+  args = args or {}
+  if args.hidden == nil then
+    args.hidden = M.SHOW_HIDDEN
+  end
+  if args.no_ignore == nil then
+    args.no_ignore = not M.RESPECT_IGNORE
+  end
 
-function M.findFilesToggleHidden(prompt_bufnr)
-  M.toggleHidden()
-  local currentText = actionState.get_current_line()
-  M.findFiles({default_text=currentText})
+  return args
 end
 
-function M.findFilesToggleIgnore(prompt_bufnr)
-  M.toggleIgnore()
-  local currentText = actionState.get_current_line()
-  M.findFiles({default_text=currentText})
-end
 
+function M.fileBrowser(args)
+  require('lualine').refresh()
+  args = getFileArgs(args)
+  -- args.find_command = {'fdfind', '-l'}
+  require("telescope").extensions.file_browser.file_browser(args)
+  require('lualine.dynamicMode').setGlobalMode('telescopeFiles')
+  -- toggleIcons(true, false)
+  -- require('lualine.dynamicMode').setMode('showHiddenIcon', nil)
+  -- require('lualine.dynamicMode').setMode('respectGitignore', nil)
+end
 
 function M.liveGrep(args)
 
@@ -108,20 +107,52 @@ function M.liveGrep(args)
   args.prompt_title = 'Live Grep (' .. util.renderHome() .. ')'
   -- print(vim.inspect(args.additional_args))
   builtin.live_grep(args)
-  require('lualine.dynamicMode').setGlobalMode('telescopeFiles', true)
+  require('lualine.dynamicMode').setGlobalMode('telescopeFiles')
   -- toggleIcons(true, false)
 end
 
-function M.liveGrepToggleHidden(prompt_bufnr)
-  M.toggleHidden()
-  local currentText = actionState.get_current_line()
-  M.liveGrep({default_text=currentText})
+--- Wrap a telescope function (ie findFiles or liveGrep) 
+--- such that it calls toggleHiden() / toggleIgnore() first.
+--- These wrapped functions can be called while a telescope prompt is already open,
+--- reopening a new telescope inplace which uses the newly toggled configuration value
+local function wrapWithToggle(finderFunc, togglerFunc)
+  local wrapped = function(prompt_bufnr)
+    togglerFunc()
+    local currentText = actionState.get_current_line()
+    return finderFunc({default_text=currentText})
+  end
+  return wrapped
 end
 
-function M.liveGrepToggleIgnore(prompt_bufnr)
-  M.toggleIgnore()
+M.fileBrowserToggleHidden = wrapWithToggle(M.fileBrowser, M.toggleHidden)
+M.fileBrowserToggleIgnore = wrapWithToggle(M.fileBrowser, M.toggleIgnore)
+M.findFilesToggleHidden = wrapWithToggle(M.findFiles, M.toggleHidden)
+M.findFilesToggleIgnore = wrapWithToggle(M.findFiles, M.toggleIgnore)
+M.liveGrepToggleHidden = wrapWithToggle(M.liveGrep, M.toggleHidden)
+M.liveGrepToggleIgnore = wrapWithToggle(M.liveGrep, M.toggleIgnore)
+
+
+M.FILE_DEPTH = 1
+
+function M.fileBrowserIncrementDepth(args)
+  args = getFileArgs(args)
+  M.FILE_DEPTH = M.FILE_DEPTH + 1
+  args.depth = M.FILE_DEPTH
+
   local currentText = actionState.get_current_line()
-  M.liveGrep({default_text=currentText})
+  args.default_text = currentText
+  require("telescope").extensions.file_browser.file_browser(args)
+  require('lualine.dynamicMode').setGlobalMode('telescopeFiles')
+end
+
+function M.fileBrowserDecrementDepth(args)
+  args = getFileArgs(args)
+  M.FILE_DEPTH = M.FILE_DEPTH - 1
+  args.depth = M.FILE_DEPTH
+  local currentText = actionState.get_current_line()
+  args.default_text = currentText
+  require("telescope").extensions.file_browser.file_browser(args)
+  require('lualine.dynamicMode').setGlobalMode('telescopeFiles')
 end
 
 function M.debugPicker(prompt_bufnr)
@@ -156,7 +187,7 @@ function M.diagnostics(args)
   local diagnosticCount = M.diagnosticCount(args.bufnr ~= nil)
   if diagnosticCount > 0 then
     -- print('found ' .. diagnosticCount .. 'diagnostics')
-    require('lualine.dynamicMode').setGlobalMode('telescopeDiagnostics', true)
+    require('lualine.dynamicMode').setGlobalMode('telescopeDiagnostics')
   end
   -- toggleIcons(true, true)
   builtin.diagnostics(args)
@@ -227,8 +258,7 @@ vim.api.nvim_create_autocmd('WinLeave', {
 
     if ft == 'TelescopeResults' or ft == 'TelescopePrompt' then
       util.debug('Left Telescope:', ev)
-      require('lualine.dynamicMode').setGlobalMode('telescopeFiles', false)
-      require('lualine.dynamicMode').setGlobalMode('telescopeDiagnostics', false)
+      require('lualine.dynamicMode').setGlobalMode('normal')
       -- require('lualine.dynamicMode').setGlobalMode('normal', true)
       -- toggleIcons(false)
     end

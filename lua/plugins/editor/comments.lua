@@ -4,6 +4,7 @@ return {
     return {
       toggler = {
         line = '<leader>l',
+        block = '<leader>L',
       },
       opleader = {
         block = '<leader>L',

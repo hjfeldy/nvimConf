@@ -4,10 +4,7 @@ return {
   {
     'nvim-telescope/telescope.nvim', tag = '0.1.8',
     dependencies = {
-      -- "debugloop/telescope-undo.nvim",
       'nvim-lua/plenary.nvim',
-      -- 'nvim-telescope/telescope-fzf-native.nvim',
-      -- "nvim-mini/mini.icons",
       "nvim-tree/nvim-web-devicons",
     },
     keys = {
@@ -23,6 +20,12 @@ return {
         function() require('telescopeHelpers').findFiles() end,
         mode="n",
         desc='Find Files'
+      },
+      {
+        "<leader>fF",
+        function() require('telescopeHelpers').fileBrowser() end,
+        mode="n",
+        desc='File Browser'
       },
       {
         "<leader>ft",
@@ -84,13 +87,42 @@ return {
         mode="n",
         desc='Undo History'
       },
+      {
+        "<leader>fG",
+        function() require("telescope.builtin").git_branches() end,
+        mode="n",
+        desc='Git Branches'
+      },
     },
     opts = function()
       local actions = require("telescope.actions")
+      local actionState = require("telescope.actions.state")
       local helpers = require('telescopeHelpers')
+      local fileBrowserActions = require("telescope").extensions.file_browser.actions
 
       return {
         extensions = {
+          file_browser = {
+            hijack_netrw = true,
+            grouped = true,
+            -- theme = 'ivy',
+            mappings = {
+              n = {
+                ["c"] = fileBrowserActions.change_cwd,
+                ["C"] = fileBrowserActions.goto_cwd,
+                ["<C-h>"] = function() helpers.fileBrowserToggleHidden() end,
+                ["<C-g>"] = function() helpers.fileBrowserToggleIgnore() end,
+                ["<C-u>"] = function() helpers.fileBrowserIncrementDepth() end,
+                ["<C-d>"] = function() helpers.fileBrowserDecrementDepth() end,
+              },
+              i = {
+                ["<C-h>"] = function() helpers.fileBrowserToggleHidden() end,
+                ["<C-g>"] = function() helpers.fileBrowserToggleIgnore() end,
+                ["<C-u>"] = function() helpers.fileBrowserIncrementDepth() end,
+                ["<C-d>"] = function() helpers.fileBrowserDecrementDepth() end,
+              }
+            }
+          },
           fzf = {
             fuzzy = true,                    -- false will only do exact matching
             override_generic_sorter = true,  -- override the generic sorter
@@ -132,6 +164,18 @@ return {
           }
         },
         pickers = {
+          git_branches = {
+            mappings = {
+              n = {
+                ["L"] = function(prompt_bufnr) 
+                  local entry = actionState.get_selected_entry()
+                  local branch = entry.value
+                  vim.cmd('G log ' .. branch .. ' --decorate')
+                  -- return actions.close(prompt_bufnr)
+                end
+              }
+            }
+          },
           diagnostics = {
             mappings = {
               i = {
@@ -141,6 +185,10 @@ return {
           },
           live_grep = {
             mappings = {
+              n = {
+                ["<C-h>"] = function() helpers.liveGrepToggleHidden() end,
+                ["<C-g>"] = function() helpers.liveGrepToggleIgnore() end,
+              },
               i = {
                 ["<C-h>"] = function() helpers.liveGrepToggleHidden() end,
                 ["<C-g>"] = function() helpers.liveGrepToggleIgnore() end,

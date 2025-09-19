@@ -5,8 +5,8 @@ local util = require('util')
 local api = vim.api
 
 return {
-  "hjfeldy/lualine.nvim",
-  -- dir = '/home/harry/Repos/lualine.nvim/',
+  -- "hjfeldy/lualine.nvim",
+  dir = '/home/harry/Repos/lualine.nvim/',
   branch = 'feature/dynamicModes',
   dependencies = {
     'folke/noice.nvim',
@@ -54,16 +54,6 @@ return {
 
     -- ensure border is drawn
     local ensureBorder = {function() return "" end, draw_empty=true}
-
-    local telescopeIcon = {
-      function() return icons.kinds.Telescope end, separator = "",
-      color = function() 
-        local whiteBlack = vim.o.background == 'dark' and 'white' or 'black'
-        return {fg = whiteBlack}
-      end,
-      component_name="telescopeIcon",
-      altModes = {'telescopeFiles', 'telescopeDiagnostics'}
-    }
 
     local lazyUpdateIcon = {
       require("lazy.status").updates,
@@ -115,6 +105,16 @@ return {
       altModes = {'normal', 'telescopeDiagnostics'}
     }
 
+    local telescopeIcon = {
+      function() return icons.kinds.Telescope end, separator = "",
+      color = function() 
+        local whiteBlack = vim.o.background == 'dark' and 'white' or 'black'
+        return {fg = whiteBlack}
+      end,
+      -- component_name="telescopeIcon",
+      altModes = {'telescopeFiles', 'telescopeDiagnostics'}
+    }
+
     local showHiddenIcon = {
       -- function() return "" end,
       function() 
@@ -125,7 +125,7 @@ return {
         local whiteBlack = vim.o.background == 'dark' and 'white' or 'black'
         return {fg=telescopeHelpers.SHOW_HIDDEN and "green" or whiteBlack}
       end,
-      component_name = "showHiddenIcon",
+      -- component_name = "showHiddenIcon",
       separator="",
       padding = { left = 1, right = 0 },
       altModes = {'telescopeFiles'}
@@ -135,7 +135,7 @@ return {
       function() 
         return icons.git.Logo
       end,
-      component_name = "respectGitignore",
+      -- component_name = "respectGitignore",
       separator="",
       padding = { left = 0, right = 0 },
       color = function() 
@@ -213,6 +213,43 @@ return {
       },
       --[[ component_separators = { left = '', right = ''},
       section_separators = { left = '', right = ''}, ]]
+
+      -- REAL CONFIG - commenting out for demo
+      -- inactive_sections = {
+      --   lualine_a = {},
+      --   lualine_b = {
+      --     {
+      --       "filetype",
+      --       icon_only = true,
+      --       separator = "",
+      --       padding = { left = 1, right = 0 } 
+      --     },
+      --     {
+      --       shortenPathFunc(2),
+      --       component_name='filename',
+      --       alts = {
+      --         short = { shortenPathFunc(1) },
+      --       }
+      --     },
+      --   },
+      --   lualine_x = {},
+      --   lualine_c = {},
+      --   lualine_y = {
+      --     telescopeIcon,
+      --     showHiddenIcon,
+      --     respectGitignoreIcon,
+      --     diagnosticsFilterIcon,
+      --     debugLogsIcon,
+      --     ensureBorder,
+      --   },
+      --   lualine_z = {
+      --     {
+      --       util.renderHome,
+      --       altModes = {'normal'},
+      --     }
+      --   }
+      -- },
+      --
       inactive_sections = {
         lualine_a = {},
         lualine_b = {
@@ -223,34 +260,83 @@ return {
             padding = { left = 1, right = 0 } 
           },
           {
-            shortenPathFunc(2),
-            component_name='filename',
+            "filename",
+            symbols = {
+              unnamed = '[Empty Buffer]'
+            },
+            path = 0,
             alts = {
-              short = { shortenPathFunc(1) },
+                mode1 = {
+                    path = 1
+                },
+                mode2 = {
+                    path = 2
+                },
+                mode3 = {
+                    path = 3
+                },
+
             }
           },
         },
         lualine_x = {},
         lualine_c = {},
         lualine_y = {
-          telescopeIcon,
-          showHiddenIcon,
-          respectGitignoreIcon,
-          diagnosticsFilterIcon,
-          debugLogsIcon,
-          ensureBorder,
+          {
+            function() return " " end,
+            separator = "",
+
+            -- component will not display unless its mode (or the global mode)
+            -- is equal to "telescopeFiles"
+            altModes = {'telescopeFiles'}
+          },
+          {
+            function() 
+              -- retrieve a dynamic configuration value "SHOW_HIDDEN" 
+              -- Determine the logo to display based on this value
+              return telescopeHelpers.SHOW_HIDDEN and "󰈈 " or "󰈉 " -- open/closed eyeball icons
+            end,
+            separator="",
+            padding = { left = 1, right = 0 },
+            -- component will not display unless its mode (or the global mode)
+            -- is equal to "telescopeFiles"
+            altModes = {'telescopeFiles'}
+          },
+          {
+            function() 
+              return " " -- git logo
+            end,
+            separator="",
+            color = function() 
+              -- Retrieve a dynamic configuration value "RESPECT_IGNORE" 
+              -- Determine the color of the git logo based on this value
+              return {fg=telescopeHelpers.RESPECT_IGNORE and "green" or "red"}
+            end,
+            padding = { left = 0, right = 0 },
+            -- component will not display unless its mode (or the global mode)
+            -- is equal to "telescopeFiles"
+            altModes = {'telescopeFiles'},
+          }
         },
         lualine_z = {
           {
-            util.renderHome,
-            alts = {
-              telescopeFiles = {
-                function() return "" end
-              }
-            }
+            function() 
+                return 'CWD: ' .. vim.uv.cwd():gsub(os.getenv('HOME'), '~')
+            end,
+            -- component will not display unless its mode (or the global mode)
+            -- is equal to "normal" (this is the default mode for a component, when no component/global mode has been explicitly set)
+            -- In effect, this configuration says "Do not display this component when *any* mode has been set"
+            altModes = {'normal'}
           }
         }
       },
+
+      -- winbar = {
+      --   lualine_a = { 
+      --     modeComponent,
+      --   },
+      -- },
+
       -- sections = lualineHelpers.parseConfig(),
       sections = {
         lualine_a = { 
