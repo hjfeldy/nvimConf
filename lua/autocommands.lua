@@ -5,7 +5,9 @@ local util = require('util')
 api.nvim_create_autocmd('BufReadPost', {
   pattern = { '*' },
   callback = function()
-    vim.cmd("normal! '\"");
+    if vim.o.filetype ~= 'fugitive' then
+      vim.cmd("normal! '\"");
+    end
   end
 })
 
