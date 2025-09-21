@@ -105,13 +105,13 @@ return {
           file_browser = {
             hijack_netrw = true,
             grouped = true,
-            -- theme = 'ivy',
             mappings = {
               n = {
                 ["c"] = fileBrowserActions.change_cwd,
                 ["C"] = fileBrowserActions.goto_cwd,
+                ["H"] = function(prompt_bufnr) helpers.fileBrowserGotoHome() end,
                 ["O"] = function(prompt_bufnr) return helpers.openFileInTab(prompt_bufnr, true) end,
-                ["o"] = function(prompt_bufnr) return helpers.openFileInTab(prompt_bufnr) end,
+                ["o"] = function(prompt_bufnr) return helpers.openFileInTab(prompt_bufnr, false) end,
                 ["<C-h>"] = function() helpers.fileBrowserToggleHidden() end,
                 ["<C-g>"] = function() helpers.fileBrowserToggleIgnore() end,
                 ["<C-u>"] = function() helpers.fileBrowserIncrementDepth() end,
@@ -125,6 +125,7 @@ return {
               }
             }
           },
+
           fzf = {
             fuzzy = true,                    -- false will only do exact matching
             override_generic_sorter = true,  -- override the generic sorter
@@ -132,6 +133,7 @@ return {
             case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
           }
         },
+
         defaults = {
           -- dynamic_preview_title = true,
           -- results_title = util.renderHome,
@@ -143,28 +145,24 @@ return {
               ["<C-h>"] = helpers.findFilesToggleHidden,
               ["<C-g>"] = helpers.findFilesToggleIgnore,
               ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
-              ["<C-e>"] = function() print ('ah!') end,
               ["<C-t>"] = helpers.telescopeTrouble,
               ["<C-c>"] = actions.close,
               ["<C-j>"] = actions.preview_scrolling_down,
               ["<C-k>"] = actions.preview_scrolling_up,
-              -- ["<C-q>"] = helpers.sendSelectedTroubleQflist
             },
             n = {
               ["<C-c>"] = actions.close,
               ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
               ["<C-t>"] = helpers.telescopeTrouble,
-              ["<C-e>"] = helpers.debugPicker,
               ["<leader>q"] = actions.send_to_qflist + actions.open_qflist,
               ["<C-j>"] = actions.preview_scrolling_down,
               ["<C-k>"] = actions.preview_scrolling_up,
               ["K"] = actions.move_to_top,
               ["J"] = actions.move_to_bottom,
-              --[[ ["<C-q>"] = helpers.sendSelectedTroubleQflist,
-              ["<leader>q"] = helpers.sendAllTroubleQfList ]]
             }
           }
         },
+
         pickers = {
           git_branches = {
             mappings = {
@@ -178,6 +176,7 @@ return {
               }
             }
           },
+
           diagnostics = {
             mappings = {
               i = {
@@ -185,6 +184,7 @@ return {
               },
             }
           },
+
           live_grep = {
             mappings = {
               n = {
