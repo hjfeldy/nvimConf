@@ -1,5 +1,12 @@
 local util = require('util')
 
+local function defaultArgs(func)
+  local function wrapped(prompt_bufnr)
+    return func({}, prompt_bufnr)
+  end
+  return wrapped
+end
+
 return {
   {
     'nvim-telescope/telescope.nvim', tag = '0.1.8',
@@ -109,19 +116,19 @@ return {
               n = {
                 ["c"] = fileBrowserActions.change_cwd,
                 ["C"] = fileBrowserActions.goto_cwd,
-                ["H"] = function(prompt_bufnr) helpers.fileBrowserGotoHome() end,
+                ["H"] = defaultArgs(helpers.fileBrowserGotoHome),
                 ["O"] = function(prompt_bufnr) return helpers.openFileInTab(prompt_bufnr, true) end,
                 ["o"] = function(prompt_bufnr) return helpers.openFileInTab(prompt_bufnr, false) end,
-                ["<C-h>"] = function() helpers.fileBrowserToggleHidden() end,
-                ["<C-g>"] = function() helpers.fileBrowserToggleIgnore() end,
-                ["<C-u>"] = function() helpers.fileBrowserIncrementDepth() end,
-                ["<C-d>"] = function() helpers.fileBrowserDecrementDepth() end,
+                ["<C-h>"] = defaultArgs(helpers.fileBrowserToggleHidden),
+                ["<C-g>"] = defaultArgs(helpers.fileBrowserToggleIgnore),
+                ["<C-u>"] = defaultArgs(helpers.fileBrowserIncrementDepth),
+                ["<C-d>"] = defaultArgs(helpers.fileBrowserDecrementDepth),
               },
               i = {
-                ["<C-h>"] = function() helpers.fileBrowserToggleHidden() end,
-                ["<C-g>"] = function() helpers.fileBrowserToggleIgnore() end,
-                ["<C-u>"] = function() helpers.fileBrowserIncrementDepth() end,
-                ["<C-d>"] = function() helpers.fileBrowserDecrementDepth() end,
+                ["<C-h>"] = defaultArgs(helpers.fileBrowserToggleHidden),
+                ["<C-g>"] = defaultArgs(helpers.fileBrowserToggleIgnore),
+                ["<C-u>"] = defaultArgs(helpers.fileBrowserIncrementDepth),
+                ["<C-d>"] = defaultArgs(helpers.fileBrowserDecrementDepth),
               }
             }
           },
@@ -188,12 +195,12 @@ return {
           live_grep = {
             mappings = {
               n = {
-                ["<C-h>"] = function() helpers.liveGrepToggleHidden() end,
-                ["<C-g>"] = function() helpers.liveGrepToggleIgnore() end,
+                ["<C-h>"] = defaultArgs(helpers.liveGrepToggleHidden),
+                ["<C-g>"] = defaultArgs(helpers.liveGrepToggleIgnore),
               },
               i = {
-                ["<C-h>"] = function() helpers.liveGrepToggleHidden() end,
-                ["<C-g>"] = function() helpers.liveGrepToggleIgnore() end,
+                ["<C-h>"] = defaultArgs(helpers.liveGrepToggleHidden),
+                ["<C-g>"] = defaultArgs(helpers.liveGrepToggleIgnore),
               }
             }
           }
