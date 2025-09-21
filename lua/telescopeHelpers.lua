@@ -64,6 +64,7 @@ local function extendArgs(args)
     args.initial_mode = mode
     local currentText = actionState.get_current_line()
     args.default_text = currentText
+    args.cwd = entry.cwd
   end
   return args
 end
