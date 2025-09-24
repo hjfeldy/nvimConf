@@ -1,15 +1,16 @@
 local api = vim.api
 local util = require('util')
+local resession = require('resession')
 
 -- go to last known cursor position when opening a file
-api.nvim_create_autocmd('BufReadPost', {
-  pattern = { '*' },
-  callback = function()
-    if vim.o.filetype ~= 'fugitive' then
-      vim.cmd("normal! '\"");
-    end
-  end
-})
+-- api.nvim_create_autocmd('BufReadPost', {
+--   pattern = { '*' },
+--   callback = function()
+--     if vim.o.filetype ~= 'fugitive' then
+--       vim.cmd("normal! '\"");
+--     end
+--   end
+-- })
 
 -- clear fugitive buffers when 
 api.nvim_create_autocmd('BufReadPost', {
@@ -31,8 +32,9 @@ api.nvim_create_autocmd('BufReadPost', {
   callback = function()
     for _, buf in ipairs(api.nvim_list_bufs()) do
       local listed = api.nvim_get_option_value('buflisted', {buf=buf})
+      local ftype = api.nvim_get_option_value('filetype', {buf=buf})
       local name = api.nvim_buf_get_name(buf)
-      if string.len(name) == 0 and listed then
+      if string.len(name) == 0 and listed and ftype ~= 'qf' then
         api.nvim_buf_delete(buf, {})
         return
       end
@@ -40,29 +42,24 @@ api.nvim_create_autocmd('BufReadPost', {
   end
 })
 
--- quit when deleting the last buffer
--- api.nvim_create_autocmd('BufDelete', {
---   pattern = { '*' },
---   callback = function(event)
---     util.debug('Event:', event)
---     local bufs = api.nvim_list_bufs()
---     local namedBufs = 0
---     for i, buf in ipairs(bufs) do
---       local bufName = api.nvim_buf_get_name(buf)
---       local bufListed = api.nvim_get_option_value('buflisted', {buf=buf})
---       local ft = api.nvim_get_option_value('filetype', {buf=buf})
---       if buf ~= event.buf 
---       and bufName ~= '[No Name]'
---       and #bufName > 0 
---       and (bufListed or ft == 'Terminal')
---       then
---         namedBufs = namedBufs+1
---       end
---     end
---     if namedBufs == 0 then
---       print('Quitting!')
---       vim.cmd('qa')
---     end
---     print(vim.inspect(namedBufs))
---   end
--- })
+
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    -- Only load the session if nvim was started with no args and without reading from stdin
+    if vim.fn.argc(-1) == 0 and not vim.g.using_stdin then
+      resession.load(vim.fn.getcwd(), { silence_errors = true })
+    end
+  end,
+  nested = true,
+})
+vim.api.nvim_create_autocmd("VimLeavePre", {
+  callback = function()
+    resession.save(vim.fn.getcwd(), { notify = false })
+  end,
+})
+vim.api.nvim_create_autocmd('StdinReadPre', {
+  callback = function()
+    -- Store this for later
+    vim.g.using_stdin = true
+  end,
+})
