@@ -114,7 +114,7 @@ return {
             grouped = true,
             mappings = {
               n = {
-                ["c"] = fileBrowserActions.change_cwd,
+                ["c"] = defaultArgs(helpers.fileBrowserTabCD),
                 ["C"] = fileBrowserActions.goto_cwd,
                 ["H"] = defaultArgs(helpers.fileBrowserGotoHome),
                 ["O"] = function(prompt_bufnr) return helpers.openFileInTab(prompt_bufnr, true) end,

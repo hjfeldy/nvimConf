@@ -21,6 +21,13 @@ local function setLualineMode(mode)
   require('lualine.dynamicMode').setGlobalMode(mode)
 end
 
+local function unsetLualineMode(mode)
+  local dynamicMode = require('lualine.dynamicMode')
+  local isOn = dynamicMode.getMode('__GLOBAL__') == mode
+  if isOn then dynamicMode.setGlobalMode('normal') end
+end
+
+
 function M.toggleHints()
   M.WARNING_FILTER = not M.WARNING_FILTER
   lspHelpers.toggleHints(M.WARNING_FILTER)
@@ -235,6 +242,12 @@ function M.fileBrowserGotoHome(args, prompt_bufnr)
   setLualineMode('telescopeFiles')
 end
 
+function M.fileBrowserTabCD(args, prompt_bufnr)
+  local cwd = actionState.get_selected_entry().value
+  vim.cmd('tcd ' .. cwd)
+  actions.close(prompt_bufnr)
+end
+
 
 -- --- Toggle between hint-level and warning-level diagnostics filter for the current diagnostics prompt
 -- function M.diagnosticsToggleHints(prompt_bufnr)
@@ -292,7 +305,8 @@ vim.api.nvim_create_autocmd('WinLeave', {
 
     if ft == 'TelescopeResults' or ft == 'TelescopePrompt' then
       util.debug('Left Telescope:', ev)
-      setLualineMode('normal')
+      unsetLualineMode('telescopeFiles')
+      unsetLualineMode('telescopeDiagnostics')
       if M.LOCAL_DIAGNOSTICS ~= nil then
         print('Resetting LOCAL_DIAGNOSTICS')
       end
