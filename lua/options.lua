@@ -26,4 +26,4 @@ vim.o.wrap=false
 
 vim.o.scrolloff = 4
 
--- vim.o.sessionoptions='global,'
+vim.o.sessionoptions='buffers,tabpages,globals'

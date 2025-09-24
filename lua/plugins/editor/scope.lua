@@ -1,1 +1,4 @@
-return { "tiagovla/scope.nvim", config = true }
+return {
+  "tiagovla/scope.nvim",
+  config = true 
+}
