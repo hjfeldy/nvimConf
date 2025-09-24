@@ -58,6 +58,7 @@ function M.setColors()
   local color
   if dark then color = '#ffffff' else color = '#000000' end
   M.setHL(0, 'FoldColumn', {fg=color})
+  M.setHL(0, 'WinSeparator', {fg=color})
 
   -- Hack statusline so we don't get weird conflicts with the trouble.statusline component
   M.copyHL('lualine_c_normal', 'StatusLine')
