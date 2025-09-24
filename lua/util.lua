@@ -127,10 +127,10 @@ function M.toggleDebug()
   vim.notify('Toggled debug logs to ' .. tf, vim.log.levels.INFO)
 end
 
-function M.renderHome()
+function M.renderHome(skipSub)
   local cwd = vim.uv.cwd() or '__notfound__'
   local home = os.getenv('HOME') or '__notfound__'
-  return " " .. string.gsub(cwd, home, '~')
+  return " " .. (skipSub == true and cwd or string.gsub(cwd, home, '~'))
 end
 
 function M.listedBufs()

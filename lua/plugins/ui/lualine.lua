@@ -4,6 +4,38 @@ local icons = require('icons')
 local util = require('util')
 local api = vim.api
 
+local function NO_OP() return "" end
+
+local function changeLevel(plus)
+  local dynamicModes = require('lualine.dynamicMode')
+  local registeredModes = dynamicModes.registeredModes()
+  local registeredModesMap = {}
+  for _, mode in ipairs(registeredModes) do
+    registeredModesMap[mode] = true
+  end
+
+  print('Registered modes: ' .. vim.inspect(registeredModes))
+  local mode = dynamicModes.getMode('__GLOBAL__')
+  local levelLen = ('level'):len()
+  local newMode
+  if mode:sub(1, levelLen) == 'level' and mode:len() == levelLen+1 then
+    local add = plus and 1 or -1
+    local level = tonumber(mode:sub(levelLen+1))
+    newMode = 'level' .. (level+add)
+    print('New mode is ' .. newMode)
+    if registeredModesMap[newMode] == nil then
+      print('wrapping')
+      newMode = plus and 'level1' or 'level5'
+    end
+  else
+    newMode = plus and 'level4' or 'level2'
+  end
+  dynamicModes.setGlobalMode(newMode)
+end
+
+local function incrementLevel() changeLevel(true) end
+local function decrementLevel() changeLevel(false) end
+
 return {
   "hjfeldy/lualine.nvim",
   -- dir = '/home/harry/Repos/lualine.nvim/',
@@ -27,6 +59,10 @@ return {
       vim.o.laststatus = 0
     end
   end,
+  keys = {
+    {'<C-U>', incrementLevel, desc = 'Increment Lualine Display Verbosity Level'},
+    {'<C-D>', decrementLevel, desc = 'Decrement Lualine Display Verbosity Level'}
+  },
   opts = function()
     -- PERF: we don't need this lualine require madness 🤷
     local lualine_require = require("lualine_require")
@@ -60,7 +96,8 @@ return {
       cond = require("lazy.status").has_updates,
       color = function() return { fg = Snacks.util.color("Special") } end,
       separator = "",
-      padding = { left = 1, right = 0 }
+      padding = { left = 1, right = 0 },
+      altModes = {'normal', 'level2', 'level3', 'level4', 'level5'}
     }
 
     -- Are neovim (noice) debug logs turned on?
@@ -102,7 +139,7 @@ return {
       end,
       separator="",
       padding = { left = 1, right = 0 },
-      altModes = {'normal', 'telescopeDiagnostics'}
+      altModes = {'normal', 'telescopeDiagnostics', 'level2', 'level3', 'level4', 'level5'},
     }
 
     local telescopeIcon = {
@@ -144,13 +181,19 @@ return {
       altModes = {'telescopeFiles'},
     }
 
-    local shortenPathFunc = function(maxComponents) 
+    local shortenPathFunc = function(maxComponents, skipReplaceCwd) 
       return function() 
         local path = api.nvim_buf_get_name(api.nvim_get_current_buf())
         maxComponents = vim.o.filetype == 'Terminal' and 1 or maxComponents
         if maxComponents == nil or maxComponents < 1 then
           maxComponents = 999
         end
+
+        if not skipReplaceCwd then
+          local cwd = vim.uv.cwd() or '__ERR__'
+          path = path:gsub(cwd, '.')
+        end
+
         return util.shortenPath(path, maxComponents)
       end
     end
@@ -161,10 +204,20 @@ return {
       alts = {
         short = {
           function() 
-            local mode = vim.fn.mode()
-            return string.upper(vim.fn.mode()) 
+            return vim.fn.mode():sub(1, 1):upper()
           end
         }
+      }
+    }
+
+    local homeComponent = {
+      NO_OP,
+      alts = {
+        level1 = {NO_OP},
+        level2 = {NO_OP},
+        level3 = {NO_OP},
+        level4 = {util.renderHome},
+        level5 = {function() return util.renderHome(true) end},
       }
     }
 
@@ -172,16 +225,18 @@ return {
       shortenPathFunc(2),
       component_name='filename',
       alts = {
-        short = { shortenPathFunc(1) },
+        level1 = { shortenPathFunc(1) },
+        level2 = { shortenPathFunc(2) },
+        level3 = { shortenPathFunc(2) },
+        level4 = { shortenPathFunc(999) },
+        level5 = { shortenPathFunc(999, true) },
       }
     }
 
     local branchComponent = {
       "branch",
       separator = "",
-      alts = {
-        short = { function() return "" end }
-      }
+      altModes = {'normal', 'level3', 'level4', 'level5'}
     }
 
     local diffComponent = {
@@ -193,63 +248,29 @@ return {
         removed = icons.git.Removed
       },
       alts = {
-        short = {
+        level1 = {NO_OP},
+        level2 = {
           symbols = {
             added = "",
             modified = "",
             removed = ""
-          },
+          }
         }
       }
     }
 
     return {
       options = {
-        theme = "NeoSolarized",
+        -- theme = "NeoSolarized",
         globalstatus = vim.o.laststatus == 3,
         disabled_filetypes = { statusline = { "dashboard", "alpha", "ministarter", "snacks_dashboard" } },
+        always_show_tabline = true
         --[[ section_separators = { left = '', right = '' },
         component_separators = { left = '', right = '' }, ]]
       },
       --[[ component_separators = { left = '', right = ''},
       section_separators = { left = '', right = ''}, ]]
 
-      -- REAL CONFIG - commenting out for demo
-      -- inactive_sections = {
-      --   lualine_a = {},
-      --   lualine_b = {
-      --     {
-      --       "filetype",
-      --       icon_only = true,
-      --       separator = "",
-      --       padding = { left = 1, right = 0 } 
-      --     },
-      --     {
-      --       shortenPathFunc(2),
-      --       component_name='filename',
-      --       alts = {
-      --         short = { shortenPathFunc(1) },
-      --       }
-      --     },
-      --   },
-      --   lualine_x = {},
-      --   lualine_c = {},
-      --   lualine_y = {
-      --     telescopeIcon,
-      --     showHiddenIcon,
-      --     respectGitignoreIcon,
-      --     diagnosticsFilterIcon,
-      --     debugLogsIcon,
-      --     ensureBorder,
-      --   },
-      --   lualine_z = {
-      --     {
-      --       util.renderHome,
-      --       altModes = {'normal'},
-      --     }
-      --   }
-      -- },
-      --
       inactive_sections = {
         lualine_a = {},
         lualine_b = {
@@ -259,89 +280,29 @@ return {
             separator = "",
             padding = { left = 1, right = 0 } 
           },
-          {
-            "filename",
-            symbols = {
-              unnamed = '[Empty Buffer]'
-            },
-            path = 0,
-            alts = {
-                mode1 = {
-                    path = 1
-                },
-                mode2 = {
-                    path = 2
-                },
-                mode3 = {
-                    path = 3
-                },
-
-            }
-          },
+          filenameComponent
         },
         lualine_x = {},
         lualine_c = {},
         lualine_y = {
-          {
-            function() return " " end,
-            separator = "",
-
-            -- component will not display unless its mode (or the global mode)
-            -- is equal to "telescopeFiles"
-            altModes = {'telescopeFiles'}
-          },
-          {
-            function() 
-              -- retrieve a dynamic configuration value "SHOW_HIDDEN" 
-              -- Determine the logo to display based on this value
-              return telescopeHelpers.SHOW_HIDDEN and "󰈈 " or "󰈉 " -- open/closed eyeball icons
-            end,
-            separator="",
-            padding = { left = 1, right = 0 },
-            -- component will not display unless its mode (or the global mode)
-            -- is equal to "telescopeFiles"
-            altModes = {'telescopeFiles'}
-          },
-          {
-            function() 
-              return " " -- git logo
-            end,
-            separator="",
-            color = function() 
-              -- Retrieve a dynamic configuration value "RESPECT_IGNORE" 
-              -- Determine the color of the git logo based on this value
-              return {fg=telescopeHelpers.RESPECT_IGNORE and "green" or "red"}
-            end,
-            padding = { left = 0, right = 0 },
-            -- component will not display unless its mode (or the global mode)
-            -- is equal to "telescopeFiles"
-            altModes = {'telescopeFiles'},
-          }
+          telescopeIcon,
+          showHiddenIcon,
+          respectGitignoreIcon,
+          diagnosticsFilterIcon,
+          debugLogsIcon,
+          ensureBorder,
         },
         lualine_z = {
-          {
-            function() 
-                return 'CWD: ' .. vim.uv.cwd():gsub(os.getenv('HOME'), '~')
-            end,
-            -- component will not display unless its mode (or the global mode)
-            -- is equal to "normal" (this is the default mode for a component, when no component/global mode has been explicitly set)
-            -- In effect, this configuration says "Do not display this component when *any* mode has been set"
-            altModes = {'normal'}
-          }
+          homeComponent
         }
       },
 
-      -- winbar = {
-      --   lualine_a = { 
-      --     modeComponent,
-      --   },
-      -- },
 
-      -- sections = lualineHelpers.parseConfig(),
       sections = {
         lualine_a = { 
           modeComponent,
         },
+
         lualine_b = {
           {
             "filetype",
@@ -350,8 +311,31 @@ return {
             padding = { left = 1, right = 0 } 
           },
           filenameComponent,
-          branchComponent,
-          diffComponent,
+          {
+            "branch",
+            separator = "",
+            altModes = {'normal', 'level3', 'level4', 'level5'}
+          },
+
+          {
+            "diff",
+            padding = { left = 1, right = 1 },
+            symbols = {
+              added = icons.git.Added,
+              modified = icons.git.Modified,
+              removed = icons.git.Removed
+            },
+            alts = {
+              level1 = {NO_OP},
+              level2 = {
+                symbols = {
+                  added = "",
+                  modified = "",
+                  removed = ""
+                }
+              }
+            }
+          }
         },
 
         lualine_c = {
@@ -359,6 +343,7 @@ return {
           -- respectGitignoreIcon,
           -- diagnosticsFilterIcon,
           ensureBorder,
+
           {
             "diagnostics",
             symbols = {
@@ -367,21 +352,12 @@ return {
               info = icons.diagnostics.Info,
               hint = icons.diagnostics.Hint
             },
+            altModes = {"normal", "level3", "level4", "level5"},
           },
+
           {
             troubleStat,
-            separator="",
-            alts = {
-              short = {
-                function() 
-                  local status = troubleStat()
-                  local statusPieces = util.split(status, ' ')
-                  -- util.debug('Status pieces:', statusPieces)
-                  return statusPieces[#statusPieces-1] .. statusPieces[#statusPieces]
-                  -- Status pieces: { "%#TroubleStatusline0#󰊕", "%*%#TroubleStatusline1#opts%*", "%#TroubleStatusline0#󰊕", "%*%#TroubleStatusline1#[1]%*" } 
-                end
-              }
-            }
+            separator=""
           }
         },
 
@@ -393,7 +369,9 @@ return {
             function() return require("noice").api.status.command.get() end,
             cond = function() return package.loaded["noice"] and require("noice").api.status.command.has() end,
             color = function() return { fg = Snacks.util.color("Statement") } end,
+            altModes = {'normal', 'level2', 'level3', 'level4', 'level5'}
           },
+
           -- stylua: ignore
           -- maybe cool - leaving comments in case I want later, but I don't really use any debuggers lol
           -- {
@@ -403,7 +381,17 @@ return {
           -- },
           -- debugLogsIcon,
           -- ensureBorder,
-          { "progress"}, -- , separator = ""}, --, padding = { left = 1, right = 1 } },
+
+          {
+            "progress",
+            altModes = {'normal', 'level2', 'level3', 'level4', 'level5'},
+            -- separator=''
+          },
+          {
+            "location",
+            altModes = {'level4', 'level5'}
+          },
+
           -- { "location", padding = { left = 0, right = 1 } },
           ensureBorder
         },
@@ -415,22 +403,27 @@ return {
           lazyUpdateIcon,
           diagnosticsFilterIcon,
           debugLogsIcon,
-          ensureBorder,
+          -- ensureBorder,
           -- { "progress", separator = " ", padding = { left = 1, right = 0 } },
           -- { "location", padding = { left = 0, right = 1 } },
         },
 
-        lualine_z = {
-          {
-            util.renderHome,
-          }
-        },
+        lualine_z = {homeComponent},
       },
+
       extensions = {
         "lazy",
         "fzf",
         "fugitive",
         "quickfix",
+
+        {
+          filetypes = {'Outline'},
+          sections = {
+            lualine_a = {'filetype'},
+          }
+        },
+
         {
           filetypes = {'Terminal'},
           inactive_sections = {
@@ -441,6 +434,7 @@ return {
               { "location", padding = { left = 0, right = 1 } },
             },
           },
+
           sections = {
             lualine_a = {modeComponent},
             lualine_b = {filenameComponent},
@@ -448,17 +442,10 @@ return {
               { "progress", separator = "", padding = { left = 1, right = 1 } },
               { "location", padding = { left = 0, right = 1 } },
             },
-            lualine_z = {
-              {util.renderHome},
-            }
+            lualine_z = {homeComponent}
           }
         },
-        {
-          filetypes = {'Outline'},
-          sections = {
-            lualine_a = {'filetype'},
-          }
-        }
+
       },
     }
   end,
