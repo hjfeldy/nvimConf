@@ -17,12 +17,12 @@ function M.getStatus()
   return string.gsub(stat, '%%#%S*#', ''):gsub('%%<', ''):gsub('%%%*', ''):gsub('%%%%', '%')
 end
 
-vim.api.nvim_create_autocmd('WinEnter', {
-  pattern = {'*'},
-  callback = function(ev)
-    local stat = M.getStatus()
-  end
-});
+-- vim.api.nvim_create_autocmd('WinEnter', {
+--   pattern = {'*'},
+--   callback = function(ev)
+--     local stat = M.getStatus()
+--   end
+-- });
 
 -- local _refresh = lualine.refresh
 -- lualine.refresh = function() 
