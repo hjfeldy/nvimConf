@@ -102,7 +102,6 @@ function M.getConfig()
       local hasUpdates = require('lazy.status').has_updates()
       return hasUpdates and noTelescopeMode()
     end
-    -- altModes = {'normal', 'level2', 'level3', 'level4', 'level5'}
   }
 
   --- Visual notification that Noice debug logs are turned on

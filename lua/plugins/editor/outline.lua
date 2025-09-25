@@ -5,7 +5,11 @@ return {
     {"<leader>o", "<cmd>Outline<cr>", desc="Symbols Outline"}
   },
   cmd = { "Outline", "OutlineOpen" },
-  opts = {}
+  opts = {
+    keymaps = {
+      toggle_preview = 'p'
+    }
+  }
 }
 
 -- return {
