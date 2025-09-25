@@ -86,7 +86,10 @@ function M.join(strings, delim)
   return out:sub(1, #out-#delim)
 end
 
+--- Generate a shortened version of a path,
+--- specifying a fixed number of path components
 ---@param path string
+---@param maxComponents integer?
 function M.shortenPath(path, maxComponents)
   maxComponents = maxComponents or 0
 
@@ -106,6 +109,26 @@ function M.shortenPath(path, maxComponents)
 
 end
 
+--- Generate a wrapped version of shortenPath() for the current buffer
+---@param maxComponents integer? Maximum number of path components
+---@param skipReplaceCwd boolean? Should the vim working directory be replaced with "."?
+function M.shortenPathFunc(maxComponents, skipReplaceCwd) 
+  return function() 
+    local path = api.nvim_buf_get_name(api.nvim_get_current_buf())
+    maxComponents = vim.o.filetype == 'Terminal' and 1 or maxComponents
+    if maxComponents == nil or maxComponents < 1 then
+      maxComponents = 999
+    end
+
+    if not skipReplaceCwd then
+      local cwd = vim.uv.cwd() or '__ERR__'
+      path = path:gsub(cwd, '.')
+    end
+
+    return M.shortenPath(path, maxComponents)
+  end
+end
+
 function M.debug(...) 
   if not vim.g.NOICE_DEBUG then return end
   local args = { ... }
@@ -120,12 +143,14 @@ function M.debug(...)
   vim.notify(s, vim.log.levels.DEBUG)
 end
 
+
 function M.toggleDebug()
   vim.g.NOICE_DEBUG = not vim.g.NOICE_DEBUG
   local tf = vim.g.NOICE_DEBUG and 'true' or 'false'
   -- vim.cmd('Lazy reload noice.nvim')
   vim.notify('Toggled debug logs to ' .. tf, vim.log.levels.INFO)
 end
+
 
 function M.renderHome(skipSub)
   local cwd = vim.uv.cwd() or '__notfound__'
@@ -145,5 +170,25 @@ function M.listedBufs()
   return out
 end
 
+--- Merge the values of a table into another table, doing so recursively for table values
+--- When both tables define a key with a primitive value, the source table's value is overridden by the addTable
+function M.recursiveMerge(sourceTable, addTable)
+  local merged = {}
+  local keys = {}
+  for i, tbl in ipairs({sourceTable, addTable}) do
+    for k, _ in pairs(tbl) do
+      keys[#keys+1] = k
+    end
+  end
+
+  for i, key in ipairs(keys) do
+    if type(addTable[key]) == 'table' and type(sourceTable[key]) == 'table' then
+      merged[key] = M.recursiveMerge(sourceTable[key], addTable[key])
+    else
+      merged[key] = addTable[key] or sourceTable[key]
+    end
+  end
+  return merged
+end
 
 return M

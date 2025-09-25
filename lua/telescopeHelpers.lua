@@ -3,6 +3,7 @@ local actionState = require("telescope.actions.state")
 local actions = require("telescope.actions")
 local util = require('util')
 local lspHelpers = require('lspHelpers')
+local lualineConf = require('lualineConfig')
 
 local M = {}
 
@@ -18,13 +19,13 @@ M.FILE_DEPTH = 1
 
 --- Set the lualine dynamic mode 
 local function setLualineMode(mode)
-  require('lualine.dynamicMode').setGlobalMode(mode)
+  lualineConf.setMode(mode)
 end
 
 local function unsetLualineMode(mode)
-  local dynamicMode = require('lualine.dynamicMode')
-  local isOn = dynamicMode.getMode('__GLOBAL__') == mode
-  if isOn then dynamicMode.setGlobalMode('normal') end
+  local dynamicMode = lualineConf.getMode()
+  local isOn = dynamicMode == mode
+  if isOn then lualineConf.setMode('normal') end
 end
 
 
