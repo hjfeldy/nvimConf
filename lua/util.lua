@@ -191,4 +191,16 @@ function M.recursiveMerge(sourceTable, addTable)
   return merged
 end
 
+function M.tblToArray(tbl) 
+  local out = {}
+  for k, v in pairs(tbl) do
+    if v.index ~= nil then
+      out[v.index] = v
+    else
+      out[#out+1] = v
+    end
+  end
+  return out
+end
+
 return M

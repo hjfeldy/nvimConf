@@ -4,15 +4,45 @@ local api = vim.api
 
 local M = {}
 
+local MAX_LEVEL = 5
+
+--- Configurable mode, for lualine components' cond functions to react to
 M.CURRENT_MODE = 'normal'
 
+--- Configurable level, for dynamic configuration overrides
+M.CURRENT_LEVEL = 3
+
+
+--- Set the mode (ie. to toggle telescope components on/off)
 function M.setMode(mode) 
   M.CURRENT_MODE = mode or 'normal'
 end
 
+--- Set the mode (to determine whether to render telescope components)
 function M.getMode() 
   return M.CURRENT_MODE
 end
+
+--- Refresh the statusline to make level/mode changes take effect
+function M.refreshConfig() 
+  require('lualine').setup(M.getConfig())
+end
+
+--- Increment/Decrement the level (wraps around) to trigger different configuration overrides
+local function changeLevel(plus)
+    local add = plus and 1 or -1
+  M.CURRENT_LEVEL = (M.CURRENT_LEVEL + add) % MAX_LEVEL
+  if M.CURRENT_LEVEL == 0 then M.CURRENT_LEVEL = MAX_LEVEL end
+  M.refreshConfig()
+end
+
+--- Increment the level (wraps around) to trigger different configuration overrides
+function M.incrementLevel() changeLevel(true) end
+
+--- Decrement the level (wraps around) to trigger different configuration overrides
+function M.decrementLevel() changeLevel(false) end
+
+--- lualine condition functions for telescope
 
 local telescopeFileMode = function() return M.getMode() == 'telescopeFiles' end
 local telescopeDiagnosticsMode = function() return M.getMode() == 'telescopeDiagnostics' end
@@ -26,7 +56,19 @@ local shortenPathFunc = util.shortenPathFunc
 local function NO_OP() return "" end
 local NO_OP_COMPONENT = {NO_OP}
 
+--- Add an "index" field to a component's configuration
+--- this allows us to manually the order of non-array table elements
+--- eg. { lualine_a = { namedComponent = {componentConfig..., index=1} } } 
+--- instead of lualine_a = { {componentConfig...} }
+--- we can then selectively access/modify these components by name while we construct our configs
+--- and then convert to arrays later, preserving the order
+local function addIndex(component, index) 
+  return vim.tbl_extend('keep', component, {index=index})
+end
 
+--- Generate a lualine configuration based on the current level and mode
+--- "mode" determines whether or not to show/hide telescope-specific logic - via the cond function
+--- "level" determines the display behavior of regular (non-telescope-specific) logic - via configuration overrides
 function M.getConfig()
   local icons = require('icons')
   local telescopeHelpers = require('telescopeHelpers')
@@ -47,10 +89,8 @@ function M.getConfig()
     -- hl_group = "Normal",
   }).get
 
-
   -- ensure border is drawn
   local ensureBorder = {function() return "" end, draw_empty=true}
-
 
   --- Visual notification of available plugin updates
   local lazyUpdateIcon = {
@@ -64,7 +104,6 @@ function M.getConfig()
     end
     -- altModes = {'normal', 'level2', 'level3', 'level4', 'level5'}
   }
-
 
   --- Visual notification that Noice debug logs are turned on
   local debugLogsIcon = {
@@ -91,7 +130,6 @@ function M.getConfig()
     padding = { right = 0, left = 1 }
   }
 
-
   -- Visual indicator of whether we are currently filtering diagnostics for hints (" ") or warnings (" ")
   local diagnosticsFilterIcon = {
     function()
@@ -117,7 +155,6 @@ function M.getConfig()
     cond = telescopeMode,
   }
 
-
   --- Do we show hidden files in telescope prompts?
   local showHiddenIcon = {
     function() 
@@ -132,7 +169,6 @@ function M.getConfig()
     cond = telescopeFileMode
   }
 
-
   --- Do we respect .ignore/.gitignore in telescope prompts?S
   local respectGitignoreIcon = {
     function() 
@@ -146,7 +182,7 @@ function M.getConfig()
     cond = telescopeFileMode
   }
 
-
+  --- Filetype icon
   local filetypeComponent = {
     "filetype",
     icon_only = true,
@@ -154,8 +190,7 @@ function M.getConfig()
     padding = { left = 1, right = 0 } 
   }
 
-
-
+  --- Visual indicator of the current diagnostics filter level (either hints or warnings)
   local diagnosticsComponent = {
     "diagnostics",
     symbols = {
@@ -173,7 +208,16 @@ function M.getConfig()
   --   cond = function() return package.loaded["dap"] and require("dap").status() ~= "" end,
   --   color = function() return { fg = Snacks.util.color("Debug") } end,
   -- }
+  --
 
+  -- stylua: ignore
+  local lastCharComponent = {
+      function() return require("noice").api.status.command.get() end,
+      cond = function() return package.loaded["noice"] and require("noice").api.status.command.has() end,
+      color = function() return { fg = Snacks.util.color("Statement") } end,
+    }
+
+  --- Indicator of the git additions / modifications / deletions
   local diffComponent = {
     "diff",
     padding = { left = 1, right = 1 },
@@ -185,137 +229,127 @@ function M.getConfig()
   }
 
 
+  --- Base configuration for inactive sections 
+  --- lualine_{a/b/c/x/y/z} tables will be converted to array later
+  --- ie. 'lualine_a = { mode = {"mode"} }' becomes 'lualine_a = { {"mode"} }
   local inactive_base = {
     lualine_a = {},
     lualine_b = {
-      filetypeComponent,
-      {shortenPathFunc(2)}
+      ft = filetypeComponent,
+      path = {shortenPathFunc(2)}
     },
     lualine_c = {},
 
     lualine_x = {},
     lualine_y = {
-      telescopeIcon,
-      showHiddenIcon,
-      respectGitignoreIcon,
-      diagnosticsFilterIcon,
-      debugLogsIcon,
-      -- ensureBorder,
+      telescopeIndicator = telescopeIcon,
+      hiddenIndicator = showHiddenIcon,
+      gitignoreIndicator = respectGitignoreIcon,
+      diagnosticsIndicator = diagnosticsFilterIcon,
+      debugIndicator = debugLogsIcon,
     },
     lualine_z = {
-      {util.renderHome, cond=noTelescopeMode}
+      home = {util.renderHome, cond=noTelescopeMode}
     }
   }
 
-  -- TODO express these as named keys, not integer keys
-  -- when generating the *actual* config for lualine,
-  -- convert the {name -> component} tables to component[] arrays 
 
-  -- override:
-  -- lualine_b[1] (filetype)
-  -- lualine_y[1] (debugLogsIcon)
-  -- lualine_z[1] (home icon)
+  -- Tiered extensions of the inactive_sections base config
 
   local inactiveLvl1 = util.recursiveMerge(inactive_base, {
-    lualine_b = {[2] = NO_OP_COMPONENT },
-    lualine_y = {[1] = NO_OP_COMPONENT },
-    lualine_z = {[1] = NO_OP_COMPONENT }
+    lualine_b = { path = NO_OP_COMPONENT },
+    lualine_y = { debugIndicator = NO_OP_COMPONENT },
+    lualine_z = { home = NO_OP_COMPONENT }
   })
   local inactiveLvl2 = util.recursiveMerge(inactive_base, {
-    lualine_z = {[1] = NO_OP_COMPONENT }
+    lualine_z = { home = NO_OP_COMPONENT }
   })
   local inactiveLvl3 = util.recursiveMerge(inactive_base, {
-    lualine_b = {[2] = {shortenPathFunc(3)} },
+    lualine_b = { path = {shortenPathFunc(3)} },
   })
   local inactiveLvl4 = util.recursiveMerge(inactive_base, {
-    lualine_b = {[2] = {shortenPathFunc(999)} }
+    lualine_b = { path = {shortenPathFunc(999)} }
   })
   local inactiveLvl5 = util.recursiveMerge(inactive_base, {
-    lualine_b = {[2] = {shortenPathFunc(999, true)} },
-    lualine_z = {function() return util.renderHome(true) end},
+    lualine_b = { path = {shortenPathFunc(999, true)} },
+    lualine_z = { home = {function() return util.renderHome(true) end} },
   })
 
 
+  --- Base configuration for active sections 
+  --- lualine_{a/b/c/x/y/z} tables will be converted to array later
+  --- ie. 'lualine_a = { mode = {"mode"} }' becomes 'lualine_a = { {"mode"} }
   local active_base = {
     lualine_a = { 
-      {"mode"},
+      mode = addIndex({"mode"}, 1),
     },
 
     lualine_b = {
-      filetypeComponent,
-      { shortenPathFunc(2) },
-      { "branch", separator = "" },
-      diffComponent,
+      ft = addIndex(filetypeComponent, 1),
+      path = addIndex({ shortenPathFunc(2) }, 2),
+      branch = addIndex({ "branch", separator = "" }, 3),
+      diff = addIndex(diffComponent, 4),
     },
 
     lualine_c = {
-      diagnosticsComponent,
-      { troubleStat, separator="" }
+      diagnostics = addIndex(diagnosticsComponent, 1),
+      troubleStat = addIndex({ troubleStat, separator="" }, 2)
     },
 
     lualine_x = {
 
-      Snacks.profiler.status(),
-      -- stylua: ignore
-      {
-        function() return require("noice").api.status.command.get() end,
-        cond = function() return package.loaded["noice"] and require("noice").api.status.command.has() end,
-        color = function() return { fg = Snacks.util.color("Statement") } end,
-      },
-
-      { "progress", draw_empty = true },
-      { "location", draw_empty = true },
-      ensureBorder
+      progBar = addIndex(Snacks.profiler.status(), 1),
+      lastChar = addIndex(lastCharComponent, 2),
+      fileProgress = addIndex({ "progress", draw_empty = true }, 3),
+      cursorLocation = addIndex({ "location", draw_empty = true }, 4),
+      border = addIndex(ensureBorder, 5)
     },
 
     lualine_y = {
-      lspStatusIcon,
-      lazyUpdateIcon,
-      diagnosticsFilterIcon,
-      debugLogsIcon,
-      -- ensureBorder,
-      -- { "progress", separator = " ", padding = { left = 1, right = 0 } },
-      -- { "location", padding = { left = 0, right = 1 } },
+      lspStat = addIndex(lspStatusIcon, 1),
+      lazyUpdates = addIndex(lazyUpdateIcon, 2),
+      diagnosticsIndicator = addIndex(diagnosticsFilterIcon, 3),
+      debugIndicator = addIndex(debugLogsIcon, 4),
+      border = addIndex(ensureBorder, 5)
     },
 
-    lualine_z = { {util.renderHome} },
+    lualine_z = { home = addIndex({util.renderHome}) },
   }
 
 
+  -- Tiered extensions of the sections base config
+
   local activeLvl1 = util.recursiveMerge(active_base, {
-    lualine_a = { NO_OP_COMPONENT },
+    lualine_a = { mode = NO_OP_COMPONENT },
     lualine_b = {
-      -- override all but filetype component
-      [2] = NO_OP_COMPONENT,
-      [3] = NO_OP_COMPONENT,
-      [4] = NO_OP_COMPONENT
+      -- hide all but filetype component
+      path = NO_OP_COMPONENT,
+      branch = NO_OP_COMPONENT,
+      diff = NO_OP_COMPONENT
     },
     lualine_c = {
-      [1] = NO_OP_COMPONENT,
-      -- leave in 2 (troubleStat)
+      diagnostics = NO_OP_COMPONENT,
+      -- leave in the troubleStat component- this level1 mode is intended for when troubleStat is super long,
+      -- and we basically remove the entire reset of the statusline
     },
-    -- remove editor-status info entirely
+
     lualine_x = {
-      [1] = NO_OP_COMPONENT,
-      [2] = NO_OP_COMPONENT,
-      [3] = { NO_OP, draw_empty=false, separator="" },
-      [4] = { NO_OP, draw_empty=false, separator="" },
-      [5] = { NO_OP, draw_empty=false },
+      progBar = NO_OP_COMPONENT,
+      lastChar = NO_OP_COMPONENT,
+      fileProgress = { NO_OP, draw_empty=false, separator="" },
+      cursorLocation = { NO_OP, draw_empty=false, separator="" },
+      border = { NO_OP, draw_empty=false },
     },
-    -- leave lualine_y as-is (most conds only trigger for telescope modes anyway)
-    -- remove home component
-    lualine_z = { [1] = NO_OP_COMPONENT }
+    lualine_z = { home = NO_OP_COMPONENT }
   })
 
 
   local activeLvl2 = util.recursiveMerge(active_base, {
-    lualine_a = { NO_OP_COMPONENT },
+    lualine_a = { mode = NO_OP_COMPONENT },
     lualine_b = {
-      -- override path component, override diff component symbols 
-      [2] = { shortenPathFunc(1) },
-      [3] = { NO_OP, separator="" },
-      -- remove diff symbols
-      [4] = { 
+      path = { shortenPathFunc(1) },
+      branch = { NO_OP, separator="" },
+      diff = { 
         separator="",
         symbols = {
           added = "",
@@ -324,72 +358,39 @@ function M.getConfig()
         }
       }
     },
-    lualine_c = {
-      -- leave in 2 (troubleStat)
-      -- 
-    },
+
     lualine_x = {
-      -- remove 1 (progress bar)
-      [1] = { NO_OP },
-      -- leave in 2 (noice status)
-      -- leave in 3 (file progress) but remove separator
-      [3] = { separator = "" },
-      -- remove 4 (location)
-      [4] = { NO_OP },
+      progBar = { NO_OP },
+      fileProgress = { separator = "" },
+      cursorLocation = { NO_OP },
     },
-    -- leave lualine_y as-is (most conds only trigger for telescope modes anyway)
-    -- remove home component
-    lualine_z = { [1] = { NO_OP } }
+    lualine_z = { home = { NO_OP } }
   })
 
 
   local activeLvl3 = util.recursiveMerge(active_base, {
-    -- leave lualine_a (mode component) as is
     lualine_b = {
-      -- override path component
-      [2] = { shortenPathFunc(2) },
-      -- leave 3 in (enable branch component)
-    },
-    lualine_c = {
-      -- leave 1 (diagnostics) as is
-      -- leave in 2 (troubleStat)
+      path = { shortenPathFunc(2) },
     },
     lualine_x = {
-      -- leave in 1 (progress bar)
-      -- leave in 2 (noice status)
-      -- leave in 3 (file progress) but remove separator
-      [3] = { separator = "" },
-      -- remove 4 (location)
-      [4] = { NO_OP }
+      fileProgress = { separator = "" },
+      cursorLocation = { NO_OP }
     },
-    -- leave lualine_y as-is
-    -- leave lualine_z as-is (enable home component)
   })
 
 
   local activeLvl4 = util.recursiveMerge(active_base, {
-    -- leave lualine_a (mode component) as is
     lualine_b = {
-      -- override path component (full path)
-      [2] = { shortenPathFunc(999) },
-      -- leave 3 in (enable branch component)
-      -- leave in 4 (location)
+      path = { shortenPathFunc(999) },
     },
-    -- leave lualine_y as-is
-    -- leave lualine_z as-is (enable home component)
   })
 
 
   local activeLvl5 = util.recursiveMerge(active_base, {
-    -- leave lualine_a (mode component) as is
     lualine_b = {
-      -- override path component (full path, no substitutions)
-      [2] = { shortenPathFunc(999) },
-      -- leave 3 in (enable branch component)
+      path = { shortenPathFunc(999) },
     },
-    -- leave lualine_y as-is
-    -- lengthen home component (no substitutions)
-    lualine_z = {function() return util.renderHome(true) end},
+    lualine_z = { home = {function() return util.renderHome(true) end} },
   })
 
 
@@ -410,6 +411,53 @@ function M.getConfig()
     inactiveLvl5
   }
 
+  -- Perform the conversion mentioned earlier
+  -- (convert human readable named components { lualine_<letter> = {name: string -> component} } 
+  -- to lualine-compatible arrays { lualine_<letter> = component[] })
+
+  local sectionLetters = {'a', 'b', 'c', 'x', 'y', 'z'}
+  for _, tbls in ipairs({activeExtensions, inactiveExtensions}) do
+    for _, tbl in ipairs(tbls) do
+      for _, letter in ipairs(sectionLetters) do
+        local key = 'lualine_' .. letter
+        local section = tbl[key]
+        if section ~= nil then
+          tbl[key] = util.tblToArray(section)
+        end
+      end
+    end
+  end
+
+
+  local filetypeExtension = {
+    filetypes = {'Terminal'},
+    inactive_sections = {
+      lualine_a = {},
+      lualine_b = { {shortenPathFunc(2)} },
+      lualine_y = {
+        { "progress", separator = "", padding = { left = 1, right = 1 } },
+        { "location", padding = { left = 0, right = 1 } },
+      },
+    },
+
+    sections = {
+      lualine_a = { {"mode"} },
+      lualine_b = { {shortenPathFunc(2)} },
+      lualine_y = {
+        { "progress", separator = "", padding = { left = 1, right = 1 } },
+        { "location", padding = { left = 0, right = 1 } },
+      },
+      lualine_z = { {util.renderHome} }
+    }
+  }
+
+  -- Someone has already put a PR to make this a builtin extension
+  local outlineExtension = {
+    filetypes = {'Outline'},
+    sections = {
+      lualine_a = {'filetype'},
+    }
+  }
 
   local config = {
     options = {
@@ -417,11 +465,7 @@ function M.getConfig()
       globalstatus = vim.o.laststatus == 3,
       disabled_filetypes = { statusline = { "dashboard", "alpha", "ministarter", "snacks_dashboard" } },
       always_show_tabline = true
-      --[[ section_separators = { left = '', right = '' },
-      component_separators = { left = '', right = '' }, ]]
     },
-    --[[ component_separators = { left = '', right = ''},
-    section_separators = { left = '', right = ''}, ]]
 
     inactive_sections = inactiveExtensions[M.CURRENT_LEVEL],
     sections = activeExtensions[M.CURRENT_LEVEL],
@@ -432,57 +476,13 @@ function M.getConfig()
       "fzf",
       "fugitive",
       "quickfix",
-
-      {
-        filetypes = {'Outline'},
-        sections = {
-          lualine_a = {'filetype'},
-        }
-      },
-
-      {
-        filetypes = {'Terminal'},
-        inactive_sections = {
-          lualine_a = {},
-          lualine_b = { {shortenPathFunc(2)} },
-          lualine_y = {
-            { "progress", separator = "", padding = { left = 1, right = 1 } },
-            { "location", padding = { left = 0, right = 1 } },
-          },
-        },
-
-        sections = {
-          lualine_a = { {"mode"} },
-          lualine_b = { {shortenPathFunc(2)} },
-          lualine_y = {
-            { "progress", separator = "", padding = { left = 1, right = 1 } },
-            { "location", padding = { left = 0, right = 1 } },
-          },
-          lualine_z = { {util.renderHome} }
-        }
-      },
-
+      outlineExtension,
+      filetypeExtension
     },
   }
   return config
 end
 
-M.CURRENT_LEVEL = 3
-local MAX_LEVEL = 5
-
-function M.refreshConfig() 
-  require('lualine').setup(M.getConfig())
-end
-
-local function changeLevel(plus)
-    local add = plus and 1 or -1
-  M.CURRENT_LEVEL = (M.CURRENT_LEVEL + add) % MAX_LEVEL
-  if M.CURRENT_LEVEL == 0 then M.CURRENT_LEVEL = MAX_LEVEL end
-  M.refreshConfig()
-end
-
-function M.incrementLevel() changeLevel(true) end
-function M.decrementLevel() changeLevel(false) end
 
 
 return M
