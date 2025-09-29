@@ -36,7 +36,13 @@ return {
       },
       {
         "<leader>ft",
-        function() require('neoWin.customPicker').termPick() end,
+        function() require('neoWin.customPicker').termPick({localTab=true}) end,
+        mode="n",
+        desc='Pick Terminals'
+      },
+      {
+        "<leader>fT",
+        function() require('neoWin.customPicker').termPick({localTab=false}) end,
         mode="n",
         desc='Pick Terminals'
       },

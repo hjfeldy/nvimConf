@@ -86,7 +86,7 @@ return {
       always_show_bufferline = true,
 
       custom_filter = function(bufnr, bufnrs)
-        local bufType = vim.api.nvim_get_option_value('filetype', {buf=bufnr})
+        local bufType = vim.bo[bufnr].filetype
         local blacklist = {
           ['grug-far'] = true,
           ['help'] = true,

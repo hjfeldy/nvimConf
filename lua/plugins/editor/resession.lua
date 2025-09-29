@@ -72,15 +72,18 @@ return {
   opts = {
     -- override default filter
     buf_filter = function(bufnr)
-      local filetype = vim.api.nvim_get_option_value('filetype', {buf=bufnr})
-      if filetype == 'Terminal' or filetype == 'fugitive' then
+      local exclude = {
+        ['Terminal'] = true,
+        ['fugitive'] = true,
+        ['help'] = true
+      }
+      local filetype = vim.bo[bufnr].filetype
+      -- if filetype == 'Terminal' or filetype == 'fugitive' then
+      if exclude[filetype] then
         return false
       end
 
       local buftype = vim.bo[bufnr].buftype
-      if buftype == 'help' then
-        return true
-      end
       if buftype ~= "" and buftype ~= "acwrite" then
         return false
       end

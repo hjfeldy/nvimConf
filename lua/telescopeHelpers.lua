@@ -302,7 +302,7 @@ end
 vim.api.nvim_create_autocmd('WinLeave', {
   pattern = {'*'},
   callback = function(ev)
-    local ft = vim.api.nvim_get_option_value('filetype', {buf=ev.buf})
+    local ft = vim.bo[ev.buf].filetype
 
     if ft == 'TelescopeResults' or ft == 'TelescopePrompt' then
       util.debug('Left Telescope:', ev)

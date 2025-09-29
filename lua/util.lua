@@ -161,7 +161,7 @@ end
 function M.listedBufs()
   local out = {}
   for _, buf in ipairs(api.nvim_list_bufs()) do
-    local listed = api.nvim_get_option_value('buflisted', {buf=buf})
+    local listed = vim.bo[buf].buflisted
     local name = api.nvim_buf_get_name(buf)
     if listed then
       out[#out+1] = name
