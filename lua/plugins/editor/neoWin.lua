@@ -3,8 +3,8 @@ local toggleColor = require('toggleColor')
 
 return {
   {
-    "hjfeldy/neoWin",
-    -- dir = '/home/harry/Repos/neowin',
+    -- "hjfeldy/neoWin",
+    dir = '/Users/RC12664/Repos/neoWin',
     branch="feature/tpad",
     -- branch="feature/tabScoped",
     keys = {
@@ -63,9 +63,28 @@ return {
                 util.debug(#lspResults.items .. ' definitions found, but all are on the same line')
               end
 
+              util.debug('Lsp multi-results: ' .. vim.inspect(lspResults))
+              vim.cmd("normal! m`")
+
+              if allSame or #lspResults.items == 1 then
+
+                -- vim.api.nvim_win_set_buf(0, lspResults.items[1].bufnr)
+                local currFile = vim.api.nvim_buf_get_name(0)
+                local firstResult = lspResults.items[1]
+                util.debug("Current file: " .. currFile .. "\nResult File: " .. firstResult.filename:lower())
+                if currFile:lower() ~= firstResult.filename:lower() then
+                  vim.cmd('keepjumps edit ' .. firstResult.filename)
+                end
+
+                -- add current position to jumplist
+                -- vim.cmd("normal! m`")
+                vim.api.nvim_win_set_cursor(0, {firstResult.lnum, firstResult.col - 1})
+                return
+              end
+              -- local a = lspResults.items[1]
+
               -- default lsp behavior is to open the quickfix list when there are multiple potential definitions
               -- we override with trouble.nvim here
-              util.debug('Lsp multi-results: ' .. vim.inspect(lspResults))
               vim.fn.setqflist(lspResults.items)
               if #lspResults.items == 1 or allSame then
                 vim.cmd.cfirst()
@@ -93,6 +112,13 @@ return {
         end,
         desc="Open Diagnostics"
       },
+
+      -- Directory navigation commands
+      {"<leader>c", "", desc="+CD"},
+      {"<leader>cc", function() require('neoWin.smartCD').smartCD(false) end, mode="n", desc="Change Directory to Current Buffer's"},
+      {"<leader>cl", function() require('neoWin.smartCD').smartCD(true) end, mode="n", desc="Change Local-Window Directory to Current Buffer's"},
+      {"<leader>co", function() require('neoWin.smartCD').jumpBack() end, mode="n", desc="Change to Previous Directory"},
+      {"<leader>ci", function() require('neoWin.smartCD').jumpForwards() end, mode="n", desc="Change to Next Directory"},
 
       -- Terminal commands
       {"<leader>t", "", mode="n", desc="+Terminals"},
