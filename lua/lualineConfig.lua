@@ -1,3 +1,5 @@
+--- Dynamic lualine configs
+
 local util = require('util')
 local api = vim.api
 

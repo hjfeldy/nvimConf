@@ -1,8 +1,10 @@
-
 local api = vim.api
 
 local M = {}
 
+--- Reverse a table k:v to v:k
+--- @param d table
+--- @return table
 function M.reverse(d)
   local out = {}
   for k, v in pairs(d) do
@@ -11,6 +13,10 @@ function M.reverse(d)
   return out
 end
 
+--- Merge two tables
+--- @param d1 table
+--- @param d2 table
+--- @return table
 function M.merge(d1, d2) 
   local out = {}
   for _, d in pairs({d1, d2}) do
@@ -23,6 +29,7 @@ function M.merge(d1, d2)
   return out
 end
 
+--- Merge an array of tables
 function M.mergeArrays(...)
   local arrays = { ... }
   local out = {}
@@ -34,7 +41,10 @@ function M.mergeArrays(...)
   return out
 end
 
-function M.shallowCopy(d) 
+--- Copy a table
+--- @param d table
+--- @return table
+function M.copy(d) 
   local out = {}
   for k, v in pairs(d) do
     out[k] = v
@@ -42,16 +52,17 @@ function M.shallowCopy(d)
   return out
 end
 
-local map = api.nvim_set_keymap
-local opts = { noremap = true }
-function M.mapKey(key, mapTo, mode, desc)
-  local _opts = M.shallowCopy(opts)
-  if desc ~= nil
-    then _opts.desc = desc
-  end
-  map(mode, key, mapTo, _opts)
-end
+-- local map = api.nvim_set_keymap
+-- local opts = { noremap = true }
+-- function M.mapKey(key, mapTo, mode, desc)
+--   local _opts = M.copy(opts)
+--   if desc ~= nil
+--     then _opts.desc = desc
+--   end
+--   map(mode, key, mapTo, _opts)
+-- end
 
+--- Capitalize the first letter of a string
 --- @param str string
 function M.capitalize(str) 
   local first = str:sub(1, 1)
@@ -59,7 +70,9 @@ function M.capitalize(str)
   return first:upper() .. rest
 end
 
+--- Split a string by a delimiter
 --- @param str string
+--- @return string[]
 function M.split(str, delim)
   local out = {}
   local s = ''
@@ -78,6 +91,9 @@ function M.split(str, delim)
   return out
 end
 
+--- Join an array of strings with a delimiter
+--- @param strings string[]
+--- @param delim string
 function M.join(strings, delim)
   local out = ''
   for _, str in pairs(strings) do
@@ -129,6 +145,7 @@ function M.shortenPathFunc(maxComponents, skipReplaceCwd)
   end
 end
 
+--- Emit a debug log
 function M.debug(...) 
   if not vim.g.NOICE_DEBUG then return end
   local args = { ... }
@@ -144,6 +161,7 @@ function M.debug(...)
 end
 
 
+--- Toggle debug logs
 function M.toggleDebug()
   vim.g.NOICE_DEBUG = not vim.g.NOICE_DEBUG
   local tf = vim.g.NOICE_DEBUG and 'true' or 'false'
@@ -152,26 +170,31 @@ function M.toggleDebug()
 end
 
 
+--- Render a user-friendly string for the current PWD (with a nerd-font icon)
+--- @param skipSub boolean Skip the string substitution of "~" for the HOME environment var
 function M.renderHome(skipSub)
   local cwd = vim.uv.cwd() or '__notfound__'
   local home = os.getenv('HOME') or '__notfound__'
   return " " .. (skipSub == true and cwd or string.gsub(cwd, home, '~'))
 end
 
-function M.listedBufs()
-  local out = {}
-  for _, buf in ipairs(api.nvim_list_bufs()) do
-    local listed = vim.bo[buf].buflisted
-    local name = api.nvim_buf_get_name(buf)
-    if listed then
-      out[#out+1] = name
-    end
-  end
-  return out
-end
+-- function M.listedBufs()
+--   local out = {}
+--   for _, buf in ipairs(api.nvim_list_bufs()) do
+--     local listed = vim.bo[buf].buflisted
+--     local name = api.nvim_buf_get_name(buf)
+--     if listed then
+--       out[#out+1] = name
+--     end
+--   end
+--   return out
+-- end
 
 --- Merge the values of a table into another table, doing so recursively for table values
 --- When both tables define a key with a primitive value, the source table's value is overridden by the addTable
+--- @param sourceTable table table whose values are overridden 
+--- @param addTable table table with overriding values
+--- @return table
 function M.recursiveMerge(sourceTable, addTable)
   local merged = {}
   local keys = {}
@@ -191,6 +214,11 @@ function M.recursiveMerge(sourceTable, addTable)
   return merged
 end
 
+
+--- Extract the values of a table into an array
+--- If the values contain an "index" field, sort the array by it
+--- @param tbl table
+--- @return table
 function M.tblToArray(tbl) 
   local out = {}
   for k, v in pairs(tbl) do

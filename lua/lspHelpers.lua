@@ -5,6 +5,8 @@ local M = {}
 
 M.WARNING_FILTER = true
 
+--- Toggle WARNING-level vs HINT-level LSP diagnostics
+--- @param force boolean? Force a specific value (true for WARN, false for HINT) rather than just flipping the value
 function M.toggleHints(force)
   if force ~= nil then 
     M.WARNING_FILTER = force

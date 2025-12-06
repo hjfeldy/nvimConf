@@ -5,45 +5,57 @@ local util = require('util')
 local lspHelpers = require('lspHelpers')
 local lualineConf = require('lualineConfig')
 
+--- Telescope quality-of-life functions
 local M = {}
 
 M.SHOW_HIDDEN = false
 M.RESPECT_IGNORE = true
 
+--- Whether or not to show warnings or hints 
+--- (tied to the global lsp configuration, which is also toggleable)
 M.WARNING_FILTER = lspHelpers.WARNING_FILTER
+-- Whether or not the telescope-diagnostics pertain 
+-- to the entire workspace vs just the current file
 M.LOCAL_DIAGNOSTICS = nil
 
+--- File-browser depth (incrementable/decrementable)
 M.FILE_DEPTH = 1
 
--- UTILITES 
 
 --- Set the lualine dynamic mode 
+--- @param mode string
 local function setLualineMode(mode)
   lualineConf.setMode(mode)
 end
 
+--- If the current lualine mode is {mode}, switch to normal mode
+--- @param mode string
 local function unsetLualineMode(mode)
   local dynamicMode = lualineConf.getMode()
   local isOn = dynamicMode == mode
   if isOn then lualineConf.setMode('normal') end
 end
 
-
+--- Toggle the WARNING/HINT level filter for diagnostics
+--- (propagate to global LSP toggleable configuration)
 function M.toggleHints()
   M.WARNING_FILTER = not M.WARNING_FILTER
   lspHelpers.toggleHints(M.WARNING_FILTER)
 end
 
+--- Toggle respect-gitignore config
  function M.toggleIgnore()
   M.RESPECT_IGNORE = not M.RESPECT_IGNORE
 end
 
+--- Toggle show-hidden-files config
 function M.toggleHidden()
   M.SHOW_HIDDEN = not M.SHOW_HIDDEN
 end
 
 --- Count total diagnostics in the current buffer (or the entire workspace),
 --- based on the current filter (warnings vs hints)
+--- @param currBuf boolean Should the count be local to the current buffer? 
 local function diagnosticCount(currBuf)
   local severity = {
     vim.diagnostic.severity.INFO,
@@ -62,6 +74,7 @@ end
 
 --- If there is an existing telescope prompt,
 --- extend the telescope prompt args with the current text and input-mode
+--- @param args table
 local function extendArgs(args)
   -- local picker = actionState.get_current_picker(
   local entry = actionState.get_selected_entry()
@@ -80,6 +93,9 @@ end
 
 --- Generate args for a telescope file-finder (find_files or file_browser)
 --- Show hidden/ignored files based on the current configuration
+--- @param args table? Existing arguments (applicable if telescope is already open, and we're re-calling a finder function in response to a keypress)
+--- @param prefix string Prefix for the prompt title
+--- @param prompt_bufnr integer? The prompt_bufnr of the currently-open telescope prompt buffer (if we're re-calling)
 local function getFileArgs(args, prefix, prompt_bufnr)
   args = args or {}
   if args.hidden == nil then
@@ -95,6 +111,8 @@ end
 
 
 --- Generate args for the telescope file-browser (extend getFileArgs() output)
+--- @param args table? applicable
+--- @param prompt_bufnr integer? The prompt_bufnr of the currently-open telescope prompt buffer (if we're re-calling)
 local function getFilebrowseArgs(args, prompt_bufnr)
   args = getFileArgs(args, 'File Browser', prompt_bufnr)
   args.depth = M.FILE_DEPTH
@@ -106,6 +124,8 @@ end
 
 --- Generate args for telescope live_grep 
 --- (same logic as getFileArgs, but live_grep args expect different format with "additional_args")
+--- @param args table? applicable
+--- @param prompt_bufnr integer? The prompt_bufnr of the currently-open telescope prompt buffer (if we're re-calling)
 local function getLiveGrepArgs(args, prompt_bufnr)
   args = args or {}
   local additional_args = args.additional_args or {}
@@ -122,6 +142,8 @@ end
 
 
 --- Generate args for telescope diagnostics
+--- @param args table? applicable
+--- @param prompt_bufnr integer? The prompt_bufnr of the currently-open telescope prompt buffer (if we're re-calling)
 local function getDiagnosticsArgs(args, prompt_bufnr)
   args = args or {}
   if args.severity_limit == nil then
@@ -133,9 +155,9 @@ local function getDiagnosticsArgs(args, prompt_bufnr)
   -- When we call diagnosticsToggleHints, we will retain this option
   if M.LOCAL_DIAGNOSTICS == nil then
     M.LOCAL_DIAGNOSTICS = args.bufnr ~= nil
-    print('Set LOCAL_DIAGNOSTICS to ' .. (M.LOCAL_DIAGNOSTICS and 'true' or 'false'))
+    util.debug('Set LOCAL_DIAGNOSTICS to ' .. (M.LOCAL_DIAGNOSTICS and 'true' or 'false'))
   elseif M.LOCAL_DIAGNOSTICS then
-    print('Using  LOCAL_DIAGNOSTICS value (setting bufnr = 0)')
+    util.debug('Using  LOCAL_DIAGNOSTICS value (setting bufnr = 0)')
     args.bufnr = 0
   end
 
@@ -145,6 +167,9 @@ end
 
 -- TELESCOPE PICKER-OPENERS 
 
+--- Find-files with Telescope
+--- @param args table? applicable
+--- @param prompt_bufnr integer? The prompt_bufnr of the currently-open telescope prompt buffer (if we're re-calling)
 function M.findFiles(args, prompt_bufnr)
   require('lualine').refresh()
   args = getFileArgs(args, 'Find Files', prompt_bufnr)
@@ -153,6 +178,9 @@ function M.findFiles(args, prompt_bufnr)
 end
 
 
+--- Browse filesystem with Telescope
+--- @param args table? applicable
+--- @param prompt_bufnr integer? The prompt_bufnr of the currently-open telescope prompt buffer (if we're re-calling)
 function M.fileBrowser(args, prompt_bufnr)
   require('lualine').refresh()
   args = getFilebrowseArgs(args, prompt_bufnr)
@@ -161,12 +189,20 @@ function M.fileBrowser(args, prompt_bufnr)
 end
 
 
+--- Live-Grep with Telescope
+--- @param args table? applicable
+--- @param prompt_bufnr integer? The prompt_bufnr of the currently-open telescope prompt buffer (if we're re-calling)
 function M.liveGrep(args, prompt_bufnr)
   args = getLiveGrepArgs(args, prompt_bufnr)
   builtin.live_grep(args)
   setLualineMode('telescopeFiles')
 end
 
+--- Browse buffer/workspace diagnostics with Telescope
+--- (according to the current LOCAL_DIAGNOSTICS configuraiton,
+--- whose toggle-function should be bound to some key)
+--- @param args table? applicable
+--- @param prompt_bufnr integer? The prompt_bufnr of the currently-open telescope prompt buffer (if we're re-calling)
 function M.diagnostics(args, prompt_bufnr)
   args = getDiagnosticsArgs(args, prompt_bufnr)
   if prompt_bufnr ~= nil then
