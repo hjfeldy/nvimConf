@@ -8,12 +8,13 @@ local config = {
     settings = {
       java = {
         configuration = {
-          runtimes = {
-            {
-              name = 'JavaSE-1.8',
-              path = '/Users/rc12664/AppData/local/Programs/Eclipse Adoptium/jdk-8.0.462.8-hotspot/'
-            }
-          }
+          -- runtimes = {
+          --   {
+          --     name = 'JavaSE-1.8',
+          --     -- path = os.getenv('HOME') .. '/AppData/local/Programs/Eclipse Adoptium/jdk-8.0.462.8-hotspot/'
+          --     path = os.getenv('HOME') .. '/AppData/local/Programs/Eclipse Adoptium/jdk-8.0.462.8-hotspot/'
+          --   }
+          -- }
         }
       }
     },

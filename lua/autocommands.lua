@@ -24,7 +24,7 @@ api.nvim_create_autocmd('BufReadPost', {
       local bo = vim.bo[buf]
       local name = api.nvim_buf_get_name(buf)
       if string.len(name) == 0 and bo.buflisted and bo.filetype ~= 'qf' then
-        vim.notify('deleting empty buffer', vim.log.levels.DEBUG)
+        util.debug('deleting empty buffer')
         api.nvim_buf_delete(buf, {})
         return
       end

@@ -1,5 +1,4 @@
 local M = {}
-local util = require('util')
 
 function M.getFinder(results)
   local finders = require('telescope.finders')
@@ -19,35 +18,6 @@ function M.getFinder(results)
   }
 end
 
-
-function M.wipeout()
-  local tabs = vim.api.nvim_list_tabpages()
-  local bufs = vim.api.nvim_list_bufs()
-  local currTab = vim.api.nvim_get_current_tabpage()
-  local newBuf = vim.api.nvim_create_buf(true, false)
-  util.debug('Created new dummy buffer: ' .. newBuf)
-  vim.api.nvim_win_set_buf(0, newBuf)
-  local currBuf = vim.api.nvim_get_current_buf()
-  util.debug('Current tab: ' .. currTab)
-  util.debug('Current buf: ' .. currBuf)
-  util.debug('Old tabs: ' .. vim.inspect(tabs))
-  util.debug('Old bufs: ' .. vim.inspect(bufs))
-
-  for _, tab in ipairs(tabs) do
-    if tab ~= currTab then
-      local tabIndex = vim.api.nvim_tabpage_get_number(tab)
-      util.debug('Deleting tab ' .. tab .. '(tabIndex ' .. tabIndex .. ')')
-      vim.cmd('tabclose ' .. tabIndex)
-    end
-  end
-  for _, buf in ipairs(bufs) do
-    if buf ~= currBuf then
-      util.debug('Deleting buf ' .. buf)
-      vim.api.nvim_buf_delete(buf, {force=true})
-    end
-  end
-  vim.cmd('Lazy reload bufferline.nvim')
-end
 
 function M.pickSession(opts)
   local pickers = require('telescope.pickers')
@@ -71,7 +41,6 @@ function M.pickSession(opts)
           local action_state = require "telescope.actions.state"
           local entry = action_state.get_selected_entry()
           actions.close(prompt_bufnr)
-          -- M.wipeout()
           resession.load(entry.value, {dir='explicit'})
         end
       )
