@@ -243,9 +243,17 @@ function M.fileBrowserGotoHome(args, prompt_bufnr)
   setLualineMode('telescopeFiles')
 end
 
+function M.fileBrowserGotoVimHome(args, prompt_bufnr)
+  args = getFilebrowseArgs(args, prompt_bufnr)
+  args.cwd = vim.cmd('pwd')
+  require("telescope").extensions.file_browser.file_browser(args)
+  setLualineMode('telescopeFiles')
+end
+
 function M.fileBrowserTabCD(args, prompt_bufnr)
   local cwd = actionState.get_selected_entry().value
   vim.cmd('tcd ' .. cwd)
+  vim.api.nvim_tabpage_set_var(0, 'name', vim.fs.basename(cwd))
   actions.close(prompt_bufnr)
 end
 
@@ -291,6 +299,8 @@ function M.openFileInTab(prompt_bufnr, focus)
     vim.cmd('tabprevious')
   end
 end
+
+
 
 --- Send all results to Trouble
 function M.telescopeTrouble(...)

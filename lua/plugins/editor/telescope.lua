@@ -123,6 +123,7 @@ return {
                 ["c"] = defaultArgs(helpers.fileBrowserTabCD),
                 ["C"] = fileBrowserActions.goto_cwd,
                 ["H"] = defaultArgs(helpers.fileBrowserGotoHome),
+                ["h"] = defaultArgs(helpers.fileBrowserGotoVimHome),
                 ["O"] = function(prompt_bufnr) return helpers.openFileInTab(prompt_bufnr, true) end,
                 ["o"] = function(prompt_bufnr) return helpers.openFileInTab(prompt_bufnr, false) end,
                 ["<C-h>"] = defaultArgs(helpers.fileBrowserToggleHidden),
@@ -139,12 +140,12 @@ return {
             }
           },
 
-          fzf = {
-            fuzzy = true,                    -- false will only do exact matching
-            override_generic_sorter = true,  -- override the generic sorter
-            override_file_sorter = true,     -- override the file sorter
-            case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
-          }
+          -- fzf = {
+          --   fuzzy = true,                    -- false will only do exact matching
+          --   override_generic_sorter = true,  -- override the generic sorter
+          --   override_file_sorter = true,     -- override the file sorter
+          --   case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
+          -- }
         },
 
         defaults = {
