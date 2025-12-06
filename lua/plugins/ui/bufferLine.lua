@@ -3,6 +3,13 @@
 local util = require('util')
 local icons = require('icons')
 
+local function newTab() 
+  local nTabs = #vim.api.nvim_list_tabpages()
+  local tabName = 'Tab ' .. tostring(nTabs+1)
+  vim.cmd('tabnew')
+  vim.api.nvim_tabpage_set_var(0, 'name', tabName)
+end
+
 return {
   "hjfeldy/bufferline.nvim",
   -- dir = "/home/harry/Repos/bufferline.nvim/",
@@ -24,7 +31,7 @@ return {
     { "<C-a>", "", desc = "+BufferLine Tabs"},
     { "<C-a>n", "<cmd>tabnext<cr>", desc = "Next Tab"},
     { "<C-a>p", "<cmd>tabprevious<cr>", desc = "Previous Tab"},
-    { "<C-a>c", "<cmd>tabnew<cr>", desc = "New Tab"},
+    { "<C-a>c", newTab, desc = "New Tab"},
     { "<C-a>x", "<cmd>tabclose<cr>", desc = "Close Tab"},
 
     {
@@ -75,15 +82,24 @@ return {
   opts = {
     options = {
       -- stylua: ignore
+      mode = "tabs",
       show_close_icon = false,
       show_buffer_close_icon = false,
       move_wraps_at_ends = true,
-      close_command = function(n) require('snacks').bufdelete(n) end,
+      -- close_command = function(n) require('snacks').bufdelete(n) end,
       numbers = 'ordinal',
       -- stylua: ignore
-      right_mouse_command = function(n) require('snacks').bufdelete(n) end,
+      -- right_mouse_command = function(n) require('snacks').bufdelete(n) end,
       diagnostics = "nvim_lsp",
       always_show_bufferline = true,
+      max_name_length = 50,
+
+      name_formatter = function(buf) 
+        local tabVars = vim.t[buf.tabnr]
+        local tabName = tabVars.name or tostring(buf.tabnr)
+        return tabName
+        -- return tabName .. ' (' .. buf.name .. ')'
+      end,
 
       custom_filter = function(bufnr, bufnrs)
         local bufType = vim.bo[bufnr].filetype
@@ -97,23 +113,11 @@ return {
         return not blacklist[bufType]
       end,
 
-      diagnostics_indicator = function(_, _, diag)
-        local ret = (diag.error and icons.diagnostics.Error .. diag.error .. " " or "")
-          .. (diag.warning and icons.diagnostics.Warn .. diag.warning or "")
-        return vim.trim(ret)
-      end,
-
-      offsets = {
-        {
-          filetype = "neo-tree",
-          text = "Neo-tree",
-          highlight = "Directory",
-          text_align = "left",
-        },
-        {
-          filetype = "snacks_layout_box",
-        },
-      },
+      -- diagnostics_indicator = function(_, _, diag)
+      --   local ret = (diag.error and icons.diagnostics.Error .. diag.error .. " " or "")
+      --     .. (diag.warning and icons.diagnostics.Warn .. diag.warning or "")
+      --   return vim.trim(ret)
+      -- end,
     },
   },
 
