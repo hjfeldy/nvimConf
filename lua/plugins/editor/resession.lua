@@ -42,7 +42,8 @@ return {
       return true
     end,
     extensions = {
-      orderedTabBuffersPlugin = {},
+      -- orderedTabBuffersPlugin = {},
+      neoWin = {},
       bufferline = {},
       scope = {}
     } 
