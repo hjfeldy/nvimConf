@@ -1,7 +1,11 @@
+-- Custom highlighting logic
+
 local util = require('util')
 
 local COLORSCHEME_PLUGIN = 'NeoSolarized.nvim'
 
+--- LSP highlight groups to copy to Blink highlight groups  
+--- This allows us to align the Blink completion colors with the colorscheme
 local lspKinds = {
   '@lsp.type.enum',
   '@lsp.type.type',
@@ -40,10 +44,11 @@ local blinkLspOverrides = {
 
 
 local M = {}
+
+--- light/dark mode config
 M.DARK = true
 
-
-M.setHL = vim.api.nvim_set_hl
+local setHL = vim.api.nvim_set_hl
 
 --- Get the colors for a given highlight name
 --- @param hl string
@@ -56,7 +61,7 @@ end
 --- @param toHL string
 function M.copyHL(fromHL, toHL)
   local copied = M.getHL(fromHL)
-  M.setHL(0, toHL, {fg=copied.fg, bg=copied.bg, link=copied.link})
+  setHL(0, toHL, {fg=copied.fg, bg=copied.bg, link=copied.link})
 end
 
 
@@ -75,15 +80,15 @@ function M.setColors(pluginName)
   local dark = M.DARK
   local color
   if dark then color = '#ffffff' else color = '#000000' end
-  M.setHL(0, 'FoldColumn', {fg=color})
-  M.setHL(0, 'WinSeparator', {fg=color})
+  setHL(0, 'FoldColumn', {fg=color})
+  setHL(0, 'WinSeparator', {fg=color})
 
   -- Hack statusline so we don't get weird conflicts with the trouble.statusline component
   M.copyHL('lualine_c_normal', 'StatusLine')
 
   -- Get rid of annoying automatic highlighting of the word under the cursor
   -- M.copyHL('Normal', 'CurrentWord')
-  M.setHL(0, 'CurrentWord', {})
+  setHL(0, 'CurrentWord', {})
 
   -- Reverse flash label/cursor - more visibly clear
   -- local flashLabel = M.getHL('FlashLabel')
@@ -91,15 +96,15 @@ function M.setColors(pluginName)
   -- util.debug('Flash Label:', flashLabel)
   -- util.debug('Flash Cursor:', flashCursor)
   -- M.copyHL('FlashLabel', 'FlashCursor')
-  -- M.setHL(0, 'FlashCursor', {fg=flashLabel.fg, bg=flashLabel.bg})
+  -- setHL(0, 'FlashCursor', {fg=flashLabel.fg, bg=flashLabel.bg})
   -- flashLabel = M.getHL('FlashLabel')
   -- flashCursor = M.getHL('FlashCursor')
   -- util.debug('Flash Label (post):', flashLabel)
   -- util.debug('Flash Cursor (post):', flashCursor)
 
-  M.setHL(0, 'FlashMatch', {fg='red', bg='black'})
-  M.setHL(0, 'FlashLabel', {fg='red', bg='black'})
-  M.setHL(0, 'FlashCurrent', {fg='red', bg='black'})
+  setHL(0, 'FlashMatch', {fg='red', bg='black'})
+  setHL(0, 'FlashLabel', {fg='red', bg='black'})
+  setHL(0, 'FlashCurrent', {fg='red', bg='black'})
 
   -- Override Blink lsp highlights (which NeoSolarized does not define) with builtin lsp highlights
   -- This adds color/style to the LSP completion menu
