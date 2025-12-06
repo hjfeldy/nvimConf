@@ -24,13 +24,13 @@ return {
       },
       {
         "<leader>ff",
-        function() require('telescopeHelpers').findFiles() end,
+        function() require('telescopeHelpers.pick').findFiles() end,
         mode="n",
         desc='Find Files'
       },
       {
         "<leader>fF",
-        function() require('telescopeHelpers').fileBrowser() end,
+        function() require('telescopeHelpers.pick').fileBrowser() end,
         mode="n",
         desc='File Browser'
       },
@@ -48,19 +48,19 @@ return {
       },
       {
         "<leader>fg",
-        function() require('telescopeHelpers').liveGrep() end, 
+        function() require('telescopeHelpers.pick').liveGrep() end, 
         mode="n",
         desc='Grep Files'
       },
       {
         "<leader>fd",
-        function() require('telescopeHelpers').diagnostics({bufnr=0}) end,
+        function() require('telescopeHelpers.pick').diagnostics({bufnr=0}) end,
         mode="n",
         desc='File Diagnostics'
       },
       {
         "<leader>fD",
-        function() require('telescopeHelpers').diagnostics({}) end,
+        function() require('telescopeHelpers.pick').diagnostics({}) end,
         mode="n",
         desc='Workspace Diagnostics'
       },
@@ -110,7 +110,7 @@ return {
     opts = function()
       local actions = require("telescope.actions")
       local actionState = require("telescope.actions.state")
-      local helpers = require('telescopeHelpers')
+      local customActions = require('telescopeHelpers.act')
       local fileBrowserActions = require("telescope").extensions.file_browser.actions
 
       return {
@@ -120,22 +120,22 @@ return {
             grouped = true,
             mappings = {
               n = {
-                ["c"] = defaultArgs(helpers.fileBrowserTabCD),
+                ["c"] = defaultArgs(customActions.fileBrowserTabCD),
                 ["C"] = fileBrowserActions.goto_cwd,
-                ["H"] = defaultArgs(helpers.fileBrowserGotoHome),
-                ["h"] = defaultArgs(helpers.fileBrowserGotoVimHome),
-                ["O"] = function(prompt_bufnr) return helpers.openFileInTab(prompt_bufnr, true) end,
-                ["o"] = function(prompt_bufnr) return helpers.openFileInTab(prompt_bufnr, false) end,
-                ["<C-h>"] = defaultArgs(helpers.fileBrowserToggleHidden),
-                ["<C-g>"] = defaultArgs(helpers.fileBrowserToggleIgnore),
-                ["<C-u>"] = defaultArgs(helpers.fileBrowserIncrementDepth),
-                ["<C-d>"] = defaultArgs(helpers.fileBrowserDecrementDepth),
+                ["H"] = defaultArgs(customActions.fileBrowserGotoHome),
+                ["h"] = defaultArgs(customActions.fileBrowserGotoVimHome),
+                ["O"] = function(prompt_bufnr) return customActions.openFileInTab(prompt_bufnr, true) end,
+                ["o"] = function(prompt_bufnr) return customActions.openFileInTab(prompt_bufnr, false) end,
+                ["<C-h>"] = defaultArgs(customActions.fileBrowserToggleHidden),
+                ["<C-g>"] = defaultArgs(customActions.fileBrowserToggleIgnore),
+                ["<C-u>"] = defaultArgs(customActions.fileBrowserIncrementDepth),
+                ["<C-d>"] = defaultArgs(customActions.fileBrowserDecrementDepth),
               },
               i = {
-                ["<C-h>"] = defaultArgs(helpers.fileBrowserToggleHidden),
-                ["<C-g>"] = defaultArgs(helpers.fileBrowserToggleIgnore),
-                ["<C-u>"] = defaultArgs(helpers.fileBrowserIncrementDepth),
-                ["<C-d>"] = defaultArgs(helpers.fileBrowserDecrementDepth),
+                ["<C-h>"] = defaultArgs(customActions.fileBrowserToggleHidden),
+                ["<C-g>"] = defaultArgs(customActions.fileBrowserToggleIgnore),
+                ["<C-u>"] = defaultArgs(customActions.fileBrowserIncrementDepth),
+                ["<C-d>"] = defaultArgs(customActions.fileBrowserDecrementDepth),
               }
             }
           },
@@ -156,10 +156,10 @@ return {
             i = {
               ['<C-p>'] = actions.cycle_history_prev,
               ['<C-n>'] = actions.cycle_history_next,
-              ["<C-h>"] = helpers.findFilesToggleHidden,
-              ["<C-g>"] = helpers.findFilesToggleIgnore,
+              ["<C-h>"] = customActions.findFilesToggleHidden,
+              ["<C-g>"] = customActions.findFilesToggleIgnore,
               ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
-              ["<C-t>"] = helpers.telescopeTrouble,
+              ["<C-t>"] = customActions.telescopeTrouble,
               ["<C-c>"] = actions.close,
               ["<C-j>"] = actions.preview_scrolling_down,
               ["<C-k>"] = actions.preview_scrolling_up,
@@ -167,7 +167,7 @@ return {
             n = {
               ["<C-c>"] = actions.close,
               ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
-              ["<C-t>"] = helpers.telescopeTrouble,
+              ["<C-t>"] = customActions.telescopeTrouble,
               ["<leader>q"] = actions.send_to_qflist + actions.open_qflist,
               ["<C-j>"] = actions.preview_scrolling_down,
               ["<C-k>"] = actions.preview_scrolling_up,
@@ -194,7 +194,7 @@ return {
           diagnostics = {
             mappings = {
               i = {
-              ["<C-d>"] = helpers.diagnosticsToggleHints,
+              ["<C-d>"] = customActions.diagnosticsToggleHints,
               },
             }
           },
@@ -202,12 +202,12 @@ return {
           live_grep = {
             mappings = {
               n = {
-                ["<C-h>"] = defaultArgs(helpers.liveGrepToggleHidden),
-                ["<C-g>"] = defaultArgs(helpers.liveGrepToggleIgnore),
+                ["<C-h>"] = defaultArgs(customActions.liveGrepToggleHidden),
+                ["<C-g>"] = defaultArgs(customActions.liveGrepToggleIgnore),
               },
               i = {
-                ["<C-h>"] = defaultArgs(helpers.liveGrepToggleHidden),
-                ["<C-g>"] = defaultArgs(helpers.liveGrepToggleIgnore),
+                ["<C-h>"] = defaultArgs(customActions.liveGrepToggleHidden),
+                ["<C-g>"] = defaultArgs(customActions.liveGrepToggleIgnore),
               }
             }
           }

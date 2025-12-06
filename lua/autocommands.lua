@@ -1,6 +1,8 @@
 local api = vim.api
 local util = require('util')
 local resession = require('resession')
+local telescopeUtils = require('telescopeHelpers.utils')
+local telescopeConf = require('telescopeHelpers.config')
 
 -- clear fugitive buffers when 
 api.nvim_create_autocmd('BufReadPost', {
@@ -54,4 +56,23 @@ vim.api.nvim_create_autocmd('StdinReadPre', {
     -- Store this for later
     vim.g.using_stdin = true
   end,
+})
+
+--- Whenever leaving a telescope prompt, turn off all dynamic lualine icons
+vim.api.nvim_create_autocmd('WinLeave', {
+  pattern = {'*'},
+  callback = function(ev)
+    local ft = vim.bo[ev.buf].filetype
+
+    if ft == 'TelescopeResults' or ft == 'TelescopePrompt' then
+      util.debug('Left Telescope:', ev)
+      telescopeUtils.unsetLualineMode('telescopeFiles')
+      telescopeUtils.unsetLualineMode('telescopeDiagnostics')
+      if telescopeConf.LOCAL_DIAGNOSTICS ~= nil then
+        util.debug('Resetting LOCAL_DIAGNOSTICS') 
+      end
+
+      telescopeConf.LOCAL_DIAGNOSTICS = nil
+    end
+  end
 })

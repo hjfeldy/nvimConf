@@ -11,7 +11,7 @@ return {
         '<leader>gt',
         function() 
           require('lspHelpers').toggleHints() 
-          require('telescopeHelpers').toggleHints()
+          require('telescopeHelpers.utils').toggleHints()
         end,
         desc='Toggle LSP Diagnostic Level'
       },

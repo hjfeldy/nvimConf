@@ -73,7 +73,8 @@ end
 --- "level" determines the display behavior of regular (non-telescope-specific) logic - via configuration overrides
 function M.getConfig()
   local icons = require('icons')
-  local telescopeHelpers = require('telescopeHelpers')
+  -- local telescopeHelpers = require('telescopeHelpers')
+  local telescopeConf = require('telescopeHelpers.config')
   local Snacks = require('snacks')
   local trouble = require('trouble')
 
@@ -134,12 +135,12 @@ function M.getConfig()
   -- Visual indicator of whether we are currently filtering diagnostics for hints (" ") or warnings (" ")
   local diagnosticsFilterIcon = {
     function()
-      return telescopeHelpers.WARNING_FILTER and icons.diagnostics.Warn or icons.diagnostics.Info
+      return telescopeConf.WARNING_FILTER and icons.diagnostics.Warn or icons.diagnostics.Info
     end,
     component_name = 'diagnosticsFilter',
     color = function()
       local whiteBlack = vim.o.background == 'dark' and 'white' or 'black'
-      return {fg = telescopeHelpers.WARNING_FILTER and "orange" or whiteBlack  }
+      return {fg = telescopeConf.WARNING_FILTER and "orange" or whiteBlack  }
     end,
     separator="",
     padding = { left = 1, right = 0 },
@@ -159,11 +160,11 @@ function M.getConfig()
   --- Do we show hidden files in telescope prompts?
   local showHiddenIcon = {
     function() 
-      return telescopeHelpers.SHOW_HIDDEN and icons.showHide.Show or icons.showHide.Hide
+      return telescopeConf.SHOW_HIDDEN and icons.showHide.Show or icons.showHide.Hide
     end,
     color = function() 
       local whiteBlack = vim.o.background == 'dark' and 'white' or 'black'
-      return {fg=telescopeHelpers.SHOW_HIDDEN and "green" or whiteBlack}
+      return {fg=telescopeConf.SHOW_HIDDEN and "green" or whiteBlack}
     end,
     separator="",
     padding = { left = 1, right = 0 },
@@ -178,7 +179,7 @@ function M.getConfig()
     separator="",
     padding = { left = 0, right = 0 },
     color = function() 
-      return {fg=telescopeHelpers.RESPECT_IGNORE and "green" or "red"}
+      return {fg=telescopeConf.RESPECT_IGNORE and "green" or "red"}
     end,
     cond = telescopeFileMode
   }

@@ -171,7 +171,7 @@ end
 
 
 --- Render a user-friendly string for the current PWD (with a nerd-font icon)
---- @param skipSub boolean Skip the string substitution of "~" for the HOME environment var
+--- @param skipSub boolean? Skip the string substitution of "~" for the HOME environment var
 function M.renderHome(skipSub)
   local cwd = vim.uv.cwd() or '__notfound__'
   local home = os.getenv('HOME') or '__notfound__'
