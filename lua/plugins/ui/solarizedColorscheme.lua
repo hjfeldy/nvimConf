@@ -4,13 +4,14 @@ return {
     priority = 1000, -- make sure to load this before all the other start plugins
     config = function()
       local solarized = require('NeoSolarized')
-      local toggler = require('toggleColor')
-      local style = toggler.toggle()
+      local hl = require('highlights')
+      local style = hl.DARK and 'dark' or 'light'
+
       vim.o.background = style
       solarized.setup({
         style=style,
         -- style='dark',
-        transparent=toggler.DARK,
+        transparent=hl.DARK,
       })
       vim.cmd [[ colorscheme NeoSolarized ]]
     end

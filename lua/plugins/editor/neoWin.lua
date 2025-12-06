@@ -1,12 +1,9 @@
 local util = require('util')
-local toggleColor = require('toggleColor')
 
 return {
   {
-    -- "hjfeldy/neoWin",
-    dir = '/Users/RC12664/Repos/neoWin',
-    branch="feature/tpad",
-    -- branch="feature/tabScoped",
+    "hjfeldy/neoWin",
+    branch="feature/work",
     keys = {
       -- LSP 
       {"<leader>g", "", desc="+LSP"},
@@ -156,7 +153,6 @@ return {
 
       -- Quitting
       {"q", "", mode="n", desc="+Quitting"},
-      -- {"qw", "<cmd>q<cr>", mode="n", desc="Close Window"},
       {"qw", function() require('neoWin.smartDelete').smartCloseWin() end, mode="n", desc="Close Window"},
       {"qW", function() require('neoWin.smartDelete').smartCloseWin(true) end, mode="n", desc="Force-Close Window"},
       {"qq", function() require('neoWin.smartDelete').smartDelete() end, mode="n", desc="Quit Buffer"},
@@ -165,8 +161,7 @@ return {
       {
         "<C-p>",
         function() 
-          vim.cmd('Lazy reload NeoSolarized.nvim')
-          require('highlights').setColors()
+          require('highlights').toggleColor()
           require('lualine').refresh()
         end,
         mode="n" 

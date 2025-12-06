@@ -1,5 +1,7 @@
 local util = require('util')
 
+local COLORSCHEME_PLUGIN = 'NeoSolarized.nvim'
+
 local lspKinds = {
   '@lsp.type.enum',
   '@lsp.type.type',
@@ -38,23 +40,39 @@ local blinkLspOverrides = {
 
 
 local M = {}
+M.DARK = true
+
 
 M.setHL = vim.api.nvim_set_hl
 
+--- Get the colors for a given highlight name
+--- @param hl string
 function M.getHL(hl)
   return vim.api.nvim_get_hl(0, {name=hl})
 end
 
+--- Set a particular highlight's colors to equal another's
+--- @param fromHL string
+--- @param toHL string
 function M.copyHL(fromHL, toHL)
   local copied = M.getHL(fromHL)
   M.setHL(0, toHL, {fg=copied.fg, bg=copied.bg, link=copied.link})
 end
 
 
---- Invoke custom highlighting logic
-function M.setColors()
+--- Invoke custom highlighting logic, 
+--- (either light or dark theme, depending on the current value of DARK)
+--- Call this ad-hoc to refresh the colors according to the configuration
+--- It's convenient to call this in the initialization logic of a colorscheme plugin,
+--- so you can reload the plugin (ie. "Lazy reload NeoSolarized") 
+--- @param pluginName string?
+function M.setColors(pluginName)
+  if pluginName ~= nil then
+    vim.cmd('Lazy reload ' .. pluginName)
+  end
+
   -- Set the foldColumn color based on whether we currently are in dark mode
-  local dark = require('toggleColor').DARK
+  local dark = M.DARK
   local color
   if dark then color = '#ffffff' else color = '#000000' end
   M.setHL(0, 'FoldColumn', {fg=color})
@@ -99,6 +117,17 @@ function M.setColors()
   end
 end
 
--- Expose as a module so that we can refresh colors ad-hoc (ie. after toggling dark-mode)
-M.setColors()
+--- Toggle the colorscheme configuration and refresh the colorscheme
+function M.toggleColor() 
+  M.DARK = not M.DARK
+  local tf
+  print('Dark: ' .. tostring(M.DARK))
+  M.setColors(COLORSCHEME_PLUGIN)
+  -- if M.DARK then tf = 'true' else tf = 'false' end
+  -- if M.DARK then return 'dark' else return 'light' end
+end
+
+
+-- M.toggleColor()
+
 return M
