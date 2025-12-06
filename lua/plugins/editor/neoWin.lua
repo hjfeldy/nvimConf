@@ -2,113 +2,11 @@ local util = require('util')
 
 return {
   {
-    "hjfeldy/neoWin",
+    -- "hjfeldy/neoWin",
+    dir="/home/harry/Repos/neowin",
     branch="feature/work",
+    lazy=false,
     keys = {
-      -- LSP 
-      {"<leader>g", "", desc="+LSP"},
-      {
-        '<leader>gt',
-        function() 
-          require('lspHelpers').toggleHints() 
-          require('telescopeHelpers.utils').toggleHints()
-        end,
-        desc='Toggle LSP Diagnostic Level'
-      },
-      {
-        "<leader>go",
-        function()
-          vim.lsp.buf.hover({border='rounded'})
-        end,
-        desc="Hover"
-      },
-      {
-        "<leader>gr",
-        '<cmd>Trouble lsp_references focus=true<CR>',
-        --[[ function()
-          vim.cmd('Trouble references focus=true')
-        end, ]]
-        desc="References"
-      },
-      {
-        "<leader>gd",
-        function()
-          vim.lsp.buf.definition({
-            on_list = function(lspResults)
-
-              -- Some LSPs will give multiple results which are all from the same line
-              -- ie. "some.member = function() ..." will match on "member" and "function" 
-              -- This should not open up the quickfix list, we should just go to the first one
-              local matchingLineNums = {}
-              local matchingFiles = 0
-
-              -- if all results are from the same file and line-number, treat them as a single result
-              local allSame = true
-              for _, match in ipairs(lspResults.items) do
-                if matchingLineNums[match.filename] == nil then
-                  matchingLineNums[match.filename] = match.lnum
-                  matchingFiles = matchingFiles+1
-                  if matchingFiles > 1 then
-                    allSame = false 
-                  end
-                elseif matchingLineNums[match.filename] ~= match.lnum then
-                  allSame = false
-                end
-              end
-
-              if allSame and #lspResults.items > 1 then
-                util.debug(#lspResults.items .. ' definitions found, but all are on the same line')
-              end
-
-              util.debug('Lsp multi-results: ' .. vim.inspect(lspResults))
-              vim.cmd("normal! m`")
-
-              if allSame or #lspResults.items == 1 then
-
-                -- vim.api.nvim_win_set_buf(0, lspResults.items[1].bufnr)
-                local currFile = vim.api.nvim_buf_get_name(0)
-                local firstResult = lspResults.items[1]
-                util.debug("Current file: " .. currFile .. "\nResult File: " .. firstResult.filename:lower())
-                if currFile:lower() ~= firstResult.filename:lower() then
-                  vim.cmd('keepjumps edit ' .. firstResult.filename)
-                end
-
-                -- add current position to jumplist
-                -- vim.cmd("normal! m`")
-                vim.api.nvim_win_set_cursor(0, {firstResult.lnum, firstResult.col - 1})
-                return
-              end
-              -- local a = lspResults.items[1]
-
-              -- default lsp behavior is to open the quickfix list when there are multiple potential definitions
-              -- we override with trouble.nvim here
-              vim.fn.setqflist(lspResults.items)
-              if #lspResults.items == 1 or allSame then
-                vim.cmd.cfirst()
-                vim.fn.setqflist({})
-              else
-                vim.cmd('Trouble qflist focus=true auto_preview=false')
-              end
-            end
-
-          })
-        end,
-        desc="Goto Definition"
-      },
-      {
-        "<leader>gi",
-        function()
-          vim.lsp.buf.implementation()
-        end,
-        desc="Goto Implementation"
-      },
-      {
-        "<leader>gD",
-        function()
-          vim.diagnostic.open_float()
-        end,
-        desc="Open Diagnostics"
-      },
 
       -- Directory navigation commands
       {"<leader>c", "", desc="+CD"},
@@ -119,37 +17,12 @@ return {
 
       -- Terminal commands
       {"<leader>t", "", mode="n", desc="+Terminals"},
-      {"<leader>tt", "<cmd>NewTerm<CR>", mode="n", desc="New Terminal"},
-      {"<leader>tT", "<cmd>Terminals<CR>", mode="n", desc="Telescope Terminal Picker"},
-      {"<leader>tn", "<cmd>NextTerm<CR>", mode="n", desc="Next Terminal"},
-      {"<leader>tp", "<cmd>PrevTerm<CR>", mode="n", desc="Previous Terminal"},
-      {"<leader>tr", "<cmd>RenameTerm<CR>", mode="n", desc="Rename Terminal"},
-      {"<C-t>", "<cmd>ToggleTerm<CR>", mode={"n", "t"}, desc="Toggle Terminal(s)"},
-
-      -- Window jumping/resizing
-      {"-", "<cmd>resize -1<cr>", mode="n"},
-      {"+", "<cmd>resize +1<cr>", mode="n"},
-      {"<C-s>", "<cmd>vertical resize -1<cr>", mode="n"},
-      {"<C-b>", "<cmd>vertical resize +1<cr>", mode="n"},
-      {"<C-w>", "<C-\\><C-n>", mode="t"},
-      {"<C-j>", "<C-w>j", mode="n"},
-      {"<C-k>", "<C-w>k", mode="n"},
-      {"<C-h>", "<C-w>h", mode="n"},
-      {"<C-l>", "<C-w>l", mode="n"},
-      {"<C-j>", "<C-\\><C-n><C-w>j", mode="t"},
-      {"<C-k>", "<C-\\><C-n><C-w>k", mode="t"},
-      {"<C-h>", "<C-\\><C-n><C-w>h", mode="t"},
-      {"<C-l>", "<C-\\><C-n><C-w>l", mode="t"},
-      {"<leader>v", "<cmd>vsplit<CR><C-w>l", mode="n", desc="Vertical Split"},
-
-      -- Sane text-editing defaults
-      {"J", "}", mode={"n", "x"}, desc="Jump Down"},
-      {"K", "{", mode={"n", "x"}, desc="Jump Up"},
-      {"<leader>j", "<cmd>cnext<CR>", mode="n", desc="Qfix next"},
-      {"<leader>k", "<cmd>cprev<CR>", mode="n", desc="Qfix prev"},
-      {"vv", "gv", mode="n", "Rehighlight"},
-      {"<leader>J", "J", mode="n", desc="Merge Lines"},
-      {"<leader>N", function() vim.o.hlsearch = not vim.o.hlsearch end, mode="n", desc="Toggle Highlight"},
+      {"<leader>tt", function() require('neoWin.terminals').newTerm() end, mode="n", desc="New Terminal"},
+      {"<leader>tT", function() require('neoWin.customPicker').termPick() end, mode="n", desc="Telescope Terminal Picker"},
+      {"<leader>tn", function() require('neoWin.terminals').nextTerm() end, mode="n", desc="Next Terminal"},
+      {"<leader>tp", function() require('neowin.terminals').prevTerm() end, mode="n", desc="Previous Terminal"},
+      {"<leader>tr", function() require('neoWin.Terminals').renameTerm() end, mode="n", desc="Rename Terminal"},
+      {"<C-t>", function() require('neoWin.terminals').toggle() end, mode={"n", "t"}, desc="Toggle Terminal(s)"},
 
       -- Quitting
       {"q", "", mode="n", desc="+Quitting"},
