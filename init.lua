@@ -6,6 +6,6 @@ require('nvimDebugger')
 require('autocommands')
 
 local telescope = require('telescope')
-telescope.load_extension('fzf')
+-- telescope.load_extension('fzf')
 telescope.load_extension('file_browser')
 telescope.load_extension('undo')

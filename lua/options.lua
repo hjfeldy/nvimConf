@@ -7,7 +7,7 @@ vim.o.smartcase=true
 vim.o.ignorecase=true
 
 vim.o.clipboard='unnamedplus'
-vim.g.clipboard='xclip'
+-- vim.g.clipboard='xclip'
 
 vim.o.number=true
 vim.o.relativenumber=true

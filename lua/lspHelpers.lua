@@ -22,6 +22,7 @@ function M.toggleHints(force)
     table.remove(severity, 1)
   end
   vim.diagnostic.config({
+    severity_sort=true,
     signs = {
       severity=severity
     }
