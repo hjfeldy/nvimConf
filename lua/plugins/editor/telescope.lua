@@ -24,13 +24,13 @@ return {
       },
       {
         "<leader>ff",
-        function() require('telescopeHelpers.pick').findFiles() end,
+        function() require('helpers.telescope.pick').findFiles() end,
         mode="n",
         desc='Find Files'
       },
       {
         "<leader>fF",
-        function() require('telescopeHelpers.pick').fileBrowser() end,
+        function() require('helpers.telescope.pick').fileBrowser() end,
         mode="n",
         desc='File Browser'
       },
@@ -48,19 +48,19 @@ return {
       },
       {
         "<leader>fg",
-        function() require('telescopeHelpers.pick').liveGrep() end, 
+        function() require('helpers.telescope.pick').liveGrep() end, 
         mode="n",
         desc='Grep Files'
       },
       {
         "<leader>fd",
-        function() require('telescopeHelpers.pick').diagnostics({bufnr=0}) end,
+        function() require('helpers.telescope.pick').diagnostics({bufnr=0}) end,
         mode="n",
         desc='File Diagnostics'
       },
       {
         "<leader>fD",
-        function() require('telescopeHelpers.pick').diagnostics({}) end,
+        function() require('helpers.telescope.pick').diagnostics({}) end,
         mode="n",
         desc='Workspace Diagnostics'
       },
@@ -110,7 +110,7 @@ return {
     opts = function()
       local actions = require("telescope.actions")
       local actionState = require("telescope.actions.state")
-      local customActions = require('telescopeHelpers.act')
+      local customActions = require('helpers.telescope.act')
       local fileBrowserActions = require("telescope").extensions.file_browser.actions
 
       return {

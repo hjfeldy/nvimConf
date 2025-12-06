@@ -1,5 +1,6 @@
 local M = {}
 
+--- Get a custom telescope finder for explicitly-saved sessions
 function M.getFinder(results)
   local finders = require('telescope.finders')
   local resession = require('resession')
@@ -19,6 +20,7 @@ function M.getFinder(results)
 end
 
 
+--- Open a telescope picker with explicitly-saved sessions
 function M.pickSession(opts)
   local pickers = require('telescope.pickers')
   local conf = require("telescope.config").values

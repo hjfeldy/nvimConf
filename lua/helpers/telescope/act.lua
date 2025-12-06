@@ -1,9 +1,9 @@
 local actionState = require("telescope.actions.state")
 local actions = require("telescope.actions")
 
-local telescopeUtil = require('telescopeHelpers.utils')
-local telescopeConf = require('telescopeHelpers.config')
-local customPickers = require('telescopeHelpers.pick')
+local telescopeUtil = require('helpers.telescope.utils')
+local telescopeConf = require('helpers.telescope.config')
+local customPickers = require('helpers.telescope.pick')
 local util = require('util')
 
 local M = {}

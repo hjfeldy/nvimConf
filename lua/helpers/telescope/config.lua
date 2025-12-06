@@ -1,4 +1,4 @@
-local lspHelpers = require('lspHelpers')
+local lspHelpers = require('helpers.lsp')
 local M = {}
 
 M.SHOW_HIDDEN = false

@@ -1,6 +1,6 @@
-local lspHelpers = require('lspHelpers')
+local lspHelpers = require('helpers.lsp')
 local lualineConf = require('lualineConfig')
-local telescopeConf = require('telescopeHelpers.config')
+local telescopeConf = require('helpers.telescope.config')
 
 local M = {}
 

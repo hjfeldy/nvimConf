@@ -73,8 +73,8 @@ end
 --- "level" determines the display behavior of regular (non-telescope-specific) logic - via configuration overrides
 function M.getConfig()
   local icons = require('icons')
-  -- local telescopeHelpers = require('telescopeHelpers')
-  local telescopeConf = require('telescopeHelpers.config')
+  -- local telescopeHelpers = require('helpers.telescope')
+  local telescopeConf = require('helpers.telescope.config')
   local Snacks = require('snacks')
   local trouble = require('trouble')
 

@@ -1,5 +1,5 @@
 local util = require('util')
-local helpers = require('sessionHelpers')
+local helpers = require('helpers.resession')
 
 return {
   "stevearc/resession.nvim",

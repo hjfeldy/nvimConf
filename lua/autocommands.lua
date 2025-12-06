@@ -1,8 +1,8 @@
 local api = vim.api
 local util = require('util')
 local resession = require('resession')
-local telescopeUtils = require('telescopeHelpers.utils')
-local telescopeConf = require('telescopeHelpers.config')
+local telescopeUtils = require('helpers.telescope.utils')
+local telescopeConf = require('helpers.telescope.config')
 
 -- clear fugitive buffers when 
 api.nvim_create_autocmd('BufReadPost', {

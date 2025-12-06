@@ -3,8 +3,8 @@ local actions = require("telescope.actions")
 local builtin = require('telescope.builtin')
 
 local util = require('util')
-local telescopeUtil = require('telescopeHelpers.utils')
-local telescopeConf = require('telescopeHelpers.config')
+local telescopeUtil = require('helpers.telescope.utils')
+local telescopeConf = require('helpers.telescope.config')
 
 local M = {}
 

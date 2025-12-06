@@ -1,5 +1,4 @@
-local helpers = require('lspHelpers')
-local util = require('lspconfig.util')
+-- Individual LSP configurations
 
 -- https://docs.basedpyright.com/v1.21.0/configuration/language-server-settings/
 vim.lsp.config.basedpyright = {
@@ -38,24 +37,29 @@ vim.lsp.config.lua_ls = {
   }
 }
 
-
+-- Configure per-project with tsconfig.json
 vim.lsp.config.ts_ls = {
   settings = {
   }
 }
 
+-- use ftplugin, as per the docs - do not use native LSP
+-- vim.lsp.config.jdtls = {
+--   settings = {
+--     java = {
+--     }
+--   }
+-- }
 
-vim.lsp.config.jdtls = {
-  settings = {
-    java = {
-    }
-  }
-}
 
-vim.lsp.enable({
-  'lua_ls',
-  -- 'jdtls',
-  'basedpyright',
-  'csharp_ls',
-  'ts_ls'
-})
+if vim.g.NO_LSP then
+  print('Neglecting to enable LSP - it is disabled globally')
+else
+  vim.lsp.enable({
+    'lua_ls',
+    -- 'jdtls', <- see above
+    'basedpyright',
+    'csharp_ls',
+    'ts_ls'
+  })
+end
