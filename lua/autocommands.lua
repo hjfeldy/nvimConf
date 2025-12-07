@@ -68,7 +68,7 @@ vim.api.nvim_create_autocmd('StdinReadPre', {
 
 --- Keep track of whether or not a fugitive window (git status, git log, etc) is open in each tab
 --- This allows us to close and reopen the terminal window whenever a fugitive window
---- @type { [integer]: boolean }
+--- @type { [integer]: integer }
 local FUGITIVE_STATUS = {}
 
 --- Reopen the terminal window when fugitive windows are closed 
@@ -80,8 +80,10 @@ vim.api.nvim_create_autocmd('WinClosed', {
     local fugitiveStatus = FUGITIVE_STATUS[tab] and FUGITIVE_STATUS[tab]
     local bufType = vim.bo[ev.buf].filetype
     if bufType == 'fugitive' and fugitiveStatus then
-      terms.toggle()
-      FUGITIVE_STATUS[tab] = false
+      FUGITIVE_STATUS[tab] = FUGITIVE_STATUS[tab]-1
+      if FUGITIVE_STATUS[tab] == 0 then
+        terms.toggle()
+      end
     end
 
   end
@@ -96,7 +98,7 @@ vim.api.nvim_create_autocmd('User', {
     local tab = vim.api.nvim_get_current_tabpage()
     if firstWindowId ~= nil then
       terms.toggle()
-      FUGITIVE_STATUS[tab] = true
+      FUGITIVE_STATUS[tab] = FUGITIVE_STATUS[tab] and FUGITIVE_STATUS[tab]+1 or 1
     end
   end
 })
