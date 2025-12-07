@@ -1,12 +1,11 @@
+local isWindows = package.config:sub(1,1) == '\\'
+
 return {
   'nvim-telescope/telescope-fzf-native.nvim',
-  build = function() 
-    local isWindows = 'package.config:sub(1,1)' == '\\'
-    return isWindows and {
+  build = isWindows and {
       'cmake -S. -Bbuild "-DCMAKE_POLICY_VERSION_MINIMUM=3.5" -DCMAKE_BUILD_TYPE=Release',
-      'cmake --build build --config Release'
-    } or 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release'
-  end,
+      'cmake --build build --config Release --target install'
+    } or 'make',
   -- build = {'cmake -S. -Bbuild "-DCMAKE_POLICY_VERSION_MINIMUM=3.5" -DCMAKE_BUILD_TYPE=Release', 'cmake --build build --config Release'},
 
   dependencies = {
