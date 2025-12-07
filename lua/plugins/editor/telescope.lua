@@ -178,6 +178,14 @@ return {
         },
 
         pickers = {
+          buffers = {
+            mappings = {
+              n = {
+                [ "D" ] = function(prompt_bufnr) customActions.deleteBufferSelection(prompt_bufnr, true) end,
+                [ "d" ] = function(prompt_bufnr) customActions.deleteBufferSelection(prompt_bufnr, false) end
+              }
+            }
+          },
           git_branches = {
             mappings = {
               n = {

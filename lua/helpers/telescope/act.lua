@@ -8,6 +8,19 @@ local util = require('util')
 
 local M = {}
 
+function M.debugEntry(prompt_bufnr)
+  local entry = actionState.get_selected_entry()
+  print('Entry: ' .. vim.inspect(entry))
+end
+
+function M.deleteBufferSelection(prompt_bufnr, force) 
+  local entry = actionState.get_selected_entry()
+  require('neoWin.smartDelete').smartDeleteBuffer(force, entry.bufnr, false)
+  customPickers.browseBuffers({}, prompt_bufnr)
+  -- vim.api.nvim_buf_delete(entry.bufnr, {force=force})
+  -- vim.api.nvim_buf_delete(entry.bufnr, {force=force})
+end
+
 --- Wrap a telescope function (ie findFiles or liveGrep) 
 --- such that it calls toggleHiden() / toggleIgnore() first.
 --- These wrapped functions can be called while a telescope prompt is already open,

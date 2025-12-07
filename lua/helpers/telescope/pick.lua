@@ -111,6 +111,10 @@ function M.findFiles(args, prompt_bufnr)
   telescopeUtil.setLualineMode('telescopeFiles')
 end
 
+function M.browseBuffers(args, prompt_bufnr) 
+  args = M.extendArgs(args or {})
+  builtin.buffers(args)
+end
 
 --- Browse filesystem with Telescope
 --- @param args table? applicable
