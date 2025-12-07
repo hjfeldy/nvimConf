@@ -5,7 +5,7 @@ return {
     -- "hjfeldy/neoWin",
     dir="/home/harry/Repos/neowin",
     branch="feature/work",
-    lazy=false,
+    -- lazy=false,
     keys = {
 
       -- Directory navigation commands
