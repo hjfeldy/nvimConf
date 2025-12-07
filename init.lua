@@ -1,7 +1,6 @@
 require('config.lazy')
 require('config.lsp')
-require('options')
 require('highlights')
 require('nvimDebugger')
-require('autocommands')
 require('saneDefaults')
+require('autocommands')

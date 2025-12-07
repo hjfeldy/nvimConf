@@ -52,7 +52,7 @@ function M.pickSession(opts)
   }):find()
 end
 
-
+-- Save the current session with an explicit session-name
 function M.saveSesh()
   local seshName = vim.fn.input({prompt='Session Name'})
   require('resession').save(seshName, {dir='explicit'}) 

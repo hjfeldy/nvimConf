@@ -1,4 +1,3 @@
-local util = require('util')
 local helpers = require('helpers.resession')
 
 return {

@@ -1,5 +1,5 @@
 -- completions
---
+
 local function has_words_before()
   local col = vim.api.nvim_win_get_cursor(0)[2]
   if col == 0 then
@@ -40,7 +40,7 @@ return {
     -- C-k: Toggle signature help (if signature.enabled = true)
     --
     -- See :h blink-cmp-config-keymap for defining your own keymap
-    --
+
     keymap = {
       preset = 'default' ,
 

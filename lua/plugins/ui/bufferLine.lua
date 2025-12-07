@@ -1,7 +1,6 @@
 -- buffer tabs
 
 local util = require('util')
-local icons = require('icons')
 
 local function newTab() 
   local nTabs = #vim.api.nvim_list_tabpages()

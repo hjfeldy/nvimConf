@@ -93,7 +93,7 @@ vim.api.nvim_create_autocmd('WinClosed', {
 vim.api.nvim_create_autocmd('User', {
   pattern = {'FugitiveEditor', 'FugitiveIndex', 'FugitivePager'},
   callback = function(ev)
-    print('Caught fugitive event:\n' .. vim.inspect(ev))
+    util.debug('Caught fugitive event:\n' .. vim.inspect(ev))
     local firstWindowId = terms.firstWindowId()
     local tab = vim.api.nvim_get_current_tabpage()
     if firstWindowId ~= nil then

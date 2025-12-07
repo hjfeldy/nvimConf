@@ -4,9 +4,8 @@ return {
   opts = function()
     local metals_config = require("metals").bare_config()
     metals_config.on_attach = function(client, bufnr)
-      -- your on_attach function
+      -- on_attach logic here
     end
-
     return metals_config
   end,
   config = function(self, metals_config)

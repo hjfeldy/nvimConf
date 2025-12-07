@@ -26,5 +26,7 @@ return {
     {'<C-U>', function() require('lualineConfig').incrementLevel() end, desc = 'Increment Lualine Display Verbosity Level'},
     {'<C-D>', function() require('lualineConfig').decrementLevel() end, desc = 'Decrement Lualine Display Verbosity Level'},
   },
+
+  -- Dynamic multi-mode config generator
   opts = require('lualineConfig').getConfig
 }

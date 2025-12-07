@@ -15,8 +15,6 @@ function M.extendArgs(args)
   -- local picker = actionState.get_current_picker(
   local entry = actionState.get_selected_entry()
   if entry then
-    -- print('Found entry: ' .. vim.inspect(entry))
-
     local mode = vim.fn.mode() == 'n' and 'normal' or 'insert'
     args.initial_mode = mode
     local currentText = actionState.get_current_line()

@@ -16,7 +16,7 @@ return {
       char = { enabled = false }
     }
   },
-  -- stylua: ignore
+
   keys = {
     {"<leader>s", "", desc="+Flash Search"},
     { 

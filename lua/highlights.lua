@@ -2,8 +2,6 @@
 
 local util = require('util')
 
-local COLORSCHEME_PLUGIN = 'NeoSolarized.nvim'
-
 --- LSP highlight groups to copy to Blink highlight groups  
 --- This allows us to align the Blink completion colors with the colorscheme
 local lspKinds = {
@@ -126,13 +124,13 @@ end
 function M.toggleColor() 
   M.DARK = not M.DARK
   local tf
-  print('Dark: ' .. tostring(M.DARK))
-  M.setColors(COLORSCHEME_PLUGIN)
+  -- print('Dark: ' .. tostring(M.DARK))
+  -- M.setColors(COLORSCHEME_PLUGIN)
   -- if M.DARK then tf = 'true' else tf = 'false' end
   -- if M.DARK then return 'dark' else return 'light' end
 end
 
 
--- M.toggleColor()
+-- M.setColors()
 
 return M

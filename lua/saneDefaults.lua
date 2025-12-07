@@ -26,9 +26,6 @@ map(
   "n",
   "<leader>gr",
   "<cmd>Trouble lsp_references focus=true<CR>",
-  --[[ function()
-    vim.cmd("Trouble references focus=true")
-  end, ]]
   {desc="References"}
 )
 
@@ -63,6 +60,7 @@ map(
 
 
 -- Window jumping/resizing
+
 map("n", "-", "<cmd>resize -1<cr>")
 map("n", "+", "<cmd>resize +1<cr>")
 map("n", "<C-s>", "<cmd>vertical resize -1<cr>")
@@ -78,7 +76,9 @@ map("t", "<C-h>", "<C-\\><C-n><C-w>h")
 map("t", "<C-l>", "<C-\\><C-n><C-w>l")
 map("n", "<leader>v", "<cmd>vsplit<CR><C-w>l", {desc="Vertical Split"})
 
+
 -- Sane text-editing defaults
+
 map({"n", "x"}, "J", "}", {desc="Jump Down"})
 map({"n", "x"}, "K", "{", {desc="Jump Up"})
 map("n", "<leader>j", "<cmd>cnext<CR>", {desc="Qfix next"})
@@ -92,9 +92,13 @@ map(
   "<C-p>",
   function() 
     require('highlights').toggleColor()
+    vim.cmd('Lazy reload NeoSolarized.nvim')
     require('lualine').refresh()
   end
 )
+
+
+-- Native vim options
 
 vim.o.shiftwidth=2
 vim.o.tabstop=2

@@ -1,4 +1,4 @@
-local util = require('util')
+-- Terminal-Window / editor enhancements
 
 return {
   {

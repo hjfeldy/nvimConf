@@ -14,5 +14,6 @@ return {
         transparent=hl.DARK,
       })
       vim.cmd [[ colorscheme NeoSolarized ]]
+      hl.setColors()
     end
 }
