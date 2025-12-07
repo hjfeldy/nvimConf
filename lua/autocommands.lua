@@ -47,6 +47,14 @@ vim.api.nvim_create_autocmd("VimEnter", {
       ENTERED_CWD = cwd
       resession.load(cwd, { silence_errors = true })
     end
+
+    if #vim.api.nvim_list_tabpages() > 1 then return end
+    -- only 1 tab open
+
+    if vim.t[0].name == nil then
+      vim.api.nvim_tabpage_set_var(0, 'name', 'Tab 1')
+    end
+
   end,
   nested = true,
 })
