@@ -14,15 +14,12 @@ return {
       typescript = { "prettier" },
       json = {'formatJson'},
     },
-    -- formatters = {
-    --   -- black = {
-    --   --   command = "py -m black"
-    --   -- },
-    --   formatJson = {
-    --     command = 'py',
-    --     args = {'-m', 'json.tool', '--indent', '2'},
-    --     cwd = vim.uv.cwd
-    --   }
-    -- }
+    formatters = {
+      formatJson = {
+        command = 'python3',
+        args = {'-m', 'json.tool', '--indent', '2'},
+        cwd = vim.uv.cwd
+      }
+    }
   }
 }
