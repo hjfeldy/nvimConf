@@ -1,8 +1,23 @@
+--- @require('trouble')
+
 -- diagnostics
 return {
   "folke/trouble.nvim",
   lazy=false,
-  opts = {}, -- for default options, refer to the configuration section for custom setup.
+
+  --- @type trouble.Config
+  opts = {
+    focus=true,
+    follow = true,
+    auto_preview = true,
+    preview = {
+      type = 'float',
+      relative = 'editor',
+      border = 'rounded',
+      title = 'Preview',
+      title_pos = 'center'
+    }
+  },
   cmd = "Trouble",
   keys = {
     {
