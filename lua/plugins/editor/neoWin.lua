@@ -1,5 +1,16 @@
 -- Terminal-Window / editor enhancements
 
+--- Return a wrapped function which calls lualine.refresh() after its execution
+local function lualineWrapped(innerFunc)
+  local wrapped = function(...) 
+    local out = innerFunc(...)
+    require('lualine').refresh()
+    return out
+  end
+  return wrapped
+end
+
+
 return {
   {
     -- "hjfeldy/neoWin",
@@ -9,11 +20,32 @@ return {
     keys = {
 
       -- Directory navigation commands
+      -- Wrap these in lualine.refresh() calls, because we display current-directory info with lualine
+      -- If we wait for the periodic lualine refresh, there is a noticeable delay
       {"<leader>c", "", desc="+CD"},
-      {"<leader>cc", function() require('neoWin.smartCD').smartCD(false) end, mode="n", desc="Change Directory to Current Buffer's"},
-      {"<leader>cl", function() require('neoWin.smartCD').smartCD(true) end, mode="n", desc="Change Local-Window Directory to Current Buffer's"},
-      {"<leader>co", function() require('neoWin.smartCD').jumpBack() end, mode="n", desc="Change to Previous Directory"},
-      {"<leader>ci", function() require('neoWin.smartCD').jumpForwards() end, mode="n", desc="Change to Next Directory"},
+      {
+        "<leader>cc",
+        lualineWrapped(function() require('neoWin.smartCD').smartCD(false) end),
+        mode="n",
+        desc="Change Directory to Current Buffer's"
+      },
+      {
+        "<leader>cl",
+        lualineWrapped(function() require('neoWin.smartCD').smartCD(true) end),
+        mode="n",
+        desc="Change Local-Window Directory to Current Buffer's"
+      },
+      {
+        "<leader>co", lualineWrapped(function() require('neoWin.smartCD').jumpBack() end),
+        mode="n",
+        desc="Change to Previous Directory"
+      },
+      {
+        "<leader>ci",
+        lualineWrapped(function() require('neoWin.smartCD').jumpForwards() end),
+        mode="n",
+        desc="Change to Next Directory"
+      },
 
       -- Terminal commands
       {"<leader>t", "", mode="n", desc="+Terminals"},
@@ -30,6 +62,7 @@ return {
       {"qW", function() require('neoWin.smartDelete').smartCloseWin(true) end, mode="n", desc="Force-Close Window"},
       {"qq", function() require('neoWin.smartDelete').smartDelete() end, mode="n", desc="Quit Buffer"},
       {"qf", function() require('neoWin.smartDelete').smartDelete(true) end, mode="n", desc="Force-Quit Buffer"},
+      {"qr", function() require('neoWin.smartDelete').resetLastBufs() end, mode='n', desc='Force-Reset Buffer History'},
       
       {
         "<C-p>",
