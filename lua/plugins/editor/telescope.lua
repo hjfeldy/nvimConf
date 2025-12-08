@@ -181,8 +181,8 @@ return {
           buffers = {
             mappings = {
               n = {
-                [ "D" ] = function(prompt_bufnr) customActions.deleteBufferSelection(prompt_bufnr, true) end,
-                [ "d" ] = function(prompt_bufnr) customActions.deleteBufferSelection(prompt_bufnr, false) end
+                [ "D" ] = function(prompt_bufnr) customActions.deleteSelectedBuffers(prompt_bufnr, true) end,
+                [ "d" ] = function(prompt_bufnr) customActions.deleteSelectedBuffers(prompt_bufnr, false) end
               }
             }
           },

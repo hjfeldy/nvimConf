@@ -1,5 +1,6 @@
 local actionState = require("telescope.actions.state")
 local actions = require("telescope.actions")
+local actionUtils = require("telescope.actions.utils")
 
 local telescopeUtil = require('helpers.telescope.utils')
 local telescopeConf = require('helpers.telescope.config')
@@ -13,12 +14,34 @@ function M.debugEntry(prompt_bufnr)
   print('Entry: ' .. vim.inspect(entry))
 end
 
-function M.deleteBufferSelection(prompt_bufnr, force) 
-  local entry = actionState.get_selected_entry()
+function M.deleteBufferSelection(entry, force) 
+  -- local entry = actionState.get_selected_entry()
+  -- actionState.g
+  local isVisible = false
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if vim.api.nvim_win_get_buf(win) == entry.bufnr then
+      isVisible = true
+    end
+  end
+  if isVisible then
+    local name = vim.api.nvim_buf_get_name(entry.bufnr)
+    name = name and name:match("([^\\/]+)$")
+    return vim.notify('Buffer "' .. (name or 'nil') .. '" is visible!', vim.log.levels.WARN)
+  end
+
   require('neoWin.smartDelete').smartDeleteBuffer(force, entry.bufnr, false)
+  -- customPickers.browseBuffers({}, prompt_bufnr)
+end
+
+function M.deleteSelectedBuffers(prompt_bufnr, force)
+  local selected = {}
+  actionUtils.map_selections(prompt_bufnr, function(entry) selected[#selected+1] = entry end)
+  if #selected > 1 then
+    actionUtils.map_selections(prompt_bufnr, function(entry) return M.deleteBufferSelection(entry, force) end)
+  else
+    M.deleteBufferSelection(actionState.get_selected_entry(), force)
+  end
   customPickers.browseBuffers({}, prompt_bufnr)
-  -- vim.api.nvim_buf_delete(entry.bufnr, {force=force})
-  -- vim.api.nvim_buf_delete(entry.bufnr, {force=force})
 end
 
 --- Wrap a telescope function (ie findFiles or liveGrep) 
