@@ -7,8 +7,12 @@ local terms = require('neoWin.terminals')
 
 -- clear fugitive buffers when their windows are deleted
 api.nvim_create_autocmd('BufReadPost', {
-  pattern = { 'fugitive://*' },
-  callback = function()
+  pattern = {
+    'fugitive://*',
+    'man://*' 
+  },
+  callback = function(ev)
+    print('Caught BufReadPost: ' .. vim.inspect(ev))
     vim.o.bufhidden = 'delete'
   end
 })
