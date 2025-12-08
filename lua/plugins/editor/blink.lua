@@ -1,5 +1,6 @@
 -- completions
 
+
 local function has_words_before()
   local col = vim.api.nvim_win_get_cursor(0)[2]
   if col == 0 then
@@ -14,7 +15,8 @@ return {
   lazy = false,
   -- optional: provides snippets for the snippet source
   dependencies = {
-    'rafamadriz/friendly-snippets' ,
+    -- 'rafamadriz/friendly-snippets',
+    'echasnovski/mini.snippets' ,
     'nvim-tree/nvim-web-devicons'
   },
 
@@ -40,14 +42,36 @@ return {
     -- C-k: Toggle signature help (if signature.enabled = true)
     --
     -- See :h blink-cmp-config-keymap for defining your own keymap
+    signature = { enabled = false },
+
 
     keymap = {
       preset = 'default' ,
 
       ['<Up>'] = false,
       ['<Down>'] = false,
+      ['<C-K>'] = {
+        function(cmp)
+          if cmp.snippet_active() then
+            return cmp.snippet_backward()
+          end
+        end,
+        'fallback'
+      },
+      ['<C-J>'] = {
+        function(cmp)
+          if cmp.snippet_active() then
+            return cmp.snippet_forward()
+          end
+        end,
+        'fallback'
+      },
       ['<CR>'] = {
         function(cmp)
+          if cmp.snippet_active() then
+            return cmp.snippet_forward()
+          end
+
           if cmp.is_menu_visible() and cmp.get_selected_item() then
             return cmp.select_and_accept() 
           end
@@ -56,6 +80,8 @@ return {
       },
       ['<tab>'] = {
         function(cmp)
+          -- if cmp.snippet_active() then
+          --   return cmp.snippet_forward()
           if cmp.is_menu_visible() then
             return cmp.select_next()
           elseif has_words_before() then
@@ -64,7 +90,17 @@ return {
         end,
         'fallback' 
       },
-      ['<s-tab>'] = { 'select_prev', 'fallback' },
+      ['<s-tab>'] = {
+        'select_prev',
+        -- function(cmp)
+        --   if cmp.snippet_active() then
+        --     return cmp.snippet_backward()
+        --   end
+        --
+        --   return cmp.select_prev()
+        -- end,
+        'fallback' 
+      },
     },
 
     cmdline = {
@@ -87,7 +123,7 @@ return {
 
     completion = {
       documentation = { auto_show = true } ,
-      list = { selection = { preselect = false, } },
+      list = { selection = { preselect = false } },
       menu = {
         -- border = 'rounded' ,
         draw = {
@@ -101,11 +137,18 @@ return {
       },
     },
 
+    snippets = {
+      -- preset = 'mini_snippets'
+    },
     -- Default list of enabled providers defined so that you can extend it
     -- elsewhere in your config, without redefining it, due to `opts_extend`
     sources = {
       default = { 'lazydev', 'lsp', 'path', 'snippets', 'buffer' },
       providers = {
+        snippets = {
+
+        },
+
         lazydev = {
           name = "LazyDev",
           module = "lazydev.integrations.blink",
@@ -123,5 +166,7 @@ return {
     fuzzy = { implementation = "prefer_rust_with_warning" }
   },
 
-  opts_extend = { "sources.default" }
+  opts_extend = { "sources.default" },
+
 }
+
