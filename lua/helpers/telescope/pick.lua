@@ -12,15 +12,16 @@ local M = {}
 --- extend the telescope prompt args with the current text and input-mode
 --- @param args table
 function M.extendArgs(args)
-  -- local picker = actionState.get_current_picker(
+  local mode = vim.fn.mode() == 'n' and 'normal' or 'insert'
+  args.initial_mode = mode
+  local currentText = actionState.get_current_line()
+  args.default_text = currentText
+
   local entry = actionState.get_selected_entry()
   if entry then
-    local mode = vim.fn.mode() == 'n' and 'normal' or 'insert'
-    args.initial_mode = mode
-    local currentText = actionState.get_current_line()
-    args.default_text = currentText
     args.cwd = entry.cwd
   end
+
   return args
 end
 
@@ -122,6 +123,7 @@ end
 function M.fileBrowser(args, prompt_bufnr)
   require('lualine').refresh()
   args = M.getFilebrowseArgs(args, prompt_bufnr)
+  print('Args: ' .. vim.inspect(args))
   require("telescope").extensions.file_browser.file_browser(args)
   telescopeUtil.setLualineMode('telescopeFiles')
 end
