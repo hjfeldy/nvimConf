@@ -9,7 +9,6 @@ function M.getFinder(results)
   return finders.new_table {
     results = sessions,
     entry_maker = function(entry)
-      print('Making entry: ' .. vim.inspect(entry))
       return {
         value=entry,
         display=entry,

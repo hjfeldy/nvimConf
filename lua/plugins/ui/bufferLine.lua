@@ -37,7 +37,6 @@ return {
       "<C-a>m",
       function()
         local tabIndex = vim.api.nvim_tabpage_get_number(0)
-        print('Tab Index: ' .. tabIndex)
         if tabIndex == #vim.api.nvim_list_tabpages() then
           vim.cmd('tabmove 0')
         else

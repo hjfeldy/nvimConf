@@ -22,16 +22,13 @@ function M.extendArgs(args, prompt_bufnr)
 
   util.debug('PICKER: ' .. vim.inspect(picker))
   if picker ~= nil then
-    print('Setting CWD')
     args.cwd = picker.cwd
   end
 
   -- prefer entry's cwd if it exits
   if entry then
-    print('Entry: ' .. vim.inspect(entry))
     args.cwd = entry.cwd
   end
-  print('Augmented Args: ' .. vim.inspect(args))
 
   return args
 end
