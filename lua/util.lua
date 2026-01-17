@@ -113,6 +113,9 @@ function M.shortenPath(path, maxComponents)
   path = path:gsub(home, '~')
 
   local pathSep = package.config:sub(1,1)
+  if vim.o.shellslash then
+    pathSep = '/'
+  end
   local components = M.split(path, pathSep)
   if maxComponents > 0 and maxComponents < #components then
     local lastComponents = {}
