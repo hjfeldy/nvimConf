@@ -37,13 +37,24 @@ return {
         desc="Change Local-Window Directory to Current Buffer's"
       },
       {
-        "<leader>co", lualineWrapped(function() require('neoWin.smartCD').jumpBack() end),
+        "<leader>cO", lualineWrapped(function() require('neoWin.smartCD').jumpBack(false) end),
         mode="n",
-        desc="Change to Previous Directory"
+        desc="Change Local-Window to Previous Directory"
+      },
+      {
+        "<leader>co", lualineWrapped(function() require('neoWin.smartCD').jumpBack(true) end),
+        mode="n",
+        desc="Change Local-Window to Previous Directory"
+      },
+      {
+        "<leader>cI",
+        lualineWrapped(function() require('neoWin.smartCD').jumpForwards(false) end),
+        mode="n",
+        desc="Change to Next Directory"
       },
       {
         "<leader>ci",
-        lualineWrapped(function() require('neoWin.smartCD').jumpForwards() end),
+        lualineWrapped(function() require('neoWin.smartCD').jumpForwards(true) end),
         mode="n",
         desc="Change to Next Directory"
       },
