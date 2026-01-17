@@ -18,6 +18,12 @@ function M.unsetLualineMode(mode)
   if isOn then lualineConf.setMode('normal') end
 end
 
+--- Toggle the Telescope preview window's wrap-text option
+--- (propagate to global LSP toggleable configuration)
+function M.toggleWrap()
+  telescopeConf.WRAP_TEXT = not telescopeConf.WRAP_TEXT
+end
+
 --- Toggle the WARNING/HINT level filter for diagnostics
 --- (propagate to global LSP toggleable configuration)
 function M.toggleHints()

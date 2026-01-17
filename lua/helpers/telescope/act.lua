@@ -11,7 +11,7 @@ local M = {}
 
 function M.debugEntry(prompt_bufnr)
   local entry = actionState.get_selected_entry()
-  print('Entry: ' .. vim.inspect(entry))
+  util.debug('Entry: ' .. vim.inspect(entry))
 end
 
 function M.deleteBufferSelection(entry, force) 
@@ -49,7 +49,8 @@ end
 --- These wrapped functions can be called while a telescope prompt is already open,
 --- reopening a new telescope inplace which uses the newly toggled configuration value
 local function wrapWithToggle(finderFunc, togglerFunc)
-  local wrapped = function(prompt_bufnr)
+  local wrapped = function(args, prompt_bufnr)
+    util.debug('Calling toggle-wrapped func with prompt_bufnr ' .. (prompt_bufnr or 'nil') )
     togglerFunc()
     return finderFunc({}, prompt_bufnr)
   end
@@ -92,6 +93,7 @@ end
 
 --- Jump to the user's home directory in the current file-browser prompt
 function M.fileBrowserGotoHome(args, prompt_bufnr)
+  util.debug('GOING HOME (prompt ' .. (prompt_bufnr or 'nil') .. ')')
   args = customPickers.getFilebrowseArgs(args, prompt_bufnr)
   args.cwd = os.getenv('HOME')
   require("telescope").extensions.file_browser.file_browser(args)

@@ -1,4 +1,4 @@
-local util = require('util')
+local telescopeConf = require('helpers.telescope.config')
 
 local function defaultArgs(func)
   local function wrapped(prompt_bufnr)
@@ -109,6 +109,7 @@ return {
     },
     opts = function()
       local actions = require("telescope.actions")
+      local actionUtils = require("telescope.actions.utils")
       local actionState = require("telescope.actions.state")
       local customActions = require('helpers.telescope.act')
       local fileBrowserActions = require("telescope").extensions.file_browser.actions
@@ -149,6 +150,7 @@ return {
         },
 
         defaults = {
+          -- wrap_results = telescopeConf.WRAP_TEXT,
           -- dynamic_preview_title = true,
           -- results_title = util.renderHome,
           color_devicons=true,
@@ -159,6 +161,14 @@ return {
               ["<C-h>"] = customActions.findFilesToggleHidden,
               ["<C-g>"] = customActions.findFilesToggleIgnore,
               ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
+              ["<C-o>"] = function(prompt_bufnr) 
+                actionUtils.map_selections(prompt_bufnr, function(entry)
+                  actions.close(prompt_bufnr)
+                  local filename = entry[1]
+                  vim.cmd('edit ' .. filename)
+                end)
+
+              end,
               ["<C-t>"] = customActions.telescopeTrouble,
               ["<C-c>"] = actions.close,
               ["<C-j>"] = actions.preview_scrolling_down,

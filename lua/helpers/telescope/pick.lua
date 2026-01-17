@@ -11,16 +11,22 @@ local M = {}
 --- If there is an existing telescope prompt,
 --- extend the telescope prompt args with the current text and input-mode
 --- @param args table
-function M.extendArgs(args)
+--- @param prompt_bufnr integer prompt buffer
+function M.extendArgs(args, prompt_bufnr)
   local mode = vim.fn.mode() == 'n' and 'normal' or 'insert'
   args.initial_mode = mode
   local currentText = actionState.get_current_line()
   args.default_text = currentText
-
-  local entry = actionState.get_selected_entry()
-  if entry then
-    args.cwd = entry.cwd
+  local picker = actionState.get_current_picker(prompt_bufnr)
+  util.debug('PICKER: ' .. vim.inspect(picker))
+  if picker ~= nil then
+    args.cwd = picker.cwd
   end
+
+  -- local entry = actionState.get_selected_entry()
+  -- if entry then
+  --   args.cwd = entry.cwd
+  -- end
 
   return args
 end
@@ -41,7 +47,7 @@ function M.getFileArgs(args, prefix, prompt_bufnr)
   end
 
   args.prompt_title = prefix .. ' (' .. util.renderHome() .. ')'
-  return prompt_bufnr ~= nil and M.extendArgs(args) or args
+  return prompt_bufnr ~= nil and M.extendArgs(args, prompt_bufnr) or args
 end
 
 
@@ -52,8 +58,9 @@ function M.getFilebrowseArgs(args, prompt_bufnr)
   args = M.getFileArgs(args, 'File Browser', prompt_bufnr)
   args.depth = telescopeConf.FILE_DEPTH
   args.prompt_title = 'File Browser (' .. util.renderHome() .. ')'
+  util.debug('FILEBROWSER ARGS FOR PROMPT ' .. (vim.inspect(prompt_bufnr) or 'nil') .. ': ' .. vim.inspect(args))
 
-  return prompt_bufnr ~= nil and M.extendArgs(args) or args
+  return prompt_bufnr ~= nil and M.extendArgs(args, prompt_bufnr) or args
 end
 
 
@@ -72,7 +79,7 @@ function M.getLiveGrepArgs(args, prompt_bufnr)
   end
   args.additional_args = additional_args
   args.prompt_title = 'Live Grep (' .. util.renderHome() .. ')'
-  return prompt_bufnr ~= nil and M.extendArgs(args) or args
+  return prompt_bufnr ~= nil and M.extendArgs(args, prompt_bufnr) or args
 end
 
 
@@ -96,7 +103,7 @@ function M.getDiagnosticsArgs(args, prompt_bufnr)
     args.bufnr = 0
   end
 
-  return prompt_bufnr ~= nil and M.extendArgs(args) or args
+  return prompt_bufnr ~= nil and M.extendArgs(args, prompt_bufnr) or args
 end
 
 
@@ -123,7 +130,7 @@ end
 function M.fileBrowser(args, prompt_bufnr)
   require('lualine').refresh()
   args = M.getFilebrowseArgs(args, prompt_bufnr)
-  print('Args: ' .. vim.inspect(args))
+  util.debug('Args: ' .. vim.inspect(args))
   require("telescope").extensions.file_browser.file_browser(args)
   telescopeUtil.setLualineMode('telescopeFiles')
 end

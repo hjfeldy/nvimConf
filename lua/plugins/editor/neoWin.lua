@@ -1,4 +1,5 @@
 -- Terminal-Window / editor enhancements
+local COLORSCHEME_PLUGIN = 'NeoSolarized.nvim'
 
 --- Return a wrapped function which calls lualine.refresh() after its execution
 local function lualineWrapped(innerFunc)
@@ -13,8 +14,8 @@ end
 
 return {
   {
-    -- "hjfeldy/neoWin",
-    dir="/home/harry/Repos/neowin",
+    "hjfeldy/neoWin",
+    -- dir="/home/harry/Repos/neowin",
     branch="feature/work",
     -- lazy=false,
     keys = {
@@ -52,7 +53,7 @@ return {
       {"<leader>tt", function() require('neoWin.terminals').newTerm() end, mode="n", desc="New Terminal"},
       {"<leader>tT", function() require('neoWin.customPicker').termPick() end, mode="n", desc="Telescope Terminal Picker"},
       {"<leader>tn", function() require('neoWin.terminals').nextTerm() end, mode="n", desc="Next Terminal"},
-      {"<leader>tp", function() require('neowin.terminals').prevTerm() end, mode="n", desc="Previous Terminal"},
+      {"<leader>tp", function() require('neoWin.terminals').prevTerm() end, mode="n", desc="Previous Terminal"},
       {"<leader>tr", function() require('neoWin.Terminals').renameTerm() end, mode="n", desc="Rename Terminal"},
       {"<C-t>", function() require('neoWin.terminals').toggle() end, mode={"n", "t"}, desc="Toggle Terminal(s)"},
 
@@ -69,6 +70,7 @@ return {
         function() 
           require('highlights').toggleColor()
           require('lualine').refresh()
+          vim.cmd('Lazy reload ' .. COLORSCHEME_PLUGIN)
         end,
         mode="n" 
       }

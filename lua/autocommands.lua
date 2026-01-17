@@ -12,7 +12,7 @@ api.nvim_create_autocmd('BufReadPost', {
     'man://*' 
   },
   callback = function(ev)
-    print('Caught BufReadPost: ' .. vim.inspect(ev))
+    util.debug('Caught BufReadPost: ' .. vim.inspect(ev))
     vim.o.bufhidden = 'delete'
   end
 })
@@ -133,3 +133,13 @@ vim.api.nvim_create_autocmd('WinLeave', {
     end
   end
 })
+
+-- vim.api.nvim_create_autocmd("User", {
+--   -- not documented, but this does work...
+--   -- we can't toggle text-wrapping while the telescope picker is open though.
+--   -- we need to do the toggling *as* the previewer is opened.
+--   pattern = "TelescopePreviewerLoaded",
+--   callback = function(ev)
+--     vim.wo.wrap = require('helpers.telescope.config').WRAP_TEXT
+--   end,
+-- })

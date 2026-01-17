@@ -14,4 +14,6 @@ M.LOCAL_DIAGNOSTICS = nil
 --- File-browser depth (incrementable/decrementable)
 M.FILE_DEPTH = 1
 
+M.WRAP_TEXT = false
+
 return M

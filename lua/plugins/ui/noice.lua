@@ -31,6 +31,7 @@ return {
           filter = {
             event = "msg_show",
             any = {
+              -- "N lines yanked" messages appear as notifications
               { find = "%d+L, %d+B" },
               { find = "; after #%d+" },
               { find = "; before #%d+" },

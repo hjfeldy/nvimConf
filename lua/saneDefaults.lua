@@ -110,11 +110,17 @@ vim.o.ignorecase=true
 
 vim.o.clipboard='unnamedplus'
 -- vim.g.clipboard='xclip'
+--
+local isWindows = package.config:sub(1,1) == '\\'
+if isWindows then
+  vim.o.shellslash = true
+end
 
 vim.o.number=true
 vim.o.relativenumber=true
 
 vim.o.winborder='rounded'
+vim.o.equalalways=false
 
 vim.o.undodir='/home/harry/.local/state/nvim/undo'
 vim.o.undofile=true
