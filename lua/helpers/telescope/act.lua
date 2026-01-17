@@ -49,8 +49,9 @@ end
 --- These wrapped functions can be called while a telescope prompt is already open,
 --- reopening a new telescope inplace which uses the newly toggled configuration value
 local function wrapWithToggle(finderFunc, togglerFunc)
-  local wrapped = function(args, prompt_bufnr)
-    util.debug('Calling toggle-wrapped func with prompt_bufnr ' .. (prompt_bufnr or 'nil') )
+  local wrapped = function(prompt_bufnr)
+    -- print('Calling toggle-wrapped func with prompt_bufnr ' .. (prompt_bufnr or 'nil') )
+    -- print('Args: ' .. vim.inspect(args))
     togglerFunc()
     return finderFunc({}, prompt_bufnr)
   end
@@ -68,46 +69,46 @@ M.diagnosticsToggleHints = wrapWithToggle(customPickers.diagnostics, telescopeUt
 
 
 --- Increase/Decrease the file-depth for the current file-browser prompt
-function M.fileBrowserChangeDepth(args, prompt_bufnr, plus)
+function M.fileBrowserChangeDepth(prompt_bufnr, plus)
   telescopeConf.FILE_DEPTH = telescopeConf.FILE_DEPTH + (plus and 1 or -1)
   if telescopeConf.FILE_DEPTH < 1 then
     telescopeConf.FILE_DEPTH = 1
   end
-  args = customPickers.getFilebrowseArgs(args, prompt_bufnr)
+  local args = customPickers.getFilebrowseArgs({}, prompt_bufnr)
   require("telescope").extensions.file_browser.file_browser(args)
   telescopeUtil.setLualineMode('telescopeFiles')
 end
 
 
 --- Increase the file-depth for the current file-browser prompt
-function M.fileBrowserIncrementDepth(args, prompt_bufnr)
-  return M.fileBrowserChangeDepth(args, prompt_bufnr, true)
+function M.fileBrowserIncrementDepth(prompt_bufnr)
+  return M.fileBrowserChangeDepth(prompt_bufnr, true)
 end
 
 
 --- Decrease the file-depth for the current file-browser prompt
-function M.fileBrowserDecrementDepth(args, prompt_bufnr)
-  return M.fileBrowserChangeDepth(args, prompt_bufnr, false)
+function M.fileBrowserDecrementDepth(prompt_bufnr)
+  return M.fileBrowserChangeDepth(prompt_bufnr, false)
 end
 
 
 --- Jump to the user's home directory in the current file-browser prompt
-function M.fileBrowserGotoHome(args, prompt_bufnr)
+function M.fileBrowserGotoHome(prompt_bufnr)
   util.debug('GOING HOME (prompt ' .. (prompt_bufnr or 'nil') .. ')')
-  args = customPickers.getFilebrowseArgs(args, prompt_bufnr)
+  local args = customPickers.getFilebrowseArgs({}, prompt_bufnr)
   args.cwd = os.getenv('HOME')
   require("telescope").extensions.file_browser.file_browser(args)
   telescopeUtil.setLualineMode('telescopeFiles')
 end
 
-function M.fileBrowserGotoVimHome(args, prompt_bufnr)
-  args = customPickers.getFilebrowseArgs(args, prompt_bufnr)
+function M.fileBrowserGotoVimHome(prompt_bufnr)
+  local args = customPickers.getFilebrowseArgs({}, prompt_bufnr)
   args.cwd = vim.cmd('pwd')
   require("telescope").extensions.file_browser.file_browser(args)
   telescopeUtil.setLualineMode('telescopeFiles')
 end
 
-function M.fileBrowserTabCD(args, prompt_bufnr)
+function M.fileBrowserTabCD(prompt_bufnr)
   local cwd = actionState.get_selected_entry().value
   vim.cmd('tcd ' .. cwd)
   vim.api.nvim_tabpage_set_var(0, 'name', vim.fs.basename(cwd))

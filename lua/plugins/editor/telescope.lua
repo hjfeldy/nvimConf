@@ -1,12 +1,5 @@
 local telescopeConf = require('helpers.telescope.config')
 
-local function defaultArgs(func)
-  local function wrapped(prompt_bufnr)
-    return func({}, prompt_bufnr)
-  end
-  return wrapped
-end
-
 return {
   {
     'nvim-telescope/telescope.nvim', tag = '0.1.8',
@@ -121,22 +114,22 @@ return {
             grouped = true,
             mappings = {
               n = {
-                ["c"] = defaultArgs(customActions.fileBrowserTabCD),
+                ["c"] = customActions.fileBrowserTabCD,
                 ["C"] = fileBrowserActions.goto_cwd,
-                ["H"] = defaultArgs(customActions.fileBrowserGotoHome),
-                ["h"] = defaultArgs(customActions.fileBrowserGotoVimHome),
+                ["H"] = customActions.fileBrowserGotoHome,
+                ["h"] = customActions.fileBrowserGotoVimHome,
                 ["O"] = function(prompt_bufnr) return customActions.openFileInTab(prompt_bufnr, true) end,
                 ["o"] = function(prompt_bufnr) return customActions.openFileInTab(prompt_bufnr, false) end,
-                ["<C-h>"] = defaultArgs(customActions.fileBrowserToggleHidden),
-                ["<C-g>"] = defaultArgs(customActions.fileBrowserToggleIgnore),
-                ["<C-u>"] = defaultArgs(customActions.fileBrowserIncrementDepth),
-                ["<C-d>"] = defaultArgs(customActions.fileBrowserDecrementDepth),
+                ["<C-h>"] = customActions.fileBrowserToggleHidden,
+                ["<C-g>"] = customActions.fileBrowserToggleIgnore,
+                ["<C-u>"] = customActions.fileBrowserIncrementDepth,
+                ["<C-d>"] = customActions.fileBrowserDecrementDepth,
               },
               i = {
-                ["<C-h>"] = defaultArgs(customActions.fileBrowserToggleHidden),
-                ["<C-g>"] = defaultArgs(customActions.fileBrowserToggleIgnore),
-                ["<C-u>"] = defaultArgs(customActions.fileBrowserIncrementDepth),
-                ["<C-d>"] = defaultArgs(customActions.fileBrowserDecrementDepth),
+                ["<C-h>"] = customActions.fileBrowserToggleHidden,
+                ["<C-g>"] = customActions.fileBrowserToggleIgnore,
+                ["<C-u>"] = customActions.fileBrowserIncrementDepth,
+                ["<C-d>"] = customActions.fileBrowserDecrementDepth,
               }
             }
           },
@@ -176,6 +169,7 @@ return {
             },
             n = {
               ["<C-c>"] = actions.close,
+              ["<C-h>"] = customActions.findFilesToggleHidden,
               ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
               ["<C-t>"] = customActions.telescopeTrouble,
               ["<leader>q"] = actions.send_to_qflist + actions.open_qflist,
@@ -220,12 +214,12 @@ return {
           live_grep = {
             mappings = {
               n = {
-                ["<C-h>"] = defaultArgs(customActions.liveGrepToggleHidden),
-                ["<C-g>"] = defaultArgs(customActions.liveGrepToggleIgnore),
+                ["<C-h>"] = customActions.liveGrepToggleHidden,
+                ["<C-g>"] = customActions.liveGrepToggleIgnore,
               },
               i = {
-                ["<C-h>"] = defaultArgs(customActions.liveGrepToggleHidden),
-                ["<C-g>"] = defaultArgs(customActions.liveGrepToggleIgnore),
+                ["<C-h>"] = customActions.liveGrepToggleHidden,
+                ["<C-g>"] = customActions.liveGrepToggleIgnore,
               }
             }
           }

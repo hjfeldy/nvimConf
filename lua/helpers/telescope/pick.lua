@@ -18,15 +18,20 @@ function M.extendArgs(args, prompt_bufnr)
   local currentText = actionState.get_current_line()
   args.default_text = currentText
   local picker = actionState.get_current_picker(prompt_bufnr)
+  local entry = actionState.get_selected_entry()
+
   util.debug('PICKER: ' .. vim.inspect(picker))
   if picker ~= nil then
+    print('Setting CWD')
     args.cwd = picker.cwd
   end
 
-  -- local entry = actionState.get_selected_entry()
-  -- if entry then
-  --   args.cwd = entry.cwd
-  -- end
+  -- prefer entry's cwd if it exits
+  if entry then
+    print('Entry: ' .. vim.inspect(entry))
+    args.cwd = entry.cwd
+  end
+  print('Augmented Args: ' .. vim.inspect(args))
 
   return args
 end
