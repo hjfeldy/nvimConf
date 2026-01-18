@@ -118,6 +118,9 @@ function M.setColors(pluginName)
     local fullCmpKind = 'BlinkCmpKind' .. util.capitalize(cmpKind)
     M.copyHL(fullLspKind, fullCmpKind)
   end
+
+  local hlColor = M.DARK and '#091E2B' or '#FCFFE8'
+  setHL(0, 'Terminal', {bg=hlColor})
 end
 
 --- Toggle the colorscheme configuration and refresh the colorscheme

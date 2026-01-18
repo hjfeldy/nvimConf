@@ -3,6 +3,7 @@ local helpers = require('helpers.resession')
 return {
   "stevearc/resession.nvim",
   dependencies = {"hjfeldy/neoWin"},
+  -- dependencies = {"/home/harry/Repos/neowin"},
   -- lazy=false,
   keys = {
     {
