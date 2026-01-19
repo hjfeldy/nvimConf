@@ -2,6 +2,15 @@ local util = require('util')
 
 local M = {}
 
+function getLogger()
+  if M.LOGGER ~= nil then
+    return M.LOGGER
+  end
+  local logger = require('neoWin.logger'):new('vimConf.helpers.lsp')
+  M.LOGGER = logger
+  return logger
+end
+
 
 M.WARNING_FILTER = true
 
@@ -39,6 +48,7 @@ M.toggleHints(M.WARNING_FILTER)
 --- but sometimes there are multiple results all on the same line...
 --- In tohse cases we want to just jump to the first
 function M.listHandler(lspResults)
+  local logger = M.LOGGER:withAttrs({logMethod="listHandler"});
 
   -- Some LSPs will give multiple results which are all from the same line
   -- ie. "some.member = function() ..." will match on "member" and "function" 
@@ -61,10 +71,10 @@ function M.listHandler(lspResults)
   end
 
   if allSame and #lspResults.items > 1 then
-    util.debug(#lspResults.items .. ' definitions found, but all are on the same line')
+    logger:debug(#lspResults.items .. ' definitions found, but all are on the same line')
   end
 
-  util.debug('Lsp multi-results: ' .. vim.inspect(lspResults))
+  logger:debug('Lsp multi-results: ' .. vim.inspect(lspResults))
   vim.cmd("normal! m`")
 
   if allSame or #lspResults.items == 1 then
@@ -72,7 +82,7 @@ function M.listHandler(lspResults)
     -- vim.api.nvim_win_set_buf(0, lspResults.items[1].bufnr)
     local currFile = vim.api.nvim_buf_get_name(0)
     local firstResult = lspResults.items[1]
-    util.debug("Current file: " .. currFile .. "\nResult File: " .. firstResult.filename:lower())
+    logger:debug("Current file: " .. currFile .. "\nResult File: " .. firstResult.filename:lower())
     if currFile:lower() ~= firstResult.filename:lower() then
       vim.cmd('keepjumps edit ' .. firstResult.filename)
     end

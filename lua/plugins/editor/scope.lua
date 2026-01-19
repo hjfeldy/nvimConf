@@ -2,5 +2,6 @@
 
 return {
   "tiagovla/scope.nvim",
+  -- dir = "/home/harry/Repos/scope.nvim",
   config = true 
 }

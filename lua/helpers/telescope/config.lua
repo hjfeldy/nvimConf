@@ -16,4 +16,6 @@ M.FILE_DEPTH = 1
 
 M.WRAP_TEXT = false
 
+M.SHOW_ALL_BUFFERS = false
+
 return M

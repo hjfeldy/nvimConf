@@ -2,7 +2,10 @@ local telescopeConf = require('helpers.telescope.config')
 
 return {
   {
-    'nvim-telescope/telescope.nvim', tag = '0.1.8',
+    'nvim-telescope/telescope.nvim',
+    tag = '0.1.8',
+    -- dir = '/home/harry/Repos/telescope.nvim',
+    -- branch='feature/unlistedBuffers',
     dependencies = {
       'nvim-lua/plenary.nvim',
       "nvim-tree/nvim-web-devicons",
@@ -59,9 +62,21 @@ return {
       },
       {
         "<leader>fb",
-        function() require('telescope.builtin').buffers() end,
+        function()
+          require('helpers.telescope.pick').browseBuffers({})
+        end,
         mode="n",
-        desc='Buffers'
+        desc='Buffers (visible only)'
+      },
+      {
+        "<leader>fB",
+        function()
+          -- use the scope.nvim extension to view all buffers across all tabs
+          -- sadly we can't define any actions here
+          vim.cmd('Telescope scope buffers')
+        end,
+        mode="n",
+        desc='Buffers (all)'
       },
       {
         "<leader>fh",
@@ -186,7 +201,8 @@ return {
             mappings = {
               n = {
                 [ "D" ] = function(prompt_bufnr) customActions.deleteSelectedBuffers(prompt_bufnr, true) end,
-                [ "d" ] = function(prompt_bufnr) customActions.deleteSelectedBuffers(prompt_bufnr, false) end
+                [ "d" ] = function(prompt_bufnr) customActions.deleteSelectedBuffers(prompt_bufnr, false) end,
+                [ "h" ] = customActions.unlistSelectedBuffers
               }
             }
           },

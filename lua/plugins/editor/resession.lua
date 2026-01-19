@@ -3,7 +3,7 @@ local helpers = require('helpers.resession')
 return {
   "stevearc/resession.nvim",
   dependencies = {"hjfeldy/neoWin"},
-  -- dependencies = {"/home/harry/Repos/neowin"},
+  -- dependencies = {dir="/home/harry/Repos/neowin"},
   -- lazy=false,
   keys = {
     {
@@ -20,6 +20,11 @@ return {
   opts = {
     -- override default filter
     buf_filter = function(bufnr)
+      if not vim.api.nvim_buf_is_loaded(bufnr) then
+        print('Refusing to save unloaded buffer ' .. bufnr .. ' in session')
+        return false;
+      end
+
       local exclude = {
         ['Terminal'] = true,
         ['fugitive'] = true,

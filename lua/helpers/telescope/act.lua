@@ -7,41 +7,37 @@ local telescopeConf = require('helpers.telescope.config')
 local customPickers = require('helpers.telescope.pick')
 local util = require('util')
 
+local LOGGER = require('neoWin.logger'):new('vimConf.helpers.telescope.act')
+
 local M = {}
 
-function M.debugEntry(prompt_bufnr)
-  local entry = actionState.get_selected_entry()
-  util.debug('Entry: ' .. vim.inspect(entry))
-end
 
 function M.deleteBufferSelection(entry, force) 
-  -- local entry = actionState.get_selected_entry()
-  -- actionState.g
-  local isVisible = false
-  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-    if vim.api.nvim_win_get_buf(win) == entry.bufnr then
-      isVisible = true
-    end
-  end
-  if isVisible then
-    local name = vim.api.nvim_buf_get_name(entry.bufnr)
-    name = name and name:match("([^\\/]+)$")
-    return vim.notify('Buffer "' .. (name or 'nil') .. '" is visible!', vim.log.levels.WARN)
-  end
-
-  require('neoWin.smartDelete').smartDeleteBuffer(force, entry.bufnr, false)
-  -- customPickers.browseBuffers({}, prompt_bufnr)
+  print('Deleting entry: ' .. vim.inspect(entry))
+  require('neoWin.smartDelete').smartDeleteBuffer(force, entry.bufnr, true, false)
 end
 
-function M.deleteSelectedBuffers(prompt_bufnr, force)
+function M.unlistBufferSelection(entry)
+  require('neoWin.smartDelete').smartDeleteBuffer(false, entry.bufnr, true, true)
+end
+
+function M.actOnBufferSelection(prompt_bufnr, callback)
   local selected = {}
   actionUtils.map_selections(prompt_bufnr, function(entry) selected[#selected+1] = entry end)
   if #selected > 1 then
-    actionUtils.map_selections(prompt_bufnr, function(entry) return M.deleteBufferSelection(entry, force) end)
+    actionUtils.map_selections(prompt_bufnr, function(entry) return callback(entry) end)
   else
-    M.deleteBufferSelection(actionState.get_selected_entry(), force)
+    callback(actionState.get_selected_entry())
   end
   customPickers.browseBuffers({}, prompt_bufnr)
+end
+
+function M.deleteSelectedBuffers(prompt_bufnr, force)
+  M.actOnBufferSelection(prompt_bufnr, function(entry) M.deleteBufferSelection(entry, force) end)
+end
+
+function M.unlistSelectedBuffers(prompt_bufnr)
+  M.actOnBufferSelection(prompt_bufnr, function(entry) M.unlistBufferSelection(entry) end)
 end
 
 --- Wrap a telescope function (ie findFiles or liveGrep) 
@@ -94,7 +90,8 @@ end
 
 --- Jump to the user's home directory in the current file-browser prompt
 function M.fileBrowserGotoHome(prompt_bufnr)
-  util.debug('GOING HOME (prompt ' .. (prompt_bufnr or 'nil') .. ')')
+  local logger = LOGGER:withAttrs({logMethod="fileBrowserGotoHome"});
+  logger:debug('GOING HOME (prompt ' .. (prompt_bufnr or 'nil') .. ')')
   local args = customPickers.getFilebrowseArgs({}, prompt_bufnr)
   args.cwd = os.getenv('HOME')
   require("telescope").extensions.file_browser.file_browser(args)

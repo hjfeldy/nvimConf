@@ -17,6 +17,7 @@ return {
     "hjfeldy/neoWin",
     -- dir="/home/harry/Repos/neowin",
     branch="feature/work",
+    dependencies = {'folke/neoconf.nvim'},
     -- lazy=false,
     keys = {
 
@@ -65,7 +66,7 @@ return {
       {"<leader>tT", function() require('neoWin.customPicker').termPick() end, mode="n", desc="Telescope Terminal Picker"},
       {"<leader>tn", function() require('neoWin.terminals').nextTerm() end, mode="n", desc="Next Terminal"},
       {"<leader>tp", function() require('neoWin.terminals').prevTerm() end, mode="n", desc="Previous Terminal"},
-      {"<leader>tr", function() require('neoWin.Terminals').renameTerm() end, mode="n", desc="Rename Terminal"},
+      {"<leader>tr", function() require('neoWin.terminals').renameTerm() end, mode="n", desc="Rename Terminal"},
       {"<C-t>", function() require('neoWin.terminals').toggle() end, mode={"n", "t"}, desc="Toggle Terminal(s)"},
 
       -- Quitting
@@ -75,7 +76,7 @@ return {
       {"qq", function() require('neoWin.smartDelete').smartDelete() end, mode="n", desc="Quit Buffer"},
       {"qf", function() require('neoWin.smartDelete').smartDelete(true) end, mode="n", desc="Force-Quit Buffer"},
       {"qr", function() require('neoWin.smartDelete').resetLastBufs() end, mode='n', desc='Force-Reset Buffer History'},
-      
+
       {
         "<C-p>",
         function() 

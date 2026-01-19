@@ -121,6 +121,7 @@ vim.o.relativenumber=true
 
 vim.o.winborder='rounded'
 vim.o.equalalways=false
+vim.o.eadirection='hor'
 
 vim.o.undodir='/home/harry/.local/state/nvim/undo'
 vim.o.undofile=true

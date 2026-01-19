@@ -5,6 +5,8 @@ local telescopeUtils = require('helpers.telescope.utils')
 local telescopeConf = require('helpers.telescope.config')
 local terms = require('neoWin.terminals')
 
+local logger = require('neoWin.logger'):new('vimConf.autocommands')
+
 -- clear fugitive buffers when their windows are deleted
 api.nvim_create_autocmd('BufReadPost', {
   pattern = {
@@ -12,7 +14,7 @@ api.nvim_create_autocmd('BufReadPost', {
     'man://*' 
   },
   callback = function(ev)
-    util.debug('Caught BufReadPost: ' .. vim.inspect(ev))
+    logger:debug('Caught BufReadPost: ' .. vim.inspect(ev))
     vim.o.bufhidden = 'delete'
   end
 })
@@ -32,7 +34,7 @@ api.nvim_create_autocmd('BufReadPost', {
       local bo = vim.bo[buf]
       local name = api.nvim_buf_get_name(buf)
       if string.len(name) == 0 and bo.buflisted and bo.filetype ~= 'qf' then
-        util.debug('deleting empty buffer')
+        logger:debug('deleting empty buffer')
         api.nvim_buf_delete(buf, {})
         return
       end
@@ -46,9 +48,11 @@ local ENTERED_CWD = nil
 vim.api.nvim_create_autocmd("VimEnter", {
   callback = function()
     -- Only load the session if nvim was started with no args and without reading from stdin
-    if vim.fn.argc(-1) == 0 and not vim.g.using_stdin then
+    vim.g.using_stdin = vim.fn.argc(-1) ~= 0
+    if not vim.g.using_stdin then
       local cwd = vim.fn.getcwd()
       ENTERED_CWD = cwd
+      print('SETTING CWD: ' .. ENTERED_CWD)
       resession.load(cwd, { silence_errors = true })
     end
 
@@ -66,6 +70,11 @@ vim.api.nvim_create_autocmd("VimEnter", {
 -- Save Session for the current directory at shutdown
 vim.api.nvim_create_autocmd("VimLeavePre", {
   callback = function()
+    -- Only load the session if nvim was started with no args and without reading from stdin
+    if vim.g.using_stdin then
+      print('CWD IS NOT NULL')
+      return
+    end
     resession.save(ENTERED_CWD or vim.fn.getcwd(), { notify = false })
   end,
 })
@@ -105,7 +114,7 @@ vim.api.nvim_create_autocmd('WinClosed', {
 vim.api.nvim_create_autocmd('User', {
   pattern = {'FugitiveEditor', 'FugitiveIndex', 'FugitivePager'},
   callback = function(ev)
-    util.debug('Caught fugitive event:\n' .. vim.inspect(ev))
+    logger:debug('Caught fugitive event:\n' .. vim.inspect(ev))
     local firstWindowId = terms.firstWindowId()
     local tab = vim.api.nvim_get_current_tabpage()
     if firstWindowId ~= nil then
@@ -122,11 +131,11 @@ vim.api.nvim_create_autocmd('WinLeave', {
     local ft = vim.bo[ev.buf].filetype
 
     if ft == 'TelescopeResults' or ft == 'TelescopePrompt' then
-      util.debug('Left Telescope:', ev)
+      logger:debug('Left Telescope:', ev)
       telescopeUtils.unsetLualineMode('telescopeFiles')
       telescopeUtils.unsetLualineMode('telescopeDiagnostics')
       if telescopeConf.LOCAL_DIAGNOSTICS ~= nil then
-        util.debug('Resetting LOCAL_DIAGNOSTICS') 
+        logger:debug('Resetting LOCAL_DIAGNOSTICS') 
       end
 
       telescopeConf.LOCAL_DIAGNOSTICS = nil

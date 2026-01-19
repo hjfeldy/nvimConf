@@ -120,10 +120,10 @@ return {
       mode = {"i", "n", "s"}
     },
     {
-      "<c-b>",
+      "<c-u>",
       function()
         if not require("noice.lsp").scroll(-4) then
-          return "<c-b>"
+          return "<c-u>"
         end
       end,
       silent = true,
