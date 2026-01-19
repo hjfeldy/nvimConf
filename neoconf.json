@@ -1,0 +1,14 @@
+{
+  "logging": {
+    "vimConf.debugger": {
+      "level": "DEBUG"
+    },
+    "Terminals": {
+      "level": "INFO",
+      "format": "[{label}::{logMethod}] {msg}",
+      "withinLevelFilters": [ ],
+      "levelOverrideFilters": [
+      ]
+    }
+  }
+}
