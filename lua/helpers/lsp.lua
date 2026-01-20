@@ -1,8 +1,6 @@
-local util = require('util')
-
 local M = {}
 
-function getLogger()
+local function getLogger()
   if M.LOGGER ~= nil then
     return M.LOGGER
   end
@@ -11,13 +9,12 @@ function getLogger()
   return logger
 end
 
-
 M.WARNING_FILTER = true
 
 --- Toggle WARNING-level vs HINT-level LSP diagnostics
 --- @param force boolean? Force a specific value (true for WARN, false for HINT) rather than just flipping the value
 function M.toggleHints(force)
-  if force ~= nil then 
+  if force ~= nil then
     M.WARNING_FILTER = force
   else
     M.WARNING_FILTER = not M.WARNING_FILTER
@@ -48,7 +45,7 @@ M.toggleHints(M.WARNING_FILTER)
 --- but sometimes there are multiple results all on the same line...
 --- In tohse cases we want to just jump to the first
 function M.listHandler(lspResults)
-  local logger = M.LOGGER:withAttrs({logMethod="listHandler"});
+  local logger = getLogger():withAttrs({logMethod="listHandler"});
 
   -- Some LSPs will give multiple results which are all from the same line
   -- ie. "some.member = function() ..." will match on "member" and "function" 
@@ -63,7 +60,7 @@ function M.listHandler(lspResults)
       matchingLineNums[match.filename] = match.lnum
       matchingFiles = matchingFiles+1
       if matchingFiles > 1 then
-        allSame = false 
+        allSame = false
       end
     elseif matchingLineNums[match.filename] ~= match.lnum then
       allSame = false

@@ -17,10 +17,10 @@ end
 --- @param d1 table
 --- @param d2 table
 --- @return table
-function M.merge(d1, d2) 
+function M.merge(d1, d2)
   local out = {}
   for _, d in pairs({d1, d2}) do
-    if d ~= nil then 
+    if d ~= nil then
       for k, v in pairs(d) do
         out[k] = v
       end
@@ -34,7 +34,7 @@ function M.mergeArrays(...)
   local arrays = { ... }
   local out = {}
   for _, array in pairs(arrays) do
-    for i, v in ipairs(array) do
+    for _, v in ipairs(array) do
       out[#out+1] = v
     end
   end
@@ -44,7 +44,7 @@ end
 --- Copy a table
 --- @param d table
 --- @return table
-function M.copy(d) 
+function M.copy(d)
   local out = {}
   for k, v in pairs(d) do
     out[k] = v
@@ -64,7 +64,7 @@ end
 
 --- Capitalize the first letter of a string
 --- @param str string
-function M.capitalize(str) 
+function M.capitalize(str)
   local first = str:sub(1, 1)
   local rest = str:sub(2, #str)
   return first:upper() .. rest
@@ -81,7 +81,7 @@ function M.split(str, delim)
     if chunk == delim then
       out[#out+1] = s
       s = ''
-    else 
+    else
       s = s .. str:sub(i, i)
     end
   end
@@ -131,8 +131,8 @@ end
 --- Generate a wrapped version of shortenPath() for the current buffer
 ---@param maxComponents integer? Maximum number of path components
 ---@param skipReplaceCwd boolean? Should the vim working directory be replaced with "."?
-function M.shortenPathFunc(maxComponents, skipReplaceCwd) 
-  return function() 
+function M.shortenPathFunc(maxComponents, skipReplaceCwd)
+  return function()
     local path = api.nvim_buf_get_name(api.nvim_get_current_buf())
     maxComponents = vim.o.filetype == 'Terminal' and 1 or maxComponents
     if maxComponents == nil or maxComponents < 1 then
@@ -149,7 +149,7 @@ function M.shortenPathFunc(maxComponents, skipReplaceCwd)
 end
 
 --- Emit a debug log
-function M.debug(...) 
+function M.debug(...)
   if not vim.g.NOICE_DEBUG then return end
   local args = { ... }
   local s = ''
@@ -201,13 +201,13 @@ end
 function M.recursiveMerge(sourceTable, addTable)
   local merged = {}
   local keys = {}
-  for i, tbl in ipairs({sourceTable, addTable}) do
+  for _, tbl in ipairs({sourceTable, addTable}) do
     for k, _ in pairs(tbl) do
       keys[#keys+1] = k
     end
   end
 
-  for i, key in ipairs(keys) do
+  for _, key in ipairs(keys) do
     if type(addTable[key]) == 'table' and type(sourceTable[key]) == 'table' then
       merged[key] = M.recursiveMerge(sourceTable[key], addTable[key])
     else
@@ -222,9 +222,9 @@ end
 --- If the values contain an "index" field, sort the array by it
 --- @param tbl table
 --- @return table
-function M.tblToArray(tbl) 
+function M.tblToArray(tbl)
   local out = {}
-  for k, v in pairs(tbl) do
+  for _, v in pairs(tbl) do
     if v.index ~= nil then
       out[v.index] = v
     else

@@ -56,10 +56,10 @@ local opts = {
         end
 
         if cmp.is_menu_visible() and cmp.get_selected_item() then
-          return cmp.select_and_accept() 
+          return cmp.select_and_accept()
         end
       end,
-      'fallback' 
+      'fallback'
     },
     ['<tab>'] = {
       function(cmp)
@@ -71,7 +71,7 @@ local opts = {
           return cmp.show()
         end
       end,
-      'fallback' 
+      'fallback'
     },
     ['<s-tab>'] = {
       'select_prev',
@@ -82,7 +82,7 @@ local opts = {
       --
       --   return cmp.select_prev()
       -- end,
-      'fallback' 
+      'fallback'
     },
   },
 
@@ -114,7 +114,7 @@ local opts = {
         columns = {
           { 'kind_icon', 'kind', gap = 1 },
           { 'label', 'label_description', gap = 1 },
-          {'source_name'} 
+          {'source_name'}
         },
       }
     },

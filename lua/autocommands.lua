@@ -1,5 +1,4 @@
 local api = vim.api
-local util = require('util')
 local resession = require('resession')
 local telescopeUtils = require('helpers.telescope.utils')
 local telescopeConf = require('helpers.telescope.config')
@@ -11,7 +10,7 @@ local logger = require('neoWin.logger'):new('vimConf.autocommands')
 api.nvim_create_autocmd('BufReadPost', {
   pattern = {
     'fugitive://*',
-    'man://*' 
+    'man://*'
   },
   callback = function(ev)
     logger:debug('Caught BufReadPost: ' .. vim.inspect(ev))
@@ -52,7 +51,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
     if not vim.g.using_stdin then
       local cwd = vim.fn.getcwd()
       ENTERED_CWD = cwd
-      print('SETTING CWD: ' .. ENTERED_CWD)
+      logger:debug('SETTING CWD: ' .. ENTERED_CWD)
       resession.load(cwd, { silence_errors = true })
     end
 
@@ -120,6 +119,11 @@ vim.api.nvim_create_autocmd('User', {
     if firstWindowId ~= nil then
       terms.toggle()
       FUGITIVE_STATUS[tab] = FUGITIVE_STATUS[tab] and FUGITIVE_STATUS[tab]+1 or 1
+      vim.schedule(function()
+        local lines = vim.o.lines
+        local toResize = .50 * lines
+        vim.cmd('resize ' .. toResize)
+      end)
     end
   end
 })
@@ -135,7 +139,7 @@ vim.api.nvim_create_autocmd('WinLeave', {
       telescopeUtils.unsetLualineMode('telescopeFiles')
       telescopeUtils.unsetLualineMode('telescopeDiagnostics')
       if telescopeConf.LOCAL_DIAGNOSTICS ~= nil then
-        logger:debug('Resetting LOCAL_DIAGNOSTICS') 
+        logger:debug('Resetting LOCAL_DIAGNOSTICS')
       end
 
       telescopeConf.LOCAL_DIAGNOSTICS = nil

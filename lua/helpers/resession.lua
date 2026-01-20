@@ -1,7 +1,7 @@
 local M = {}
 
 --- Get a custom telescope finder for explicitly-saved sessions
-function M.getFinder(results)
+function M.getFinder()
   local finders = require('telescope.finders')
   local resession = require('resession')
   local sessions = resession.list({dir='explicit'})
@@ -24,6 +24,7 @@ function M.pickSession(opts)
   local pickers = require('telescope.pickers')
   local conf = require("telescope.config").values
   local actions = require "telescope.actions"
+  local action_state = require "telescope.actions.state"
   opts = opts or {}
 
   opts.dynamic_preview_title = true
@@ -35,11 +36,8 @@ function M.pickSession(opts)
     finder = M.getFinder(),
     -- luacheck: push no unused args
     attach_mappings = function(prompt_bufnr, map)
-      -- map('<C-e>',
       actions.select_default:replace(
         function()
-          local actions = require "telescope.actions"
-          local action_state = require "telescope.actions.state"
           local entry = action_state.get_selected_entry()
           actions.close(prompt_bufnr)
           resession.load(entry.value, {dir='explicit'})
@@ -54,7 +52,7 @@ end
 -- Save the current session with an explicit session-name
 function M.saveSesh()
   local seshName = vim.fn.input({prompt='Session Name'})
-  require('resession').save(seshName, {dir='explicit'}) 
+  require('resession').save(seshName, {dir='explicit'})
 end
 
 vim.api.nvim_create_user_command('SaveSession', M.saveSesh, {nargs=0})

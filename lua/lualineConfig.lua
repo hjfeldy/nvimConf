@@ -1,4 +1,5 @@
 --- Dynamic lualine configs
+---@require('noice')
 
 local util = require('util')
 local api = vim.api
@@ -16,17 +17,17 @@ M.CURRENT_LEVEL = 3
 
 
 --- Set the mode (ie. to toggle telescope components on/off)
-function M.setMode(mode) 
+function M.setMode(mode)
   M.CURRENT_MODE = mode or 'normal'
 end
 
 --- Set the mode (to determine whether to render telescope components)
-function M.getMode() 
+function M.getMode()
   return M.CURRENT_MODE
 end
 
 --- Refresh the statusline to make level/mode changes take effect
-function M.refreshConfig() 
+function M.refreshConfig()
   require('lualine').setup(M.getConfig())
 end
 
@@ -64,7 +65,7 @@ local NO_OP_COMPONENT = {NO_OP}
 --- instead of lualine_a = { {componentConfig...} }
 --- we can then selectively access/modify these components by name while we construct our configs
 --- and then convert to arrays later, preserving the order
-local function addIndex(component, index) 
+local function addIndex(component, index)
   return vim.tbl_extend('keep', component, {index=index})
 end
 
@@ -82,7 +83,7 @@ function M.getConfig()
 
   --- Trouble.nvim statusline component
   --- (Very useful - displays the current treesitter function / class / etc)
-  local troubleStat = trouble.statusline({ 
+  local troubleStat = trouble.statusline({
     mode = "symbols",
     groups = {},
     title = false,
@@ -116,7 +117,7 @@ function M.getConfig()
 
   --- Currently attached LSP
   local lspStatusIcon = {
-    function() 
+    function()
       local clients = vim.lsp.get_clients({bufnr=0})
       if #clients == 0 then return '' end
 
@@ -150,7 +151,7 @@ function M.getConfig()
   --- Visual indicator for adjacent icons ("These relate to Telescope ->")
   local telescopeIcon = {
     function() return icons.kinds.Telescope end, separator = "",
-    color = function() 
+    color = function()
       local whiteBlack = vim.o.background == 'dark' and 'white' or 'black'
       return {fg = whiteBlack}
     end,
@@ -159,10 +160,10 @@ function M.getConfig()
 
   --- Do we show hidden files in telescope prompts?
   local showHiddenIcon = {
-    function() 
+    function()
       return telescopeConf.SHOW_HIDDEN and icons.showHide.Show or icons.showHide.Hide
     end,
-    color = function() 
+    color = function()
       local whiteBlack = vim.o.background == 'dark' and 'white' or 'black'
       return {fg=telescopeConf.SHOW_HIDDEN and "green" or whiteBlack}
     end,
@@ -173,12 +174,12 @@ function M.getConfig()
 
   --- Do we respect .ignore/.gitignore in telescope prompts?S
   local respectGitignoreIcon = {
-    function() 
+    function()
       return icons.git.Logo
     end,
     separator="",
     padding = { left = 0, right = 0 },
-    color = function() 
+    color = function()
       return {fg=telescopeConf.RESPECT_IGNORE and "green" or "red"}
     end,
     cond = telescopeFileMode
@@ -189,7 +190,7 @@ function M.getConfig()
     "filetype",
     icon_only = true,
     separator = "",
-    padding = { left = 1, right = 0 } 
+    padding = { left = 1, right = 0 }
   }
 
   --- Visual indicator of the current diagnostics filter level (either hints or warnings)
@@ -282,7 +283,7 @@ function M.getConfig()
   --- lualine_{a/b/c/x/y/z} tables will be converted to array later
   --- ie. 'lualine_a = { mode = {"mode"} }' becomes 'lualine_a = { {"mode"} }
   local active_base = {
-    lualine_a = { 
+    lualine_a = {
       mode = addIndex({"mode"}, 1),
     },
 
@@ -351,7 +352,7 @@ function M.getConfig()
     lualine_b = {
       path = { shortenPathFunc(1) },
       branch = { NO_OP, separator="" },
-      diff = { 
+      diff = {
         separator="",
         symbols = {
           added = "",
@@ -399,7 +400,7 @@ function M.getConfig()
   local activeExtensions = {
     activeLvl1,
     activeLvl2,
-    activeLvl3, 
+    activeLvl3,
     activeLvl4,
     activeLvl5
   }
@@ -408,7 +409,7 @@ function M.getConfig()
   local inactiveExtensions = {
     inactiveLvl1,
     inactiveLvl2,
-    inactiveLvl3, 
+    inactiveLvl3,
     inactiveLvl4,
     inactiveLvl5
   }

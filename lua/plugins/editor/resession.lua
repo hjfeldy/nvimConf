@@ -2,9 +2,7 @@ local helpers = require('helpers.resession')
 
 return {
   "stevearc/resession.nvim",
-  dependencies = {"hjfeldy/neoWin"},
-  -- dependencies = {dir="/home/harry/Repos/neowin"},
-  -- lazy=false,
+  lazy=false,
   keys = {
     {
       '<C-s>',
@@ -27,6 +25,7 @@ return {
 
       local exclude = {
         ['Terminal'] = true,
+        ['Outline'] = true,
         ['fugitive'] = true,
         ['help'] = true
       }
@@ -52,6 +51,6 @@ return {
       neoWin = {},
       bufferline = {},
       scope = {}
-    } 
+    }
   }
 }

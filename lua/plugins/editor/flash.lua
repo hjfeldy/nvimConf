@@ -20,7 +20,7 @@ return {
 
   keys = {
     {"<leader>s", "", desc="+Flash Search"},
-    { 
+    {
       "<leader>ss",
       mode = { "n", "x", "o" },
       function() require("flash").jump() end,

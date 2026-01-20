@@ -2,7 +2,7 @@
 
 return {
   "folke/which-key.nvim",
-  opts = function() 
+  opts = function()
     return {
       delay=333,
       preset = 'modern',
@@ -22,9 +22,6 @@ return {
               return "Commands"
             end
             local out = require('which-key.view').format(key)
-            if out ~= key then 
-              -- print('Replacing "' .. key .. '" with "' .. out .. '"')
-            end
           end
         }
       }

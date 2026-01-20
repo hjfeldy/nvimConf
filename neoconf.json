@@ -3,12 +3,14 @@
     "vimConf.debugger": {
       "level": "DEBUG"
     },
+    "GLOBAL": {
+      "level": "INFO"
+    },
     "Terminals": {
       "level": "INFO",
       "format": "[{label}::{logMethod}] {msg}",
       "withinLevelFilters": [ ],
-      "levelOverrideFilters": [
-      ]
+      "levelOverrideFilters": [ ]
     }
   }
 }

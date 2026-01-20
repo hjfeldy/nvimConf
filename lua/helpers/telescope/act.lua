@@ -12,8 +12,9 @@ local LOGGER = require('neoWin.logger'):new('vimConf.helpers.telescope.act')
 local M = {}
 
 
-function M.deleteBufferSelection(entry, force) 
-  print('Deleting entry: ' .. vim.inspect(entry))
+function M.deleteBufferSelection(entry, force)
+  local logger = LOGGER:withAttrs({logMethod="deleteBufferSelection"});
+  logger:debug('Deleting entry: ' .. vim.inspect(entry))
   require('neoWin.smartDelete').smartDeleteBuffer(force, entry.bufnr, true, false)
 end
 
@@ -46,8 +47,6 @@ end
 --- reopening a new telescope inplace which uses the newly toggled configuration value
 local function wrapWithToggle(finderFunc, togglerFunc)
   local wrapped = function(prompt_bufnr)
-    -- print('Calling toggle-wrapped func with prompt_bufnr ' .. (prompt_bufnr or 'nil') )
-    -- print('Args: ' .. vim.inspect(args))
     togglerFunc()
     return finderFunc({}, prompt_bufnr)
   end

@@ -1,6 +1,9 @@
 -- Custom highlighting logic
 
 local util = require('util')
+local function getLogger()
+  return require('neoWin.logger'):new('vimConf.highlights')
+end
 
 --- LSP highlight groups to copy to Blink highlight groups  
 --- This allows us to align the Blink completion colors with the colorscheme
@@ -70,6 +73,7 @@ end
 --- so you can reload the plugin (ie. "Lazy reload NeoSolarized") 
 --- @param pluginName string?
 function M.setColors(pluginName)
+  getLogger():debug("Setting colors for plugin " .. (pluginName or 'nil'))
   if pluginName ~= nil then
     vim.cmd('Lazy reload ' .. pluginName)
   end
@@ -87,18 +91,6 @@ function M.setColors(pluginName)
   -- Get rid of annoying automatic highlighting of the word under the cursor
   -- M.copyHL('Normal', 'CurrentWord')
   setHL(0, 'CurrentWord', {})
-
-  -- Reverse flash label/cursor - more visibly clear
-  -- local flashLabel = M.getHL('FlashLabel')
-  -- local flashCursor = M.getHL('FlashCursor')
-  -- util.debug('Flash Label:', flashLabel)
-  -- util.debug('Flash Cursor:', flashCursor)
-  -- M.copyHL('FlashLabel', 'FlashCursor')
-  -- setHL(0, 'FlashCursor', {fg=flashLabel.fg, bg=flashLabel.bg})
-  -- flashLabel = M.getHL('FlashLabel')
-  -- flashCursor = M.getHL('FlashCursor')
-  -- util.debug('Flash Label (post):', flashLabel)
-  -- util.debug('Flash Cursor (post):', flashCursor)
 
   setHL(0, 'FlashMatch', {fg='red', bg='black'})
   setHL(0, 'FlashLabel', {fg='red', bg='black'})
@@ -124,13 +116,9 @@ function M.setColors(pluginName)
 end
 
 --- Toggle the colorscheme configuration and refresh the colorscheme
-function M.toggleColor() 
+function M.toggleColor()
   M.DARK = not M.DARK
-  local tf
-  -- print('Dark: ' .. tostring(M.DARK))
-  -- M.setColors(COLORSCHEME_PLUGIN)
-  -- if M.DARK then tf = 'true' else tf = 'false' end
-  -- if M.DARK then return 'dark' else return 'light' end
+  getLogger():debug('Toggling color - Dark = ' .. tostring(M.DARK))
 end
 
 

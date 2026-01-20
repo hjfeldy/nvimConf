@@ -3,7 +3,7 @@ local COLORSCHEME_PLUGIN = 'NeoSolarized.nvim'
 
 --- Return a wrapped function which calls lualine.refresh() after its execution
 local function lualineWrapped(innerFunc)
-  local wrapped = function(...) 
+  local wrapped = function(...)
     local out = innerFunc(...)
     require('lualine').refresh()
     return out
@@ -14,8 +14,8 @@ end
 
 return {
   {
-    "hjfeldy/neoWin",
-    -- dir="/home/harry/Repos/neowin",
+    -- "hjfeldy/neoWin",
+    dir = "/home/harry/Repos/neowin",
     branch="feature/work",
     dependencies = {'folke/neoconf.nvim'},
     -- lazy=false,
@@ -79,12 +79,12 @@ return {
 
       {
         "<C-p>",
-        function() 
+        function()
           require('highlights').toggleColor()
           require('lualine').refresh()
           vim.cmd('Lazy reload ' .. COLORSCHEME_PLUGIN)
         end,
-        mode="n" 
+        mode="n"
       }
     }
   }

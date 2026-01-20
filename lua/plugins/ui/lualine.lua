@@ -2,8 +2,6 @@
 
 return {
   "nvim-lualine/lualine.nvim",
-  -- dir = '/home/harry/Repos/lualine.nvim/',
-  -- branch = 'feature/dynamicModes',
   dependencies = {
     'folke/noice.nvim',
     'nvim-telescope/telescope.nvim',

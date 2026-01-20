@@ -2,7 +2,7 @@
 
 local util = require('util')
 
-local function newTab() 
+local function newTab()
   local nTabs = #vim.api.nvim_list_tabpages()
   local tabName = 'Tab ' .. tostring(nTabs+1)
   vim.cmd('tabnew')
@@ -11,10 +11,8 @@ end
 
 return {
   "hjfeldy/bufferline.nvim",
-  -- dir = "/home/harry/Repos/bufferline.nvim/",
   branch = 'feature/resession',
   lazy = false,
-  -- event = "VeryLazy",
   keys = util.mergeArrays({
 
     { "gi", "gi", noremap=true }, -- not sure why this is necessary, but the builtin gi binding is getting remapped to a no-op at somewhere
@@ -46,7 +44,7 @@ return {
       desc = "Move Tab Right"
     },
 
-    { 
+    {
       "<C-a>M",
       function()
         local tabIndex = vim.api.nvim_tabpage_get_number(0)
@@ -59,8 +57,8 @@ return {
       desc = "Move Tab Left"
     },
 
-    { "<C-a>r", 
-      function() 
+    { "<C-a>r",
+      function()
         local newName = vim.fn.input('New name for tab')
         vim.cmd('BufferLineTabRename ' .. newName)
       end,
@@ -92,21 +90,21 @@ return {
       always_show_bufferline = true,
       max_name_length = 50,
 
-      name_formatter = function(buf) 
+      name_formatter = function(buf)
         local tabVars = vim.t[buf.tabnr]
         local tabName = tabVars.name or tostring(buf.tabnr)
         return tabName
         -- return tabName .. ' (' .. buf.name .. ')'
       end,
 
-      custom_filter = function(bufnr, bufnrs)
+      custom_filter = function(bufnr, _)
         local bufType = vim.bo[bufnr].filetype
         local blacklist = {
           ['grug-far'] = true,
           ['help'] = true,
           ['Terminal'] = true,
           ['qf'] = true,
-          ['fugitive'] = true 
+          ['fugitive'] = true
         }
         return not blacklist[bufType]
       end,

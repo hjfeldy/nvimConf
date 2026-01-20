@@ -14,6 +14,7 @@ local M = {}
 --- extend the telescope prompt args with the current text and input-mode
 --- @param args table
 --- @param prompt_bufnr integer prompt buffer
+--- @return table
 function M.extendArgs(args, prompt_bufnr)
   local logger = LOGGER:withAttrs({logMethod="extendArgs"});
   local mode = vim.fn.mode() == 'n' and 'normal' or 'insert'
@@ -29,8 +30,8 @@ function M.extendArgs(args, prompt_bufnr)
   end
 
   -- prefer entry's cwd if it exists (ie. for file-browser)
-  if entry then
-    args.cwd = args.cwd or entry.cwd
+  if entry and entry.cwd then
+    args.cwd = entry.cwd
   end
 
   return args
@@ -42,6 +43,7 @@ end
 --- @param args table? Existing arguments (applicable if telescope is already open, and we're re-calling a finder function in response to a keypress)
 --- @param prefix string Prefix for the prompt title
 --- @param prompt_bufnr integer? The prompt_bufnr of the currently-open telescope prompt buffer (if we're re-calling)
+--- @return table
 function M.getFileArgs(args, prefix, prompt_bufnr)
   args = args or {}
   if args.hidden == nil then
@@ -134,10 +136,10 @@ function M.findFiles(args, prompt_bufnr)
   telescopeUtil.setLualineMode('telescopeFiles')
 end
 
-function M.browseBuffers(args, prompt_bufnr) 
+function M.browseBuffers(args, prompt_bufnr)
   args = M.getBufferBrowserArgs(args, prompt_bufnr)
   -- require('helpers.telescope.scopedBuffers').buffers(args)
-  if telescopeConf.SHOW_ALL_BUFFERS then 
+  if telescopeConf.SHOW_ALL_BUFFERS then
     require('telescope').load_extension('scope').buffers()
   else
     builtin.buffers(args)

@@ -6,8 +6,8 @@ map("n", "<leader>g", "", {desc="+LSP"})
 
 map("n",
   "<leader>gt",
-  function() 
-    require("helpers.lsp").toggleHints() 
+  function()
+    require("helpers.lsp").toggleHints()
     require("helpers.telescope.utils").toggleHints()
   end,
   {desc="Toggle LSP Diagnostic Level"}
@@ -90,7 +90,7 @@ map("n", "<leader>N", function() vim.o.hlsearch = not vim.o.hlsearch end, {desc=
 map(
   "n",
   "<C-p>",
-  function() 
+  function()
     require('highlights').toggleColor()
     vim.cmd('Lazy reload NeoSolarized.nvim')
     require('lualine').refresh()

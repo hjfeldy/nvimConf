@@ -1,11 +1,7 @@
-local telescopeConf = require('helpers.telescope.config')
-
 return {
   {
     'nvim-telescope/telescope.nvim',
     tag = '0.1.8',
-    -- dir = '/home/harry/Repos/telescope.nvim',
-    -- branch='feature/unlistedBuffers',
     dependencies = {
       'nvim-lua/plenary.nvim',
       "nvim-tree/nvim-web-devicons",
@@ -44,7 +40,7 @@ return {
       },
       {
         "<leader>fg",
-        function() require('helpers.telescope.pick').liveGrep() end, 
+        function() require('helpers.telescope.pick').liveGrep() end,
         mode="n",
         desc='Grep Files'
       },
@@ -169,7 +165,7 @@ return {
               ["<C-h>"] = customActions.findFilesToggleHidden,
               ["<C-g>"] = customActions.findFilesToggleIgnore,
               ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
-              ["<C-o>"] = function(prompt_bufnr) 
+              ["<C-o>"] = function(prompt_bufnr)
                 actionUtils.map_selections(prompt_bufnr, function(entry)
                   actions.close(prompt_bufnr)
                   local filename = entry[1]
@@ -209,7 +205,7 @@ return {
           git_branches = {
             mappings = {
               n = {
-                ["L"] = function(prompt_bufnr) 
+                ["L"] = function(_)
                   local entry = actionState.get_selected_entry()
                   local branch = entry.value
                   vim.cmd('G log ' .. branch .. ' --decorate')
