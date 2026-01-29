@@ -4,6 +4,13 @@
 local util = require('util')
 local api = vim.api
 
+local function showBranch() 
+  local icon = require('icons').git.Branch
+  local stat = vim.system({'git', 'rev-parse', '--abbrev-ref', 'HEAD'}, {}):wait()
+  local branchStr = icon .. stat.stdout:sub(1, stat.stdout:len()-1)
+  return branchStr
+end
+
 
 local M = {}
 
@@ -290,7 +297,7 @@ function M.getConfig()
     lualine_b = {
       ft = addIndex(filetypeComponent, 1),
       path = addIndex({ shortenPathFunc(2) }, 2),
-      branch = addIndex({ "branch", separator = "" }, 3),
+      branch = addIndex({ showBranch, separator = "" }, 3),
       diff = addIndex(diffComponent, 4),
     },
 
@@ -376,10 +383,12 @@ function M.getConfig()
       path = { shortenPathFunc(2) },
     },
     lualine_x = {
+
       fileProgress = { separator = "" },
       cursorLocation = { NO_OP }
     },
   })
+  -- print('LEVEL3: ' .. vim.inspect(activeLvl3))
 
 
   local activeLvl4 = util.recursiveMerge(active_base, {
@@ -430,6 +439,8 @@ function M.getConfig()
       end
     end
   end
+
+  -- print('LEVEL3 (formatted): ' .. vim.inspect(activeExtensions[3]))
 
 
   local filetypeExtension = {
@@ -483,6 +494,7 @@ function M.getConfig()
       filetypeExtension
     },
   }
+  -- print('ACTIVE-SECTION CONFIG: ' .. vim.inspect(config.sections))
   return config
 end
 
