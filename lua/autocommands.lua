@@ -18,13 +18,12 @@ api.nvim_create_autocmd('BufReadPost', {
   end
 })
 
--- For Markview (is this necessary?)
--- api.nvim_create_autocmd('BufReadPost', {
---   pattern = { '*.md' },
---   callback = function()
---     vim.cmd('TSBufEnable highlight')
---   end
--- })
+api.nvim_create_autocmd('BufReadPost', {
+  pattern = { '*' },
+  callback = function()
+    vim.cmd('TSBufEnable highlight')
+  end
+})
 
 api.nvim_create_autocmd('BufReadPost', {
   pattern = { '*' },
