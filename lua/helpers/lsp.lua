@@ -77,10 +77,11 @@ function M.listHandler(lspResults)
   if allSame or #lspResults.items == 1 then
 
     -- vim.api.nvim_win_set_buf(0, lspResults.items[1].bufnr)
-    local currFile = vim.api.nvim_buf_get_name(0)
+    local currFile = vim.api.nvim_buf_get_name(0):gsub('\\', '/')
     local firstResult = lspResults.items[1]
-    logger:debug("Current file: " .. currFile .. "\nResult File: " .. firstResult.filename:lower())
-    if currFile:lower() ~= firstResult.filename:lower() then
+    local firstFile = firstResult.filename:gsub('\\', '/')
+    logger:debug("Current file: " .. currFile .. "\nResult File: " .. firstFile:lower())
+    if currFile:lower() ~= firstFile:lower() then
       vim.cmd('keepjumps edit ' .. firstResult.filename)
     end
 
