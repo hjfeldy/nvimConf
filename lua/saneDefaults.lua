@@ -31,6 +31,15 @@ map(
 
 map(
   "n",
+  "<leader>gR",
+  function()
+    vim.lsp.buf.rename()
+  end,
+  {desc="Rename"}
+)
+
+map(
+  "n",
   "<leader>gd",
   function()
     vim.lsp.buf.definition({
