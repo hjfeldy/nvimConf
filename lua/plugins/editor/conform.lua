@@ -10,9 +10,10 @@ return {
       python = { "black" },
       -- You can customize some of the format options for the filetype (:help conform.format)
       -- Conform will run the first available formatter
+      cs = { 'csharpier' },
       javascript = { "prettier" },
       typescript = { "prettier" },
-      json = {'formatJson'},
+      json = { 'formatJson' },
     },
     formatters = {
       formatJson = {

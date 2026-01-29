@@ -17,9 +17,10 @@ vim.lsp.config.basedpyright = {
   -- root_dir = util.root_pattern("pyproject.toml", "setup.py", ".git"),
   settings = {
     basedpyright = {
+      verboseOutput=true,
       analysis = {
         autoImportCompletions = true,
-        diagnosticMode = 'openFilesOnly'
+        diagnosticMode = 'openFilesOnly',
       }
     }
   }
@@ -51,6 +52,18 @@ vim.lsp.config.ts_ls = {
 --   }
 -- }
 
+
+---@type vim.lsp.Config
+vim.lsp.config.csharp_ls = {
+  settings = {
+    ["csharp.applyFormattingOptions"] = true,
+    csharp = {
+      applyFormattingOptions = true
+    }
+  }
+}
+
+-- vim.lsp.log.set_level(vim.lsp.log.levels.DEBUG)
 
 if vim.g.NO_LSP then
   print('Neglecting to enable LSP - it is disabled globally')
