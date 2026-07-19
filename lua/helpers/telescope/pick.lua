@@ -138,7 +138,6 @@ end
 
 function M.browseBuffers(args, prompt_bufnr)
   args = M.getBufferBrowserArgs(args, prompt_bufnr)
-  -- require('helpers.telescope.scopedBuffers').buffers(args)
   if telescopeConf.SHOW_ALL_BUFFERS then
     require('telescope').load_extension('scope').buffers()
   else

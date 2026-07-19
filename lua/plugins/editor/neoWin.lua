@@ -17,7 +17,6 @@ return {
     -- "hjfeldy/neoWin",
     dir = "/home/harry/Repos/neowin",
     branch="feature/work",
-    dependencies = {'folke/neoconf.nvim'},
     -- lazy=false,
     keys = {
 
@@ -86,6 +85,9 @@ return {
         end,
         mode="n"
       }
-    }
+    },
+    -- opts = function()
+    --   return require('neoConf').get('neoWin') or {}
+    -- end
   }
 }

@@ -1,16 +1,25 @@
 {
-  "logging": {
-    "vimConf.debugger": {
-      "level": "DEBUG"
+  "neoWin": {
+    "useDotenv": true,
+    "env": {
+      "TEST": "DEFAULT",
+      "NOT_OVERRIDE": "HI"
     },
-    "GLOBAL": {
-      "level": "INFO"
-    },
-    "Terminals": {
-      "level": "INFO",
-      "format": "[{label}::{logMethod}] {msg}",
-      "withinLevelFilters": [ ],
-      "levelOverrideFilters": [ ]
+    "logging": {
+      "vimConf.debugger": {
+        "level": "DEBUG"
+      },
+      "GLOBAL": {
+        "level": "INFO"
+      },
+      "Terminals": {
+        "level": "INFO",
+        "format": "[{label}::{logMethod}] {msg}",
+        "withinLevelFilters": [ ],
+        "levelOverrideFilters": [ 
+          {"logMethod": "cycleTerm"}
+        ]
+      }
     }
   }
 }
