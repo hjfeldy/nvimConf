@@ -6,15 +6,13 @@ vim.lsp.config.basedpyright = {
   -- which triggers some bug that causes the workspace to be interpreted as the root of the filesystem "/"
   -- completely freezing neovim entirely, such that you need to kill the process externally :/
   root_dir = function(fname, on_dir)
-    local util = require("lspconfig.util")
-    local root = util.root_pattern("pyproject.toml", "setup.py", ".git")(fname)
+    local root = vim.fs.root(fname or vim.uv.cwd(), { "pyproject.toml", "setup.py", ".git" })
     if root == nil or root == "/" then
       return nil  -- don't attach at all
     end
     on_dir(root)
     return root
   end,
-  -- root_dir = util.root_pattern("pyproject.toml", "setup.py", ".git"),
   settings = {
     basedpyright = {
       verboseOutput=true,

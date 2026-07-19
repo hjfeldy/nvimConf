@@ -86,8 +86,5 @@ return {
         mode="n"
       }
     },
-    -- opts = function()
-    --   return require('neoConf').get('neoWin') or {}
-    -- end
   }
 }
