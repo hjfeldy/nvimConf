@@ -4,7 +4,6 @@ return {
   "nvim-lualine/lualine.nvim",
   dependencies = {
     'folke/noice.nvim',
-    'nvim-telescope/telescope.nvim',
     'folke/trouble.nvim',
     "nvim-tree/nvim-web-devicons"
   },
