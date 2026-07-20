@@ -48,6 +48,7 @@ api.nvim_create_autocmd('BufReadPost', {
 -- arguments were passed and Neovim is not reading stdin.
 local entered_cwd
 local session_load_pending = false
+local session_load_failed = false
 local exiting = false
 
 local function name_initial_tab()
@@ -71,11 +72,14 @@ api.nvim_create_autocmd('VimEnter', {
       vim.schedule(function()
         if exiting then return end
 
-        session_load_pending = false
         local ok, err = pcall(function()
           require('resession').load(entered_cwd, { silence_errors = true })
         end)
+        session_load_pending = false
         if not ok then
+          -- A failed load may already have replaced part of the editor state.
+          -- Never overwrite the saved session with that partial restoration.
+          session_load_failed = true
           vim.notify(('Unable to restore session: %s'):format(err), vim.log.levels.ERROR)
         end
         name_initial_tab()
@@ -93,7 +97,7 @@ api.nvim_create_autocmd('VimLeavePre', {
     exiting = true
     -- If VimLeavePre beats the scheduled load, saving the initial empty state
     -- would destroy the session that was about to be restored.
-    if vim.g.using_stdin or session_load_pending then return end
+    if vim.g.using_stdin or session_load_pending or session_load_failed then return end
     require('resession').save(entered_cwd or vim.fn.getcwd(), { notify = false })
   end,
 })
