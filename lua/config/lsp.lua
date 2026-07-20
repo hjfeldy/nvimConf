@@ -5,8 +5,8 @@ vim.lsp.config.basedpyright = {
   -- We override this because the default root_dir resolution will include fugitive buffers ("fugitive:///")
   -- which triggers some bug that causes the workspace to be interpreted as the root of the filesystem "/"
   -- completely freezing neovim entirely, such that you need to kill the process externally :/
-  root_dir = function(fname, on_dir)
-    local root = vim.fs.root(fname or vim.uv.cwd(), { "pyproject.toml", "setup.py", ".git" })
+  root_dir = function(bufnr, on_dir)
+    local root = vim.fs.root(bufnr, { "pyproject.toml", "setup.py", ".git" })
     if root == nil or root == "/" then
       return nil  -- don't attach at all
     end
@@ -15,7 +15,7 @@ vim.lsp.config.basedpyright = {
   end,
   settings = {
     basedpyright = {
-      verboseOutput=true,
+      verboseOutput = false,
       analysis = {
         autoImportCompletions = true,
         diagnosticMode = 'openFilesOnly',
