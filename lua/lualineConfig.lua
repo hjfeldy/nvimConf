@@ -297,7 +297,7 @@ function M.getConfig()
     lualine_b = {
       ft = addIndex(filetypeComponent, 1),
       path = addIndex({ shortenPathFunc(2) }, 2),
-      branch = addIndex({ showBranch, separator = "" }, 3),
+      branch = addIndex({ "branch" }, 3),
       diff = addIndex(diffComponent, 4),
     },
 
