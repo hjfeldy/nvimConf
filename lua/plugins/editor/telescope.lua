@@ -5,6 +5,10 @@ return {
     dependencies = {
       'nvim-lua/plenary.nvim',
       "nvim-tree/nvim-web-devicons",
+      'nvim-telescope/telescope-file-browser.nvim',
+      'nvim-telescope/telescope-fzf-native.nvim',
+      'debugloop/telescope-undo.nvim',
+      'tiagovla/scope.nvim',
     },
     keys = {
       { "<leader>f", "", desc = "+Telescope"},
@@ -237,6 +241,14 @@ return {
           }
         }
       }
+    end,
+    config = function(_, opts)
+      local telescope = require('telescope')
+      telescope.setup(opts)
+      telescope.load_extension('file_browser')
+      telescope.load_extension('fzf')
+      telescope.load_extension('scope')
+      telescope.load_extension('undo')
     end,
   }
 }

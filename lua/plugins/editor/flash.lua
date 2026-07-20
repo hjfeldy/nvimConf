@@ -3,8 +3,6 @@
 
 return {
   "folke/flash.nvim",
-  lazy=false,
-  -- event = "VeryLazy",
   ---@type Flash.Config
   opts = {
     label = {
@@ -34,4 +32,3 @@ return {
     },
   },
 }
-

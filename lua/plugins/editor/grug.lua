@@ -2,7 +2,6 @@
 
 return {
   "MagicDuck/grug-far.nvim",
-  lazy=false,
   keys = {
     {'<leader>r', '<cmd>GrugFar<CR>', mode='n', desc='Find/Replace'}
   },
