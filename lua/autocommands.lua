@@ -11,11 +11,19 @@ api.nvim_create_autocmd('BufReadPost', {
   end,
 })
 
-api.nvim_create_autocmd('BufReadPost', {
+api.nvim_create_autocmd('FileType', {
   group = group,
   pattern = '*',
-  callback = function()
-    vim.cmd('TSBufEnable highlight')
+  callback = function(ev)
+    -- Some 0.12 runtime ftplugins enable Treesitter themselves. Avoid
+    -- replacing an existing highlighter when they do, or when FileType is
+    -- emitted again for a buffer.
+    if vim.treesitter.highlighter.active[ev.buf] then return end
+
+    -- Missing parsers and highlight queries are expected for filetypes not in
+    -- the configured parser set. Native start() reports those as errors, so
+    -- leave those buffers on their normal syntax highlighter quietly.
+    pcall(vim.treesitter.start, ev.buf)
   end,
 })
 
