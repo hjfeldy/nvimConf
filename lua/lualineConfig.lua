@@ -1,16 +1,6 @@
---- Dynamic lualine configs
----@require('noice')
+--- Dynamic lualine config
 
 local util = require('util')
-local api = vim.api
-
-local function showBranch() 
-  local icon = require('icons').git.Branch
-  local stat = vim.system({'git', 'rev-parse', '--abbrev-ref', 'HEAD'}, {}):wait()
-  local branchStr = icon .. stat.stdout:sub(1, stat.stdout:len()-1)
-  return branchStr
-end
-
 
 local M = {}
 
@@ -26,6 +16,7 @@ M.CURRENT_LEVEL = 3
 --- Set the mode (ie. to toggle telescope components on/off)
 function M.setMode(mode)
   M.CURRENT_MODE = mode or 'normal'
+  M.refreshConfig()
 end
 
 --- Set the mode (to determine whether to render telescope components)
@@ -35,7 +26,10 @@ end
 
 --- Refresh the statusline to make level/mode changes take effect
 function M.refreshConfig()
-  require('lualine').setup(M.getConfig())
+  local lualine = package.loaded.lualine
+  if lualine then
+    lualine.refresh({ scope = 'tabpage', place = { 'statusline' } })
+  end
 end
 
 --- Increment/Decrement the level (wraps around) to trigger different configuration overrides
@@ -81,10 +75,10 @@ end
 --- "level" determines the display behavior of regular (non-telescope-specific) logic - via configuration overrides
 function M.getConfig()
   local icons = require('icons')
-  -- local telescopeHelpers = require('helpers.telescope')
   local telescopeConf = require('helpers.telescope.config')
   local Snacks = require('snacks')
   local trouble = require('trouble')
+  local lazyStatus = require('lazy.status')
 
   vim.o.laststatus = vim.g.lualine_laststatus
 
@@ -105,12 +99,12 @@ function M.getConfig()
 
   --- Visual notification of available plugin updates
   local lazyUpdateIcon = {
-    require("lazy.status").updates,
+    lazyStatus.updates,
     color = function() return { fg = Snacks.util.color("Special") } end,
     separator = "",
     padding = { left = 1, right = 0 },
     cond = function()
-      local hasUpdates = require('lazy.status').has_updates()
+      local hasUpdates = lazyStatus.has_updates()
       return hasUpdates and noTelescopeMode()
     end
   }
@@ -129,14 +123,10 @@ function M.getConfig()
       if #clients == 0 then return '' end
 
       local client = clients[1]
-      local currBuf = api.nvim_get_current_buf()
-      if client.attached_buffers[currBuf] then
-        local attachedLsp = icons.lsp[client.config.name] or client.config.name
-        return icons.kinds.Copilot .. attachedLsp
-      end
-      return ''
+      local attachedLsp = icons.lsp[client.config.name] or client.config.name
+      return icons.kinds.Copilot .. attachedLsp
     end,
-    cond = function() return #vim.lsp.get_clients() > 0 and noTelescopeMode() end,
+    cond = noTelescopeMode,
     padding = { right = 0, left = 1 }
   }
 
@@ -222,8 +212,8 @@ function M.getConfig()
 
   -- stylua: ignore
   local lastCharComponent = {
-      function() return require("noice").api.status.command.get() end,
-      cond = function() return package.loaded["noice"] and require("noice").api.status.command.has() end,
+      function() return package.loaded.noice.api.status.command.get() end,
+      cond = function() return package.loaded.noice and package.loaded.noice.api.status.command.has() end,
       color = function() return { fg = Snacks.util.color("Statement") } end,
     }
 
@@ -423,6 +413,29 @@ function M.getConfig()
     inactiveLvl5
   }
 
+  --- Build one stable component graph and select the current display level via
+  --- conditions. This lets level changes refresh lualine instead of setting it
+  --- up from scratch (which recreates components and autocmds).
+  local function dynamicSections(levels)
+    local sections = {}
+    for _, letter in ipairs({'a', 'b', 'c', 'x', 'y', 'z'}) do
+      local key = 'lualine_' .. letter
+      sections[key] = {}
+      for level, levelSections in ipairs(levels) do
+        for _, original in ipairs(levelSections[key] or {}) do
+          local component = vim.deepcopy(original)
+          if type(component) ~= 'table' then component = { component } end
+          local originalCond = component.cond
+          component.cond = function()
+            return M.CURRENT_LEVEL == level and (originalCond == nil or originalCond())
+          end
+          sections[key][#sections[key] + 1] = component
+        end
+      end
+    end
+    return sections
+  end
+
   -- Perform the conversion mentioned earlier
   -- (convert human readable named components { lualine_<letter> = {name: string -> component} } 
   -- to lualine-compatible arrays { lualine_<letter> = component[] })
@@ -481,8 +494,8 @@ function M.getConfig()
       always_show_tabline = true
     },
 
-    inactive_sections = inactiveExtensions[M.CURRENT_LEVEL],
-    sections = activeExtensions[M.CURRENT_LEVEL],
+    inactive_sections = dynamicSections(inactiveExtensions),
+    sections = dynamicSections(activeExtensions),
 
 
     extensions = {
