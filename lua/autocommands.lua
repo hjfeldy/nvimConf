@@ -50,7 +50,9 @@ local entered_cwd
 api.nvim_create_autocmd('VimEnter', {
   group = group,
   callback = function()
-    vim.g.using_stdin = vim.fn.argc(-1) ~= 0
+    -- StdinReadPre runs before VimEnter. Preserve that signal rather than
+    -- overwriting it when stdin was supplied without any file arguments.
+    vim.g.using_stdin = vim.g.using_stdin == true or vim.fn.argc(-1) ~= 0
     if not vim.g.using_stdin then
       entered_cwd = vim.fn.getcwd()
       require('resession').load(entered_cwd, { silence_errors = true })
@@ -92,6 +94,12 @@ api.nvim_create_autocmd('WinClosed', {
     if not tab then return end
 
     fugitive_windows[win] = nil
+    -- WinClosed may be emitted while closing a window in an inactive tab (or
+    -- while closing the tab itself). The terminal API is scoped to the current
+    -- tab, so never let that event toggle terminals in an unrelated tab.
+    if not api.nvim_tabpage_is_valid(tab) or api.nvim_get_current_tabpage() ~= tab then
+      return
+    end
     require('neoWin.terminals').toggle()
   end,
 })
