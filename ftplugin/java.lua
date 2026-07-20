@@ -1,9 +1,14 @@
-local bufnr = vim.api.nvim_get_current_buf()
-local buffer_path = vim.api.nvim_buf_get_name(bufnr)
-
-if buffer_path == '' then
+if vim.g.NO_LSP then
+  print('Neglecting to turn on jdtls - LSP is disabled globally')
   return
 end
+
+local bufnr = vim.api.nvim_get_current_buf()
+local buffer_uri = vim.uri_from_bufnr(bufnr)
+if not vim.startswith(buffer_uri, 'file://') then
+  return
+end
+local buffer_path = vim.uri_to_fname(buffer_uri)
 
 local root_markers = {
   'gradlew',
@@ -16,7 +21,13 @@ local root_markers = {
   '.git',
 }
 local root_dir = vim.fs.root(bufnr, root_markers) or vim.fs.dirname(buffer_path)
-local project_name = vim.fs.basename(root_dir)
+if not root_dir then
+  return
+end
+local project_name = vim.fs.basename(root_dir):gsub('[^%w._-]', '_')
+if project_name == '' then
+  project_name = 'project'
+end
 local workspace_name = ('%s-%s'):format(project_name, vim.fn.sha256(root_dir):sub(1, 8))
 local workspace_dir = vim.fs.joinpath(vim.fn.stdpath('cache'), 'jdtls', workspace_name)
 
@@ -39,9 +50,5 @@ local config = {
     },
 }
 
-if vim.g.NO_LSP then
-  print('Neglecting to turn on jdtls - LSP is disabled globally')
-else
-  print('Attaching jdtls')
-  require('jdtls').start_or_attach(config)
-end
+print('Attaching jdtls')
+require('jdtls').start_or_attach(config)
