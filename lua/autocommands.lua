@@ -1,157 +1,141 @@
 local api = vim.api
-local resession = require('resession')
-local telescopeUtils = require('helpers.telescope.utils')
-local telescopeConf = require('helpers.telescope.config')
-local terms = require('neoWin.terminals')
 
-local logger = require('neoWin.logger'):new('vimConf.autocommands')
+local group = api.nvim_create_augroup('VimConfAutocommands', { clear = true })
 
--- clear fugitive buffers when their windows are deleted
+-- Clear fugitive and man buffers when their windows are deleted.
 api.nvim_create_autocmd('BufReadPost', {
-  pattern = {
-    'fugitive://*',
-    'man://*'
-  },
+  group = group,
+  pattern = { 'fugitive://*', 'man://*' },
   callback = function(ev)
-    logger:debug('Caught BufReadPost: ' .. vim.inspect(ev))
-    vim.o.bufhidden = 'delete'
-  end
+    vim.bo[ev.buf].bufhidden = 'delete'
+  end,
 })
 
 api.nvim_create_autocmd('BufReadPost', {
-  pattern = { '*' },
+  group = group,
+  pattern = '*',
   callback = function()
     vim.cmd('TSBufEnable highlight')
-  end
+  end,
 })
 
+-- Neovim starts with a single unnamed buffer. Delete that specific placeholder
+-- after another buffer is read instead of scanning every buffer on every read.
+local initial_buffer = api.nvim_get_current_buf()
 api.nvim_create_autocmd('BufReadPost', {
-  pattern = { '*' },
-  callback = function()
-    for _, buf in ipairs(api.nvim_list_bufs()) do
-      local bo = vim.bo[buf]
-      local name = api.nvim_buf_get_name(buf)
-      if string.len(name) == 0 and bo.buflisted and bo.filetype ~= 'qf' then
-        logger:debug('deleting empty buffer')
-        api.nvim_buf_delete(buf, {})
-        return
-      end
+  group = group,
+  pattern = '*',
+  callback = function(ev)
+    if not initial_buffer then return end
+
+    if ev.buf == initial_buffer then
+      initial_buffer = nil
+      return
     end
-  end
+
+    local buf = initial_buffer
+    initial_buffer = nil
+    if api.nvim_buf_is_valid(buf)
+        and api.nvim_buf_get_name(buf) == ''
+        and vim.bo[buf].buflisted
+        and vim.bo[buf].filetype ~= 'qf' then
+      api.nvim_buf_delete(buf, {})
+    end
+  end,
 })
 
--- Load Session for the current directory at startup
--- (if no cmdline args were passed to nvim)
-local ENTERED_CWD = nil
-vim.api.nvim_create_autocmd("VimEnter", {
+-- Load the session for the current directory at startup when no command-line
+-- arguments were passed and Neovim is not reading stdin.
+local entered_cwd
+api.nvim_create_autocmd('VimEnter', {
+  group = group,
   callback = function()
-    -- Only load the session if nvim was started with no args and without reading from stdin
-    vim.g.using_stdin = vim.fn.argc(-1) ~= 0
+    -- StdinReadPre runs before VimEnter. Preserve that signal rather than
+    -- overwriting it when stdin was supplied without any file arguments.
+    vim.g.using_stdin = vim.g.using_stdin == true or vim.fn.argc(-1) ~= 0
     if not vim.g.using_stdin then
-      local cwd = vim.fn.getcwd()
-      ENTERED_CWD = cwd
-      logger:debug('SETTING CWD: ' .. ENTERED_CWD)
-      resession.load(cwd, { silence_errors = true })
+      entered_cwd = vim.fn.getcwd()
+      require('resession').load(entered_cwd, { silence_errors = true })
     end
 
-    if #vim.api.nvim_list_tabpages() > 1 then return end
-    -- only 1 tab open
-
-    if vim.t[0].name == nil then
-      vim.api.nvim_tabpage_set_var(0, 'name', 'Tab 1')
+    if #api.nvim_list_tabpages() == 1 and vim.t[0].name == nil then
+      api.nvim_tabpage_set_var(0, 'name', 'Tab 1')
     end
-
   end,
   nested = true,
 })
 
--- Save Session for the current directory at shutdown
-vim.api.nvim_create_autocmd("VimLeavePre", {
+api.nvim_create_autocmd('VimLeavePre', {
+  group = group,
   callback = function()
-    -- Only load the session if nvim was started with no args and without reading from stdin
-    if vim.g.using_stdin then
-      print('CWD IS NOT NULL')
-      return
-    end
-    resession.save(ENTERED_CWD or vim.fn.getcwd(), { notify = false })
+    if vim.g.using_stdin then return end
+    require('resession').save(entered_cwd or vim.fn.getcwd(), { notify = false })
   end,
 })
 
--- Record that a cmdline arg was passed to Neovim
-vim.api.nvim_create_autocmd('StdinReadPre', {
+api.nvim_create_autocmd('StdinReadPre', {
+  group = group,
   callback = function()
-    -- Store this for later
     vim.g.using_stdin = true
   end,
 })
 
---- Keep track of whether or not a fugitive window (git status, git log, etc) is open in each tab
---- This allows us to close and reopen the terminal window whenever a fugitive window
---- @type { [integer]: integer }
-local FUGITIVE_STATUS = {}
+-- Only the fugitive window which caused a terminal to close should reopen it.
+-- WinClosed supplies a window id in ev.match; ev.buf is not the closed window's
+-- buffer, so record the relevant window and tab when Fugitive emits its event.
+local fugitive_windows = {}
 
---- Reopen the terminal window when fugitive windows are closed 
---- (only if the fugitive window triggered an auto-close of the terminal window when it was opened)
-vim.api.nvim_create_autocmd('WinClosed', {
-  pattern = {'*'},
+api.nvim_create_autocmd('WinClosed', {
+  group = group,
+  pattern = '*',
   callback = function(ev)
-    local tab = vim.api.nvim_get_current_tabpage()
-    local fugitiveStatus = FUGITIVE_STATUS[tab] and FUGITIVE_STATUS[tab]
-    local bufType = vim.bo[ev.buf].filetype
-    if bufType == 'fugitive' and fugitiveStatus then
-      FUGITIVE_STATUS[tab] = FUGITIVE_STATUS[tab]-1
-      if FUGITIVE_STATUS[tab] == 0 then
-        terms.toggle()
+    local win = tonumber(ev.match)
+    local tab = win and fugitive_windows[win]
+    if not tab then return end
+
+    fugitive_windows[win] = nil
+    -- WinClosed may be emitted while closing a window in an inactive tab (or
+    -- while closing the tab itself). The terminal API is scoped to the current
+    -- tab, so never let that event toggle terminals in an unrelated tab.
+    if not api.nvim_tabpage_is_valid(tab) or api.nvim_get_current_tabpage() ~= tab then
+      return
+    end
+    require('neoWin.terminals').toggle()
+  end,
+})
+
+api.nvim_create_autocmd('User', {
+  group = group,
+  pattern = { 'FugitiveEditor', 'FugitiveIndex', 'FugitivePager' },
+  callback = function()
+    local terms = require('neoWin.terminals')
+    if terms.firstWindowId() == nil then return end
+
+    local win = api.nvim_get_current_win()
+    fugitive_windows[win] = api.nvim_get_current_tabpage()
+    terms.toggle()
+    vim.schedule(function()
+      if api.nvim_win_is_valid(win) then
+        api.nvim_win_call(win, function()
+          vim.cmd.resize(math.floor(0.5 * vim.o.lines))
+        end)
       end
-    end
-
-  end
+    end)
+  end,
 })
 
---- Close the terminal window (if its open) whenever a fugitive window is opened
-vim.api.nvim_create_autocmd('User', {
-  pattern = {'FugitiveEditor', 'FugitiveIndex', 'FugitivePager'},
-  callback = function(ev)
-    logger:debug('Caught fugitive event:\n' .. vim.inspect(ev))
-    local firstWindowId = terms.firstWindowId()
-    local tab = vim.api.nvim_get_current_tabpage()
-    if firstWindowId ~= nil then
-      terms.toggle()
-      FUGITIVE_STATUS[tab] = FUGITIVE_STATUS[tab] and FUGITIVE_STATUS[tab]+1 or 1
-      vim.schedule(function()
-        local lines = vim.o.lines
-        local toResize = .50 * lines
-        vim.cmd('resize ' .. toResize)
-      end)
-    end
-  end
-})
-
---- Whenever leaving a telescope prompt, turn off all dynamic lualine icons
-vim.api.nvim_create_autocmd('WinLeave', {
-  pattern = {'*'},
+-- Whenever leaving a Telescope prompt, turn off all dynamic lualine icons.
+api.nvim_create_autocmd('WinLeave', {
+  group = group,
+  pattern = '*',
   callback = function(ev)
     local ft = vim.bo[ev.buf].filetype
+    if ft ~= 'TelescopeResults' and ft ~= 'TelescopePrompt' then return end
 
-    if ft == 'TelescopeResults' or ft == 'TelescopePrompt' then
-      logger:debug('Left Telescope:', ev)
-      telescopeUtils.unsetLualineMode('telescopeFiles')
-      telescopeUtils.unsetLualineMode('telescopeDiagnostics')
-      if telescopeConf.LOCAL_DIAGNOSTICS ~= nil then
-        logger:debug('Resetting LOCAL_DIAGNOSTICS')
-      end
-
-      telescopeConf.LOCAL_DIAGNOSTICS = nil
-    end
-  end
+    local telescope_utils = require('helpers.telescope.utils')
+    local telescope_conf = require('helpers.telescope.config')
+    telescope_utils.unsetLualineMode('telescopeFiles')
+    telescope_utils.unsetLualineMode('telescopeDiagnostics')
+    telescope_conf.LOCAL_DIAGNOSTICS = nil
+  end,
 })
-
--- vim.api.nvim_create_autocmd("User", {
---   -- not documented, but this does work...
---   -- we can't toggle text-wrapping while the telescope picker is open though.
---   -- we need to do the toggling *as* the previewer is opened.
---   pattern = "TelescopePreviewerLoaded",
---   callback = function(ev)
---     vim.wo.wrap = require('helpers.telescope.config').WRAP_TEXT
---   end,
--- })
