@@ -134,9 +134,12 @@ end
 function M.shortenPathFunc(maxComponents, skipReplaceCwd)
   return function()
     local path = api.nvim_buf_get_name(api.nvim_get_current_buf())
-    maxComponents = vim.o.filetype == 'Terminal' and 1 or maxComponents
-    if maxComponents == nil or maxComponents < 1 then
-      maxComponents = 999
+    -- Keep the configured depth immutable. These closures are shared by the
+    -- long-lived lualine component graph, so changing the captured value while
+    -- rendering a terminal would otherwise shorten every later buffer too.
+    local effectiveMaxComponents = vim.bo.filetype == 'Terminal' and 1 or maxComponents
+    if effectiveMaxComponents == nil or effectiveMaxComponents < 1 then
+      effectiveMaxComponents = 999
     end
 
     if not skipReplaceCwd then
@@ -144,7 +147,7 @@ function M.shortenPathFunc(maxComponents, skipReplaceCwd)
       path = path:gsub(cwd, '.')
     end
 
-    return M.shortenPath(path, maxComponents)
+    return M.shortenPath(path, effectiveMaxComponents)
   end
 end
 
