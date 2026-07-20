@@ -47,6 +47,15 @@ api.nvim_create_autocmd('BufReadPost', {
 -- Load the session for the current directory at startup when no command-line
 -- arguments were passed and Neovim is not reading stdin.
 local entered_cwd
+local session_load_pending = false
+local exiting = false
+
+local function name_initial_tab()
+  if #api.nvim_list_tabpages() == 1 and vim.t[0].name == nil then
+    api.nvim_tabpage_set_var(0, 'name', 'Tab 1')
+  end
+end
+
 api.nvim_create_autocmd('VimEnter', {
   group = group,
   callback = function()
@@ -55,11 +64,24 @@ api.nvim_create_autocmd('VimEnter', {
     vim.g.using_stdin = vim.g.using_stdin == true or vim.fn.argc(-1) ~= 0
     if not vim.g.using_stdin then
       entered_cwd = vim.fn.getcwd()
-      require('resession').load(entered_cwd, { silence_errors = true })
-    end
+      session_load_pending = true
+      -- Let Neovim draw its first frame before restoring what may be a large
+      -- session. Keep the startup cwd captured above: a scheduled callback may
+      -- otherwise observe a directory changed by another startup callback.
+      vim.schedule(function()
+        if exiting then return end
 
-    if #api.nvim_list_tabpages() == 1 and vim.t[0].name == nil then
-      api.nvim_tabpage_set_var(0, 'name', 'Tab 1')
+        session_load_pending = false
+        local ok, err = pcall(function()
+          require('resession').load(entered_cwd, { silence_errors = true })
+        end)
+        if not ok then
+          vim.notify(('Unable to restore session: %s'):format(err), vim.log.levels.ERROR)
+        end
+        name_initial_tab()
+      end)
+    else
+      name_initial_tab()
     end
   end,
   nested = true,
@@ -68,7 +90,10 @@ api.nvim_create_autocmd('VimEnter', {
 api.nvim_create_autocmd('VimLeavePre', {
   group = group,
   callback = function()
-    if vim.g.using_stdin then return end
+    exiting = true
+    -- If VimLeavePre beats the scheduled load, saving the initial empty state
+    -- would destroy the session that was about to be restored.
+    if vim.g.using_stdin or session_load_pending then return end
     require('resession').save(entered_cwd or vim.fn.getcwd(), { notify = false })
   end,
 })
