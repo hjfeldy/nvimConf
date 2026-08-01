@@ -150,8 +150,9 @@ end
 function M.tabpages(args)
   args = args or {}
   local api = vim.api
-  local current_tab = api.nvim_get_current_tabpage()
+  local devicons = require('nvim-web-devicons')
   local entries = {}
+  local max_name_width = 0
 
   for _, tabpage in ipairs(api.nvim_list_tabpages()) do
     local tabnr = api.nvim_tabpage_get_number(tabpage)
@@ -161,24 +162,35 @@ function M.tabpages(args)
     local bufnr = api.nvim_win_get_buf(win)
     local buffer_name = api.nvim_buf_get_name(bufnr)
     local cwd = vim.fn.getcwd(winnr, tabnr)
+    local name = tostring(ok and tab_name or ('Tab ' .. tabnr))
+    local filetype = vim.bo[bufnr].filetype
+    local icon = devicons.get_icon_by_filetype(filetype, { default = true })
+    if filetype == '' then
+      icon = devicons.get_icon(buffer_name, nil, { default = true })
+    end
+    icon = icon or devicons.get_default_icon().icon
+
+    max_name_width = math.max(max_name_width, vim.fn.strdisplaywidth(name))
 
     entries[#entries + 1] = {
       tabpage = tabpage,
       tabnr = tabnr,
-      name = ok and tab_name or ('Tab ' .. tabnr),
+      name = name,
+      icon = icon,
+      bufnr = bufnr,
       buffer = buffer_name == '' and '[No Name]' or vim.fn.fnamemodify(buffer_name, ':~:.'),
       cwd = vim.fn.fnamemodify(cwd, ':~'),
-      current = tabpage == current_tab,
     }
   end
 
   require('telescope.pickers').new(args, {
     prompt_title = 'Tabpages',
+    dynamic_preview_title=true,
     finder = require('telescope.finders').new_table({
       results = entries,
       entry_maker = function(entry)
-        local marker = entry.current and '*' or ' '
-        local display = string.format('%s %d: %s  %s  (%s)', marker, entry.tabnr, entry.name, entry.buffer, entry.cwd)
+        local name_padding = string.rep(' ', max_name_width - vim.fn.strdisplaywidth(entry.name))
+        local display = string.format('%s %-2d: %s%s %s', entry.icon, entry.tabnr, entry.name, name_padding, entry.cwd)
         return {
           value = entry,
           display = display,
@@ -187,6 +199,29 @@ function M.tabpages(args)
       end,
     }),
     sorter = require('telescope.config').values.generic_sorter(args),
+    previewer = require('telescope.previewers').new_buffer_previewer({
+      -- title = 'Current Buffer',
+      dynamic_preview_title=true,
+      dyn_title = function(self, entry)
+        local basename = (entry.value.buffer:match("[^" .. package.config:sub(1,1) .. "]+$"))
+        -- print('dynamic title for entry: ' .. vim.inspect(entry))
+        return basename
+      end,
+      define_preview = function(self, entry)
+        local source_bufnr = entry.value.bufnr
+        if not api.nvim_buf_is_valid(source_bufnr) then
+          return
+        end
+
+        local lines = api.nvim_buf_get_lines(source_bufnr, 0, -1, false)
+        api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+
+        local filetype = vim.bo[source_bufnr].filetype
+        if filetype ~= '' then
+          require('telescope.previewers.utils').highlighter(self.state.bufnr, filetype)
+        end
+      end,
+    }),
     attach_mappings = function(prompt_bufnr)
       actions.select_default:replace(function()
         local selection = actionState.get_selected_entry()

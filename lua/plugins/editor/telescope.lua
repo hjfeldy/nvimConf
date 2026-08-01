@@ -166,7 +166,7 @@ return {
 
         defaults = {
           -- wrap_results = telescopeConf.WRAP_TEXT,
-          -- dynamic_preview_title = true,
+          dynamic_preview_title = true,
           -- results_title = util.renderHome,
           color_devicons=true,
           mappings = {
