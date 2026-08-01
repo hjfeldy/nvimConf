@@ -65,11 +65,35 @@ return {
       desc = "Rename Tab"
     },
 
+    { "<C-a>a",
+      function()
+        vim.api.nvim_set_current_tabpage(vim.api.nvim_list_tabpages()[1])
+      end,
+      desc = "Go to first tab"
+    },
+
+    { "<C-a>e",
+      function()
+        local tabs = vim.api.nvim_list_tabpages()
+        vim.api.nvim_set_current_tabpage(tabs[#tabs])
+      end,
+      desc = "Go to last tab"
+    },
+
     },
     (function()
       local numBindings = {}
       for i = 1,9 do
-        numBindings[i] = {"g" .. i, "<cmd>BufferLineGoToBuffer " .. i .. "<cr>", desc = "Go to buffer " .. i}
+        numBindings[i] = {
+          "<C-a>" .. i,
+          function() 
+            local tabs = vim.api.nvim_list_tabpages()
+            local tab = tabs[i]
+            vim.api.nvim_set_current_tabpage(tab)
+          end
+          ,
+          desc = "Go to tab " .. i
+        }
       end
       return numBindings
     end)()
