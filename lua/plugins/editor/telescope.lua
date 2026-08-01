@@ -44,6 +44,12 @@ return {
         desc='Pick Terminals'
       },
       {
+        "<leader>fa",
+        function() require('helpers.telescope.pick').tabpages() end,
+        mode="n",
+        desc='Tabpages'
+      },
+      {
         "<leader>fg",
         function() require('helpers.telescope.pick').liveGrep() end,
         mode="n",

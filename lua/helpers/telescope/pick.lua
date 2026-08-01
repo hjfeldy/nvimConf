@@ -145,6 +145,60 @@ function M.browseBuffers(args, prompt_bufnr)
   end
 end
 
+--- Browse open tabpages and switch to the selected tab.
+--- @param args table? Telescope picker options
+function M.tabpages(args)
+  args = args or {}
+  local api = vim.api
+  local current_tab = api.nvim_get_current_tabpage()
+  local entries = {}
+
+  for _, tabpage in ipairs(api.nvim_list_tabpages()) do
+    local tabnr = api.nvim_tabpage_get_number(tabpage)
+    local ok, tab_name = pcall(api.nvim_tabpage_get_var, tabpage, 'name')
+    local win = api.nvim_tabpage_get_win(tabpage)
+    local bufnr = api.nvim_win_get_buf(win)
+    local buffer_name = api.nvim_buf_get_name(bufnr)
+    local cwd = api.nvim_win_call(win, vim.fn.getcwd)
+
+    entries[#entries + 1] = {
+      tabpage = tabpage,
+      tabnr = tabnr,
+      name = ok and tab_name or ('Tab ' .. tabnr),
+      buffer = buffer_name == '' and '[No Name]' or vim.fn.fnamemodify(buffer_name, ':~:.'),
+      cwd = vim.fn.fnamemodify(cwd, ':~'),
+      current = tabpage == current_tab,
+    }
+  end
+
+  require('telescope.pickers').new(args, {
+    prompt_title = 'Tabpages',
+    finder = require('telescope.finders').new_table({
+      results = entries,
+      entry_maker = function(entry)
+        local marker = entry.current and '*' or ' '
+        local display = string.format('%s %d: %s  %s  (%s)', marker, entry.tabnr, entry.name, entry.buffer, entry.cwd)
+        return {
+          value = entry,
+          display = display,
+          ordinal = table.concat({ entry.name, entry.buffer, entry.cwd, tostring(entry.tabnr) }, ' '),
+        }
+      end,
+    }),
+    sorter = require('telescope.config').values.generic_sorter(args),
+    attach_mappings = function(prompt_bufnr)
+      actions.select_default:replace(function()
+        local selection = actionState.get_selected_entry()
+        actions.close(prompt_bufnr)
+        if selection and api.nvim_tabpage_is_valid(selection.value.tabpage) then
+          api.nvim_set_current_tabpage(selection.value.tabpage)
+        end
+      end)
+      return true
+    end,
+  }):find()
+end
+
 --- Browse filesystem with Telescope
 --- @param args table? applicable
 --- @param prompt_bufnr integer? The prompt_bufnr of the currently-open telescope prompt buffer (if we're re-calling)
