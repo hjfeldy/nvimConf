@@ -157,9 +157,10 @@ function M.tabpages(args)
     local tabnr = api.nvim_tabpage_get_number(tabpage)
     local ok, tab_name = pcall(api.nvim_tabpage_get_var, tabpage, 'name')
     local win = api.nvim_tabpage_get_win(tabpage)
+    local winnr = api.nvim_win_get_number(win)
     local bufnr = api.nvim_win_get_buf(win)
     local buffer_name = api.nvim_buf_get_name(bufnr)
-    local cwd = api.nvim_win_call(win, vim.fn.getcwd)
+    local cwd = vim.fn.getcwd(winnr, tabnr)
 
     entries[#entries + 1] = {
       tabpage = tabpage,
