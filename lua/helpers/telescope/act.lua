@@ -135,5 +135,38 @@ function M.telescopeTrouble(...)
   return require('trouble.sources.telescope').open(...)
 end
 
+--- Open the selected commit as a Fugitive diff.
+function M.gitCommitDiff(prompt_bufnr)
+  local entry = actionState.get_selected_entry()
+  if entry == nil then
+    return
+  end
+
+  actions.close(prompt_bufnr)
+  vim.cmd('G diff ' .. entry.value)
+end
+
+--- Cherry-pick the selected commit with Fugitive.
+function M.gitCherryPick(prompt_bufnr)
+  local entry = actionState.get_selected_entry()
+  if entry == nil then
+    return
+  end
+
+  actions.close(prompt_bufnr)
+  vim.cmd('G cherry-pick ' .. entry.value)
+end
+
+--- Start an interactive rebase onto the selected commit or branch with Fugitive.
+function M.gitInteractiveRebase(prompt_bufnr)
+  local entry = actionState.get_selected_entry()
+  if entry == nil then
+    return
+  end
+
+  actions.close(prompt_bufnr)
+  vim.cmd('G rebase --interactive ' .. entry.value)
+end
+
 
 return M

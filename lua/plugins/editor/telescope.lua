@@ -117,15 +117,44 @@ return {
       },
       {
         "<leader>fG",
-        function() require("telescope.builtin").git_branches() end,
+        "",
+        mode="n",
+        desc='+Git'
+      },
+      {
+        "<leader>fGb",
+        function() require('telescope.builtin').git_bcommits() end,
+        mode="n",
+        desc='Buffer Commits'
+      },
+      {
+        "<leader>fGb",
+        function() require('telescope.builtin').git_bcommits_range() end,
+        mode="x",
+        desc='Range Commits'
+      },
+      {
+        "<leader>fGB",
+        function() require('telescope.builtin').git_branches() end,
         mode="n",
         desc='Git Branches'
+      },
+      {
+        "<leader>fGl",
+        function() require('telescope.builtin').git_commits() end,
+        mode="n",
+        desc='Git Commits'
+      },
+      {
+        "<leader>fGL",
+        function() require('helpers.telescope.pick').gitCommitsForRef() end,
+        mode="n",
+        desc='Git Commits for Ref'
       },
     },
     opts = function()
       local actions = require("telescope.actions")
       local actionUtils = require("telescope.actions.utils")
-      local actionState = require("telescope.actions.state")
       local customActions = require('helpers.telescope.act')
       local fileBrowserActions = require("telescope").extensions.file_browser.actions
 
@@ -204,6 +233,41 @@ return {
         },
 
         pickers = {
+          git_bcommits = {
+            attach_mappings = function()
+              actions.select_default:replace(actions.select_vertical)
+              return true
+            end,
+          },
+          git_bcommits_range = {
+            attach_mappings = function()
+              actions.select_default:replace(actions.select_vertical)
+              return true
+            end,
+          },
+          git_branches = {
+            attach_mappings = function(_, map)
+              actions.select_default:replace(actions.nop)
+              map({ 'i', 'n' }, '<C-t>', actions.nop)
+              map({ 'i', 'n' }, '<C-a>', actions.nop)
+              map({ 'i', 'n' }, '<C-s>', actions.nop)
+              map({ 'i', 'n' }, '<C-r>', actions.git_rebase_branch)
+              map({ 'i', 'n' }, '<C-S-r>', customActions.gitInteractiveRebase)
+              map({ 'i', 'n' }, '<C-d>', actions.git_delete_branch)
+              map({ 'i', 'n' }, '<C-y>', actions.git_merge_branch)
+              return true
+            end,
+          },
+          git_commits = {
+            attach_mappings = function(_, map)
+              actions.select_default:replace(customActions.gitCommitDiff)
+              map({ 'i', 'n' }, '<C-r>', actions.git_rebase_branch)
+              map({ 'i', 'n' }, '<C-S-r>', customActions.gitInteractiveRebase)
+              map({ 'i', 'n' }, '<C-y>', customActions.gitCherryPick)
+              map({ 'i', 'n' }, '<C-o>', actions.git_checkout)
+              return true
+            end,
+          },
           buffers = {
             mappings = {
               n = {
@@ -213,19 +277,6 @@ return {
               }
             }
           },
-          git_branches = {
-            mappings = {
-              n = {
-                ["L"] = function(_)
-                  local entry = actionState.get_selected_entry()
-                  local branch = entry.value
-                  vim.cmd('G log ' .. branch .. ' --decorate')
-                  -- return actions.close(prompt_bufnr)
-                end
-              }
-            }
-          },
-
           diagnostics = {
             mappings = {
               i = {

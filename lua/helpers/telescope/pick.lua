@@ -235,6 +235,19 @@ function M.tabpages(args)
   }):find()
 end
 
+--- Prompt for a ref and browse commits reachable from it.
+--- An empty ref is shorthand for --all.
+function M.gitCommitsForRef()
+  local ref = vim.fn.input('Git ref (--all): ')
+  if ref == '' then
+    ref = '--all'
+  end
+
+  builtin.git_commits({
+    git_command = { 'git', 'log', '--pretty=oneline', '--abbrev-commit', ref, '--', '.' },
+  })
+end
+
 --- Browse filesystem with Telescope
 --- @param args table? applicable
 --- @param prompt_bufnr integer? The prompt_bufnr of the currently-open telescope prompt buffer (if we're re-calling)
