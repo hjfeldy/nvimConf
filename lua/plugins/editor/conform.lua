@@ -8,6 +8,7 @@ return {
       -- lua = { "stylua" },
       -- Conform will run multiple formatters sequentially
       python = { "black" },
+      cpp = { "clangFormat" },
       -- You can customize some of the format options for the filetype (:help conform.format)
       -- Conform will run the first available formatter
       cs = { 'csharpier' },
@@ -16,6 +17,11 @@ return {
       json = { 'formatJson' },
     },
     formatters = {
+      clangFormat = {
+        command = 'clang-format-22',
+        -- prepend_args = {'--style=Microsoft'},
+        cwd = vim.uv.cwd
+      },
       formatJson = {
         command = 'python3',
         args = {'-m', 'json.tool', '--indent', '2'},

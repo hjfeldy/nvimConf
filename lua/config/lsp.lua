@@ -65,6 +65,10 @@ vim.lsp.config.csharp_ls = {
   }
 }
 
+vim.lsp.config.clangd = {
+  cmd = { "clangd-20" },
+  filetypes = {'cpp', 'hpp' }
+}
 -- vim.lsp.log.set_level(vim.lsp.log.levels.DEBUG)
 
 if vim.g.NO_LSP then
@@ -72,6 +76,7 @@ if vim.g.NO_LSP then
 else
   vim.lsp.enable({
     'lua_ls',
+    'clangd',
     -- 'jdtls', <- see above
     'basedpyright',
     'csharp_ls',
