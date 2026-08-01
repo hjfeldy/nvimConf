@@ -1,6 +1,44 @@
 -- Terminal-Window / editor enhancements
 local COLORSCHEME_PLUGIN = 'NeoSolarized.nvim'
 
+--- Source project-local environment files in a newly opened neoWin terminal.
+--- @param bufnr integer
+local function sourceTerminalEnvironment(bufnr)
+  local api = vim.api
+  local terminal
+
+  for _, candidate in ipairs(require('neoWin.terminals').getTerminalBufs(false)) do
+    if candidate.bufNr == bufnr then
+      terminal = candidate
+      break
+    end
+  end
+
+  if terminal == nil or not api.nvim_tabpage_is_valid(terminal.tabNum) then
+    return
+  end
+
+  local tabnr = api.nvim_tabpage_get_number(terminal.tabNum)
+  local win = api.nvim_tabpage_get_win(terminal.tabNum)
+  local cwd = vim.fn.getcwd(api.nvim_win_get_number(win), tabnr)
+  local paths = {
+    vim.fs.joinpath(cwd, '.env'),
+    vim.fs.joinpath(cwd, '.venv', 'bin', 'activate'),
+  }
+  local commands = {}
+
+  for _, path in ipairs(paths) do
+    local stat = vim.uv.fs_stat(path)
+    if stat and stat.type == 'file' then
+      commands[#commands + 1] = 'source ' .. vim.fn.shellescape(path)
+    end
+  end
+
+  if #commands > 0 then
+    api.nvim_chan_send(terminal.channel, table.concat(commands, ' && ') .. '\r')
+  end
+end
+
 --- Return a wrapped function which calls lualine.refresh() after its execution
 local function lualineWrapped(innerFunc)
   local wrapped = function(...)
@@ -18,6 +56,19 @@ return {
     dir = "/home/harry/Repos/neowin",
     branch="feature/work",
     -- lazy=false,
+    init = function()
+      local group = vim.api.nvim_create_augroup('VimConfNeoWinTerminalEnvironment', { clear = true })
+      vim.api.nvim_create_autocmd('TermOpen', {
+        group = group,
+        callback = function(ev)
+          -- TermOpen fires from inside neoWin's jobstart(), before createTerm()
+          -- has recorded the new terminal. Defer lookup until that call returns.
+          vim.schedule(function()
+            sourceTerminalEnvironment(ev.buf)
+          end)
+        end,
+      })
+    end,
     keys = {
 
       -- Directory navigation commands
