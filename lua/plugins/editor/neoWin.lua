@@ -52,8 +52,8 @@ end
 
 return {
   {
-    -- "hjfeldy/neoWin",
-    dir = "/home/harry/Repos/neowin",
+    "hjfeldy/neoWin",
+    -- dir = "/home/harry/Repos/neowin",
     branch="feature/work",
     -- lazy=false,
     init = function()
