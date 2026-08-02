@@ -1,3 +1,5 @@
+local PRETTY_LOG = { "git", "log", "--pretty=oneline", "--abbrev-commit", "--decorate", "--", "." }
+
 return {
   {
     'nvim-telescope/telescope.nvim',
@@ -234,12 +236,14 @@ return {
 
         pickers = {
           git_bcommits = {
+            git_command = PRETTY_LOG,
             attach_mappings = function()
               actions.select_default:replace(actions.select_vertical)
               return true
             end,
           },
           git_bcommits_range = {
+            git_command = PRETTY_LOG,
             attach_mappings = function()
               actions.select_default:replace(actions.select_vertical)
               return true
@@ -259,6 +263,7 @@ return {
             end,
           },
           git_commits = {
+            git_command = PRETTY_LOG,
             attach_mappings = function(_, map)
               actions.select_default:replace(customActions.gitCommitDiff)
               map({ 'i', 'n' }, '<C-r>', actions.git_rebase_branch)
