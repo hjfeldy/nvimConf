@@ -101,6 +101,15 @@ return {
 
   opts = {
     options = {
+      tab_filter = function(tabIndex) 
+        local tab = vim.api.nvim_list_tabpages()[tabIndex]
+        local tabName = vim.api.nvim_tabpage_get_var(tab, 'name')
+        local suffix = " (diff-view)"
+        if tabName:sub(-#suffix) == suffix then
+          return false
+        end
+        return true
+      end,
       -- stylua: ignore
       mode = "tabs",
       show_close_icon = false,
